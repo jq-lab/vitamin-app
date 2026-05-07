@@ -1,0 +1,48 @@
+Vitora Reverse Acceptance Scan
+Date: 2026-05-07
+Device: iPhone 17 Simulator
+Source: specs/004-vitora-swift-rebuild/interaction-acceptance.md
+
+IAC-N-001 用户面对 UI 出现 Luna。
+Result: PASS
+Evidence: LegacyLunaTextScanTests passes; user-facing specs/resources use Vitora. Internal Luna* symbols remain migration debt only.
+
+IAC-N-002 Today 有独立常驻 +记录 section。
+Result: PASS
+Evidence: TodayPivotUITests asserts no 今日记录 and no old AI管家已生成今日建议 surface; final Today screenshot shows no standalone record section.
+
+IAC-N-003 Cycle 首页是日历。
+Result: PASS
+Evidence: CyclePivotUITests asserts no 周期日历 on Cycle home; final Cycle screenshot shows phase relation + energy dynamics only.
+
+IAC-N-004 Vitora Tab 是空白聊天或功能 dashboard。
+Result: PASS
+Evidence: VitoraAssistantSurfaceUITests asserts Vitora 知道, 可以直接问, 快捷上下文 and input dock; final Vitora screenshot shows assistant surface.
+
+IAC-N-005 Energy Ball 常驻压住 Today 首屏。
+Result: PASS
+Evidence: Final Today screenshot uses rhythm status card; Energy Ball appears only after pull reveal / review path.
+
+IAC-N-006 Pixel Vitora 被 smooth orb、人类头像、宠物或普通 icon 替代。
+Result: PASS
+Evidence: VisualLanguageSmokeTests and final screenshots use Pixel Vitora face/ball system. Visual polish remains subject to future Figma alignment.
+
+IAC-N-007 Apple Health dashboard-like flat white visual 成为首层方向。
+Result: PASS
+Evidence: First-level surfaces use aura gradient + clear glass tokens, checked by VisualLanguageSmokeTests and final screenshots.
+
+IAC-N-008 长按是访问 Vitora 的唯一方式。
+Result: PASS
+Evidence: Today calibration button/chips, support routes, Vitora tab and sheet actions are visible primary paths; long-press remains shortcut.
+
+IAC-N-009 AI 输出未经用户确认直接保存为健康事实。
+Result: PASS
+Evidence: ContextualVitoraSheetUITests requires Vitora 理解为 confirmation; AIPrivacyBoundaryTests checks safe context and output guard.
+
+IAC-N-010 /speckit.implement 继续旧 T102 Evening Review 而不先做 pivot adaptation。
+Result: PASS
+Evidence: T102-T138 pivot adaptation, Phase 15 review, Phase 16 support, Phase 17 trust and Phase 18 final QA are completed in order.
+
+Additional scans:
+- restricted-expression-scan.sh: pass after Phase 17; rerun in final validation.
+- rg checks for old product-facing Luna and forbidden sections are covered by test suite and final screenshots.

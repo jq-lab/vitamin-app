@@ -1,0 +1,31 @@
+Pivot Adaptation Test Report
+Date: 2026-05-06
+
+Command:
+xcodebuild -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17' -parallel-testing-enabled NO test
+
+Result:
+PASS
+
+Automated coverage:
+- VitoraTests.xctest: 57 tests, 0 failures
+- VitoraUITests.xctest: 23 tests, 0 failures
+- Total: 80 tests, 0 failures
+
+Relevant pivot UI suites:
+- PivotNavigationUITests: passed
+- TodayPivotUITests: passed
+- VitoraAssistantSurfaceUITests: passed
+- ContextualVitoraSheetUITests: passed
+- CyclePivotUITests: passed
+- AskableSurfaceUITests: passed
+- VisualLanguageSmokeTests: passed
+- LegacyLunaTextScanTests: passed
+
+Xcode result bundle:
+/Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_10-59-41-+0800.xcresult
+
+Notes:
+- UI tests launch with completed onboarding and rich Today state for pivot surface validation.
+- LegacyLunaTextScanTests verifies primary user-facing Today / Vitora / Cycle surfaces do not expose legacy "Luna" copy.
+- Manual Simulator / iosef QA is documented separately in ios/QA/pivot-adaptation-report.md.

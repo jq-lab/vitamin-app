@@ -1,0 +1,73 @@
+Phase 17 Trust Hardening QA
+Date: 2026-05-06
+Device: iPhone 17 Simulator, iOS 26.4.1
+
+Scope:
+- T162 AI context minimization tests.
+- T163 privacy logging tests.
+- T164 compliance surface UI tests.
+- T165 AI unavailable fallback UI tests.
+- T166 Vitora output guard wrapper.
+- T167 app capability user feedback mapping.
+- T168 restricted-expression scan.
+- T169 Trust QA report.
+
+Implementation summary:
+- Added VitoraOutputGuard as the user-facing AI output guard and kept LunaOutputGuard as an internal compatibility wrapper.
+- AI context builder now redacts direct identity hints and health values before prompt/context use.
+- VitoraLogger now sanitizes raw records, prompts, AI output, and health values before event logging.
+- AppCapabilityState now maps low-data, AI-unavailable, and denied-permission states to user-facing feedback with compliance label IDs.
+- Today, Vitora, data-source, nutrition, export, legal/account surfaces now expose the approved compliance labels.
+- Vitora AI-unavailable state preserves local input flow and avoids false low-data messaging when rich Today data exists.
+
+Automated tests:
+- Targeted Trust tests:
+  - VitoraTests/AIPrivacyBoundaryTests: passed.
+  - VitoraTests/PrivacyLoggingTests: passed.
+  - VitoraUITests/ComplianceSurfaceUITests: passed.
+  - VitoraUITests/AIUnavailableUITests: passed.
+- Full suite:
+  - Command: xcodebuild -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.4.1' -parallel-testing-enabled NO test
+  - Result: TEST SUCCEEDED.
+  - Passed: 103 / 103 tests.
+  - xcresult: /Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_17-44-45-+0800.xcresult
+
+Static scan:
+- Command: bash ios/QA/Scripts/restricted-expression-scan.sh
+- Result: passed.
+- Scope: ios/Vitora/Resources/**/*.strings
+
+Manual simulator QA:
+- Installed and launched Debug Vitora.app on iPhone 17 Simulator.
+- Used iosef view/screenshot and swipe for visible Simulator evidence.
+- Used Maestro for real tap navigation because iosef accessibility describe/tap returned an empty AX tree or no state change in this macOS session.
+- Maestro normal navigation passed:
+  - Tap Vitora.
+  - Assert Vitora 知道.
+  - Assert 可以直接问.
+  - Tap 周期.
+  - Assert 当前周期阶段与今天.
+  - Assert 能量动态.
+- Maestro AI-unavailable path passed:
+  - Launch with AI unavailable test state.
+  - Tap Vitora.
+  - Assert Vitora 知道.
+  - Assert Vitora 暂时无法生成新回复，你仍可以保存记录。
+
+Screenshots used as final evidence:
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_today.png
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_energy_reveal.png
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_support_home.png
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_support_datasource.png
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_cycle_maestro.png
+- /Users/bytedance/Desktop/Work/vitora/ios/QA/Screenshots/Trust/trust_ai_unavailable_vitora_clean.png
+
+Manual QA note:
+- iosef view and swipe are usable for this phase.
+- iosef tap/describe were not reliable in the current macOS accessibility bridge state, so clickable human-like verification was completed with Maestro flows:
+  - /Users/bytedance/Desktop/Work/vitora/ios/QA/Scripts/trust-navigation.maestro.yaml
+  - /Users/bytedance/Desktop/Work/vitora/ios/QA/Scripts/trust-open-vitora.maestro.yaml
+
+Follow-up:
+- Phase 18 should keep using Simulator plus a click-capable tool for final QA.
+- If iosef tap remains unstable, use Maestro as the primary interaction validator and keep iosef for screenshot/swipe evidence.

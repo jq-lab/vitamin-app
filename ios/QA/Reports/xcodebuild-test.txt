@@ -1,0 +1,1675 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project ios/Vitora.xcodeproj -scheme Vitora -destination "platform=iOS Simulator,name=iPhone 17,OS=26.4.1" -parallel-testing-enabled NO -resultBundlePath /tmp/vitora-final-qa-20260507c.xcresult test
+
+Writing result bundle at path:
+	/tmp/vitora-final-qa-20260507c.xcresult
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (3 targets)
+    Target 'VitoraUITests' in project 'Vitora'
+        ➜ Explicit dependency on target 'Vitora' in project 'Vitora'
+    Target 'VitoraTests' in project 'Vitora'
+        ➜ Explicit dependency on target 'Vitora' in project 'Vitora'
+    Target 'Vitora' in project 'Vitora' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk /Users/bytedance/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+    cd /Users/bytedance/Desktop/Work/vitora/ios/Vitora.xcodeproj
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.4.sdk -o /Users/bytedance/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/iphonesimulator26.4-23E252-686eebb5dc1d8ecb277353a59184f4aa.sdkstatcache
+
+Test Suite 'All tests' started at 2026-05-07 09:01:28.711.
+Test Suite 'VitoraTests.xctest' started at 2026-05-07 09:01:28.711.
+Test Suite 'AIContextContractTests' started at 2026-05-07 09:01:28.711.
+Test Case '-[VitoraTests.AIContextContractTests testAIUnavailablePathKeepsRecoverableDraft]' started.
+Test Case '-[VitoraTests.AIContextContractTests testAIUnavailablePathKeepsRecoverableDraft]' passed (0.001 seconds).
+Test Case '-[VitoraTests.AIContextContractTests testContextBuilderRemovesDirectIdentityFields]' started.
+Test Case '-[VitoraTests.AIContextContractTests testContextBuilderRemovesDirectIdentityFields]' passed (0.000 seconds).
+Test Case '-[VitoraTests.AIContextContractTests testOutputGuardBlocksRestrictedCategoryMarkers]' started.
+Test Case '-[VitoraTests.AIContextContractTests testOutputGuardBlocksRestrictedCategoryMarkers]' passed (0.000 seconds).
+Test Case '-[VitoraTests.AIContextContractTests testUnconfirmedRecordDoesNotEnterContext]' started.
+Test Case '-[VitoraTests.AIContextContractTests testUnconfirmedRecordDoesNotEnterContext]' passed (0.000 seconds).
+Test Suite 'AIContextContractTests' passed at 2026-05-07 09:01:28.715.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.004) seconds
+Test Suite 'AIPrivacyBoundaryTests' started at 2026-05-07 09:01:28.715.
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testCapabilityStateMapsUserFeedbackForLowDataAIUnavailableAndDeniedPermissions]' started.
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testCapabilityStateMapsUserFeedbackForLowDataAIUnavailableAndDeniedPermissions]' passed (0.000 seconds).
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testImmersiveChatContextUsesRecentSummariesOnlyAndRedactsSensitiveDetails]' started.
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testImmersiveChatContextUsesRecentSummariesOnlyAndRedactsSensitiveDetails]' passed (0.001 seconds).
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testRecordUnderstandingContextMinimizesIdentityAndHealthValues]' started.
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testRecordUnderstandingContextMinimizesIdentityAndHealthValues]' passed (0.001 seconds).
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testVitoraOutputGuardBlocksRestrictedExpressionsAndKeepsLegacyWrapperCompatible]' started.
+Test Case '-[VitoraTests.AIPrivacyBoundaryTests testVitoraOutputGuardBlocksRestrictedExpressionsAndKeepsLegacyWrapperCompatible]' passed (0.000 seconds).
+Test Suite 'AIPrivacyBoundaryTests' passed at 2026-05-07 09:01:28.735.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.019) seconds
+Test Suite 'DailyIntentionServiceTests' started at 2026-05-07 09:01:28.735.
+Test Case '-[VitoraTests.DailyIntentionServiceTests testCommitSchedulesReminderOnlyWhenPreferenceIsEnabled]' started.
+Test Case '-[VitoraTests.DailyIntentionServiceTests testCommitSchedulesReminderOnlyWhenPreferenceIsEnabled]' passed (0.001 seconds).
+Test Case '-[VitoraTests.DailyIntentionServiceTests testNotSuitableCreatesRejectedFeedbackWithoutReviewPressure]' started.
+Test Case '-[VitoraTests.DailyIntentionServiceTests testNotSuitableCreatesRejectedFeedbackWithoutReviewPressure]' passed (0.000 seconds).
+Test Case '-[VitoraTests.DailyIntentionServiceTests testSelectingOptionCreatesActiveDurableIntentionForSameDay]' started.
+Test Case '-[VitoraTests.DailyIntentionServiceTests testSelectingOptionCreatesActiveDurableIntentionForSameDay]' passed (0.000 seconds).
+Test Suite 'DailyIntentionServiceTests' passed at 2026-05-07 09:01:28.737.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'DataControlServiceTests' started at 2026-05-07 09:01:28.740.
+Test Case '-[VitoraTests.DataControlServiceTests testAccountRemovalClearsPersistenceAndReturnsOnboardingGate]' started.
+Test Case '-[VitoraTests.DataControlServiceTests testAccountRemovalClearsPersistenceAndReturnsOnboardingGate]' passed (0.001 seconds).
+Test Case '-[VitoraTests.DataControlServiceTests testDataExportMovesThroughConfirmationReadyAndCompletedStates]' started.
+Test Case '-[VitoraTests.DataControlServiceTests testDataExportMovesThroughConfirmationReadyAndCompletedStates]' passed (0.000 seconds).
+Test Suite 'DataControlServiceTests' passed at 2026-05-07 09:01:28.742.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'DomainModelTests' started at 2026-05-07 09:01:28.743.
+Test Case '-[VitoraTests.DomainModelTests testAppGateAllowsLowDataMainTabs]' started.
+Test Case '-[VitoraTests.DomainModelTests testAppGateAllowsLowDataMainTabs]' passed (0.000 seconds).
+Test Case '-[VitoraTests.DomainModelTests testDomainModelIDsCoverDM001ThroughDM025]' started.
+Test Case '-[VitoraTests.DomainModelTests testDomainModelIDsCoverDM001ThroughDM025]' passed (0.000 seconds).
+Test Case '-[VitoraTests.DomainModelTests testLunaRecordRequiresConfirmationBeforeSavedUnderstanding]' started.
+Test Case '-[VitoraTests.DomainModelTests testLunaRecordRequiresConfirmationBeforeSavedUnderstanding]' passed (0.000 seconds).
+Test Case '-[VitoraTests.DomainModelTests testSupportKeepsExactlyP0Items]' started.
+Test Case '-[VitoraTests.DomainModelTests testSupportKeepsExactlyP0Items]' passed (0.000 seconds).
+Test Suite 'DomainModelTests' passed at 2026-05-07 09:01:28.747.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.005) seconds
+Test Suite 'EnergyRitualServiceTests' started at 2026-05-07 09:01:28.747.
+Test Case '-[VitoraTests.EnergyRitualServiceTests testFinishWithSummaryCompletesAndCarriesResult]' started.
+Test Case '-[VitoraTests.EnergyRitualServiceTests testFinishWithSummaryCompletesAndCarriesResult]' passed (0.002 seconds).
+Test Case '-[VitoraTests.EnergyRitualServiceTests testOpeningStateIsDueOnlyWhenNotHandledToday]' started.
+Test Case '-[VitoraTests.EnergyRitualServiceTests testOpeningStateIsDueOnlyWhenNotHandledToday]' passed (0.000 seconds).
+Test Case '-[VitoraTests.EnergyRitualServiceTests testSkipDoesNotRequireEnergySummary]' started.
+Test Case '-[VitoraTests.EnergyRitualServiceTests testSkipDoesNotRequireEnergySummary]' passed (0.000 seconds).
+Test Case '-[VitoraTests.EnergyRitualServiceTests testStartReturnsRunningState]' started.
+Test Case '-[VitoraTests.EnergyRitualServiceTests testStartReturnsRunningState]' passed (0.000 seconds).
+Test Suite 'EnergyRitualServiceTests' passed at 2026-05-07 09:01:28.751.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+Test Suite 'EveningReviewServiceTests' started at 2026-05-07 09:01:28.751.
+Test Case '-[VitoraTests.EveningReviewServiceTests testAvailabilityRequiresSameDayActiveIntention]' started.
+Test Case '-[VitoraTests.EveningReviewServiceTests testAvailabilityRequiresSameDayActiveIntention]' passed (0.000 seconds).
+Test Case '-[VitoraTests.EveningReviewServiceTests testFeedbackCreatesBeforeAfterReviewWithoutCompletionPressure]' started.
+Test Case '-[VitoraTests.EveningReviewServiceTests testFeedbackCreatesBeforeAfterReviewWithoutCompletionPressure]' passed (0.000 seconds).
+Test Case '-[VitoraTests.EveningReviewServiceTests testLearningSignalDerivesFromReviewAndIntention]' started.
+Test Case '-[VitoraTests.EveningReviewServiceTests testLearningSignalDerivesFromReviewAndIntention]' passed (0.000 seconds).
+Test Case '-[VitoraTests.EveningReviewServiceTests testRepositoryRegistryPersistsReviewAndLearningSignal]' started.
+Test Case '-[VitoraTests.EveningReviewServiceTests testRepositoryRegistryPersistsReviewAndLearningSignal]' passed (0.022 seconds).
+Test Suite 'EveningReviewServiceTests' passed at 2026-05-07 09:01:28.778.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.023 (0.027) seconds
+Test Suite 'HealthKitContractTests' started at 2026-05-07 09:01:28.778.
+Test Case '-[VitoraTests.HealthKitContractTests testHealthKitAllowlistContainsOnlyP0Kinds]' started.
+Test Case '-[VitoraTests.HealthKitContractTests testHealthKitAllowlistContainsOnlyP0Kinds]' passed (0.001 seconds).
+Test Case '-[VitoraTests.HealthKitContractTests testRevokedHealthKitReturnsLowDataCapability]' started.
+Test Case '-[VitoraTests.HealthKitContractTests testRevokedHealthKitReturnsLowDataCapability]' passed (0.000 seconds).
+Test Case '-[VitoraTests.HealthKitContractTests testSkippingHealthKitKeepsAppUsable]' started.
+Test Case '-[VitoraTests.HealthKitContractTests testSkippingHealthKitKeepsAppUsable]' passed (0.000 seconds).
+Test Suite 'HealthKitContractTests' passed at 2026-05-07 09:01:28.780.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'LunaChatServiceTests' started at 2026-05-07 09:01:28.780.
+Test Case '-[VitoraTests.LunaChatServiceTests testBlankUserMessageDoesNotEnterConversation]' started.
+Test Case '-[VitoraTests.LunaChatServiceTests testBlankUserMessageDoesNotEnterConversation]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaChatServiceTests testBlockedDraftDoesNotBecomeVisibleMessage]' started.
+Test Case '-[VitoraTests.LunaChatServiceTests testBlockedDraftDoesNotBecomeVisibleMessage]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaChatServiceTests testImmersiveChatContextIsMinimizedAndSanitized]' started.
+Test Case '-[VitoraTests.LunaChatServiceTests testImmersiveChatContextIsMinimizedAndSanitized]' passed (0.001 seconds).
+Test Case '-[VitoraTests.LunaChatServiceTests testOpeningMessagesUseHomeContextAndConfirmedRecord]' started.
+Test Case '-[VitoraTests.LunaChatServiceTests testOpeningMessagesUseHomeContextAndConfirmedRecord]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaChatServiceTests testUnavailableAIProducesRecoverableLunaDraft]' started.
+Test Case '-[VitoraTests.LunaChatServiceTests testUnavailableAIProducesRecoverableLunaDraft]' passed (0.000 seconds).
+Test Suite 'LunaChatServiceTests' passed at 2026-05-07 09:01:28.785.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.002 (0.005) seconds
+Test Suite 'LunaHomeServiceTests' started at 2026-05-07 09:01:28.785.
+Test Case '-[VitoraTests.LunaHomeServiceTests testActiveIntentionAddsReviewCueToContext]' started.
+Test Case '-[VitoraTests.LunaHomeServiceTests testActiveIntentionAddsReviewCueToContext]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaHomeServiceTests testConfirmedRecentRecordAppearsOnHome]' started.
+Test Case '-[VitoraTests.LunaHomeServiceTests testConfirmedRecentRecordAppearsOnHome]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaHomeServiceTests testLowDataHomeInvitesRecordWithoutBlockingUse]' started.
+Test Case '-[VitoraTests.LunaHomeServiceTests testLowDataHomeInvitesRecordWithoutBlockingUse]' passed (0.003 seconds).
+Test Suite 'LunaHomeServiceTests' passed at 2026-05-07 09:01:28.789.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+Test Suite 'LunaRecordFallbackTests' started at 2026-05-07 09:01:28.789.
+Test Case '-[VitoraTests.LunaRecordFallbackTests testAIUnavailableStillAllowsManualFallbackSave]' started.
+Test Case '-[VitoraTests.LunaRecordFallbackTests testAIUnavailableStillAllowsManualFallbackSave]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaRecordFallbackTests testRecordUnderstandingContextUsesDraftButRemovesDirectIdentity]' started.
+Test Case '-[VitoraTests.LunaRecordFallbackTests testRecordUnderstandingContextUsesDraftButRemovesDirectIdentity]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaRecordFallbackTests testRecordUnderstandingGuardRequiresRecoverableAIState]' started.
+Test Case '-[VitoraTests.LunaRecordFallbackTests testRecordUnderstandingGuardRequiresRecoverableAIState]' passed (0.000 seconds).
+Test Suite 'LunaRecordFallbackTests' passed at 2026-05-07 09:01:28.795.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.005) seconds
+Test Suite 'LunaRecordServiceTests' started at 2026-05-07 09:01:28.795.
+Test Case '-[VitoraTests.LunaRecordServiceTests testCancelKeepsRecordOutOfSavedState]' started.
+Test Case '-[VitoraTests.LunaRecordServiceTests testCancelKeepsRecordOutOfSavedState]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaRecordServiceTests testNaturalLanguageRecordParsesConfirmsAndSaves]' started.
+Test Case '-[VitoraTests.LunaRecordServiceTests testNaturalLanguageRecordParsesConfirmsAndSaves]' passed (0.000 seconds).
+Test Case '-[VitoraTests.LunaRecordServiceTests testNutritionQuickRecordCreatesNutritionEntry]' started.
+Test Case '-[VitoraTests.LunaRecordServiceTests testNutritionQuickRecordCreatesNutritionEntry]' passed (0.000 seconds).
+Test Suite 'LunaRecordServiceTests' passed at 2026-05-07 09:01:28.797.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'NavigationContractTests' started at 2026-05-07 09:01:28.797.
+Test Case '-[VitoraTests.NavigationContractTests testContextualPresentationsHaveExitPaths]' started.
+Test Case '-[VitoraTests.NavigationContractTests testContextualPresentationsHaveExitPaths]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NavigationContractTests testLightDrawerRoutesAreExactlyP0SupportRoutes]' started.
+Test Case '-[VitoraTests.NavigationContractTests testLightDrawerRoutesAreExactlyP0SupportRoutes]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NavigationContractTests testNavigationStateHidesTabsBeforeOnboarding]' started.
+Test Case '-[VitoraTests.NavigationContractTests testNavigationStateHidesTabsBeforeOnboarding]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NavigationContractTests testPrimaryTabsAreExactlyTodayVitoraCycle]' started.
+Test Case '-[VitoraTests.NavigationContractTests testPrimaryTabsAreExactlyTodayVitoraCycle]' passed (0.000 seconds).
+Test Suite 'NavigationContractTests' passed at 2026-05-07 09:01:28.804.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.001 (0.007) seconds
+Test Suite 'NotificationContractTests' started at 2026-05-07 09:01:28.804.
+Test Case '-[VitoraTests.NotificationContractTests testCancelAllMarksPendingRemindersCanceled]' started.
+Test Case '-[VitoraTests.NotificationContractTests testCancelAllMarksPendingRemindersCanceled]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NotificationContractTests testIntentionCanExistWithoutNotificationPermission]' started.
+Test Case '-[VitoraTests.NotificationContractTests testIntentionCanExistWithoutNotificationPermission]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NotificationContractTests testPayloadDoesNotContainSensitiveValues]' started.
+Test Case '-[VitoraTests.NotificationContractTests testPayloadDoesNotContainSensitiveValues]' passed (0.000 seconds).
+Test Suite 'NotificationContractTests' passed at 2026-05-07 09:01:28.808.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.004) seconds
+Test Suite 'NotificationSchedulerTests' started at 2026-05-07 09:01:28.808.
+Test Case '-[VitoraTests.NotificationSchedulerTests testDeniedPermissionStillReturnsNonBlockingReminderState]' started.
+Test Case '-[VitoraTests.NotificationSchedulerTests testDeniedPermissionStillReturnsNonBlockingReminderState]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NotificationSchedulerTests testDisabledPreferenceDoesNotScheduleIntentionReminder]' started.
+Test Case '-[VitoraTests.NotificationSchedulerTests testDisabledPreferenceDoesNotScheduleIntentionReminder]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NotificationSchedulerTests testPayloadDoesNotCarrySensitiveHealthValues]' started.
+Test Case '-[VitoraTests.NotificationSchedulerTests testPayloadDoesNotCarrySensitiveHealthValues]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NotificationSchedulerTests testPreferenceOffCancelsPendingReminders]' started.
+Test Case '-[VitoraTests.NotificationSchedulerTests testPreferenceOffCancelsPendingReminders]' passed (0.000 seconds).
+Test Suite 'NotificationSchedulerTests' passed at 2026-05-07 09:01:28.813.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.005) seconds
+Test Suite 'NutritionServiceTests' started at 2026-05-07 09:01:28.813.
+Test Case '-[VitoraTests.NutritionServiceTests testQuickEntryCreatesNutritionContextWithoutCommercialUpsell]' started.
+Test Case '-[VitoraTests.NutritionServiceTests testQuickEntryCreatesNutritionContextWithoutCommercialUpsell]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NutritionServiceTests testRemoveNutritionEntry]' started.
+Test Case '-[VitoraTests.NutritionServiceTests testRemoveNutritionEntry]' passed (0.000 seconds).
+Test Case '-[VitoraTests.NutritionServiceTests testUpsertAddsAndUpdatesNutritionEntry]' started.
+Test Case '-[VitoraTests.NutritionServiceTests testUpsertAddsAndUpdatesNutritionEntry]' passed (0.000 seconds).
+Test Suite 'NutritionServiceTests' passed at 2026-05-07 09:01:28.817.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.004) seconds
+Test Suite 'OnboardingDomainTests' started at 2026-05-07 09:01:28.817.
+Test Case '-[VitoraTests.OnboardingDomainTests testAppGateRequiresOnboardingWithoutProfile]' started.
+Test Case '-[VitoraTests.OnboardingDomainTests testAppGateRequiresOnboardingWithoutProfile]' passed (0.000 seconds).
+Test Case '-[VitoraTests.OnboardingDomainTests testCompletionWithAuthorizedHealthKitIsReadyForToday]' started.
+Test Case '-[VitoraTests.OnboardingDomainTests testCompletionWithAuthorizedHealthKitIsReadyForToday]' passed (0.000 seconds).
+Test Case '-[VitoraTests.OnboardingDomainTests testCompletionWithSkippedHealthKitAllowsLowDataMainTabs]' started.
+Test Case '-[VitoraTests.OnboardingDomainTests testCompletionWithSkippedHealthKitAllowsLowDataMainTabs]' passed (0.000 seconds).
+Test Case '-[VitoraTests.OnboardingDomainTests testHealthKitOptionalChoiceCanSkipWithoutBlockingCompletion]' started.
+Test Case '-[VitoraTests.OnboardingDomainTests testHealthKitOptionalChoiceCanSkipWithoutBlockingCompletion]' passed (0.000 seconds).
+Test Suite 'OnboardingDomainTests' passed at 2026-05-07 09:01:28.822.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.005) seconds
+Test Suite 'PerformanceSmokeTests' started at 2026-05-07 09:01:28.822.
+Test Case '-[VitoraTests.PerformanceSmokeTests testEnergyRevealDomainSmokePerformance]' started.
+<unknown>:0: Test Case '-[VitoraTests.PerformanceSmokeTests testEnergyRevealDomainSmokePerformance]' measured [Clock Monotonic Time, s] average: 0.001, relative standard deviation: 2.760%, values: [0.001009, 0.001011, 0.001029, 0.000966, 0.000958], performanceMetricID:com.apple.dt.XCTMetric_Clock.time.monotonic, baselineName: "", baselineAverage: , polarity: prefers smaller, maxPercentRegression: 10.000%, maxPercentRelativeStandardDeviation: 10.000%, maxRegression: 0.000, maxStandardDeviation: 0.000
+Test Case '-[VitoraTests.PerformanceSmokeTests testEnergyRevealDomainSmokePerformance]' passed (0.034 seconds).
+Test Case '-[VitoraTests.PerformanceSmokeTests testLaunchEnvironmentSmokePerformance]' started.
+<unknown>:0: Test Case '-[VitoraTests.PerformanceSmokeTests testLaunchEnvironmentSmokePerformance]' measured [Clock Monotonic Time, s] average: 0.000, relative standard deviation: 30.297%, values: [0.000027, 0.000014, 0.000011, 0.000021, 0.000020], performanceMetricID:com.apple.dt.XCTMetric_Clock.time.monotonic, baselineName: "", baselineAverage: , polarity: prefers smaller, maxPercentRegression: 10.000%, maxPercentRelativeStandardDeviation: 10.000%, maxRegression: 0.000, maxStandardDeviation: 0.000
+Test Case '-[VitoraTests.PerformanceSmokeTests testLaunchEnvironmentSmokePerformance]' passed (0.006 seconds).
+Test Case '-[VitoraTests.PerformanceSmokeTests testTabSwitchingAndSheetPresentationSmokePerformance]' started.
+<unknown>:0: Test Case '-[VitoraTests.PerformanceSmokeTests testTabSwitchingAndSheetPresentationSmokePerformance]' measured [Clock Monotonic Time, s] average: 0.000, relative standard deviation: 0.807%, values: [0.000333, 0.000336, 0.000328, 0.000335, 0.000332], performanceMetricID:com.apple.dt.XCTMetric_Clock.time.monotonic, baselineName: "", baselineAverage: , polarity: prefers smaller, maxPercentRegression: 10.000%, maxPercentRelativeStandardDeviation: 10.000%, maxRegression: 0.000, maxStandardDeviation: 0.000
+Test Case '-[VitoraTests.PerformanceSmokeTests testTabSwitchingAndSheetPresentationSmokePerformance]' passed (0.007 seconds).
+Test Suite 'PerformanceSmokeTests' passed at 2026-05-07 09:01:28.871.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.048 (0.048) seconds
+Test Suite 'PersistenceContractTests' started at 2026-05-07 09:01:28.871.
+Test Case '-[VitoraTests.PersistenceContractTests testAccountRemovalClearsLocalStateAndReturnsGate]' started.
+Test Case '-[VitoraTests.PersistenceContractTests testAccountRemovalClearsLocalStateAndReturnsGate]' passed (0.000 seconds).
+Test Case '-[VitoraTests.PersistenceContractTests testExportSnapshotCoversSavedP0UserData]' started.
+Test Case '-[VitoraTests.PersistenceContractTests testExportSnapshotCoversSavedP0UserData]' passed (0.001 seconds).
+Test Case '-[VitoraTests.PersistenceContractTests testSensitiveDataClassIsStoredWithProtectedPayloadFlag]' started.
+Test Case '-[VitoraTests.PersistenceContractTests testSensitiveDataClassIsStoredWithProtectedPayloadFlag]' passed (0.001 seconds).
+Test Case '-[VitoraTests.PersistenceContractTests testTransientContextIsNotPersistedByDefault]' started.
+Test Case '-[VitoraTests.PersistenceContractTests testTransientContextIsNotPersistedByDefault]' passed (0.002 seconds).
+Test Suite 'PersistenceContractTests' passed at 2026-05-07 09:01:28.876.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.004 (0.005) seconds
+Test Suite 'PrivacyLoggingTests' started at 2026-05-07 09:01:28.876.
+Test Case '-[VitoraTests.PrivacyLoggingTests testLoggerKeepsNonSensitiveEventShape]' started.
+Test Case '-[VitoraTests.PrivacyLoggingTests testLoggerKeepsNonSensitiveEventShape]' passed (0.001 seconds).
+Test Case '-[VitoraTests.PrivacyLoggingTests testLoggerRedactsHealthValuesRawRecordsPromptsAndFullAIOutput]' started.
+Test Case '-[VitoraTests.PrivacyLoggingTests testLoggerRedactsHealthValuesRawRecordsPromptsAndFullAIOutput]' passed (0.001 seconds).
+Test Suite 'PrivacyLoggingTests' passed at 2026-05-07 09:01:28.879.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'SupportServiceTests' started at 2026-05-07 09:01:28.879.
+Test Case '-[VitoraTests.SupportServiceTests testDataSourceSummaryKeepsAppUsableWhenHealthKitSkippedOrDenied]' started.
+Test Case '-[VitoraTests.SupportServiceTests testDataSourceSummaryKeepsAppUsableWhenHealthKitSkippedOrDenied]' passed (0.000 seconds).
+Test Case '-[VitoraTests.SupportServiceTests testPanelStateOnlyContainsP0SupportRoutes]' started.
+Test Case '-[VitoraTests.SupportServiceTests testPanelStateOnlyContainsP0SupportRoutes]' passed (0.000 seconds).
+Test Case '-[VitoraTests.SupportServiceTests testVisibleSupportItemsAreExactlyP0ItemsInSpecOrder]' started.
+Test Case '-[VitoraTests.SupportServiceTests testVisibleSupportItemsAreExactlyP0ItemsInSpecOrder]' passed (0.000 seconds).
+Test Suite 'SupportServiceTests' passed at 2026-05-07 09:01:28.881.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.001 (0.002) seconds
+Test Suite 'TodayStateServiceTests' started at 2026-05-07 09:01:28.881.
+Test Case '-[VitoraTests.TodayStateServiceTests testEnergySummaryUsesKnownSignalsWithoutOverclaiming]' started.
+Test Case '-[VitoraTests.TodayStateServiceTests testEnergySummaryUsesKnownSignalsWithoutOverclaiming]' passed (0.001 seconds).
+Test Case '-[VitoraTests.TodayStateServiceTests testLowDataStillReturnsUsableTodayState]' started.
+Test Case '-[VitoraTests.TodayStateServiceTests testLowDataStillReturnsUsableTodayState]' passed (0.000 seconds).
+Test Case '-[VitoraTests.TodayStateServiceTests testReviewReadyIntentionBecomesNextAction]' started.
+Test Case '-[VitoraTests.TodayStateServiceTests testReviewReadyIntentionBecomesNextAction]' passed (0.000 seconds).
+Test Case '-[VitoraTests.TodayStateServiceTests testSignalsAndCycleProduceReadyTodayState]' started.
+Test Case '-[VitoraTests.TodayStateServiceTests testSignalsAndCycleProduceReadyTodayState]' passed (0.000 seconds).
+Test Suite 'TodayStateServiceTests' passed at 2026-05-07 09:01:28.883.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.002 (0.002) seconds
+Test Suite 'VitoraTests' started at 2026-05-07 09:01:28.884.
+Test Case '-[VitoraTests.VitoraTests testAppEnvironmentStartsAtOnboarding]' started.
+Test Case '-[VitoraTests.VitoraTests testAppEnvironmentStartsAtOnboarding]' passed (0.000 seconds).
+Test Case '-[VitoraTests.VitoraTests testCompletingOnboardingRoutesToToday]' started.
+Test Case '-[VitoraTests.VitoraTests testCompletingOnboardingRoutesToToday]' passed (0.000 seconds).
+Test Suite 'VitoraTests' passed at 2026-05-07 09:01:28.887.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.001 (0.003) seconds
+Test Suite 'VitoraTests.xctest' passed at 2026-05-07 09:01:28.887.
+	 Executed 78 tests, with 0 failures (0 unexpected) in 0.109 (0.176) seconds
+Test Suite 'All tests' passed at 2026-05-07 09:01:28.887.
+	 Executed 78 tests, with 0 failures (0 unexpected) in 0.109 (0.176) seconds
+2026-05-07 09:01:30.062286+0800 VitoraUITests-Runner[43085:331409] [Default] Running tests...
+    t =      nans Interface orientation changed to Portrait
+Test Suite 'All tests' started at 2026-05-07 09:01:31.112.
+Test Suite 'VitoraUITests.xctest' started at 2026-05-07 09:01:31.113.
+Test Suite 'ABCommitmentUITests' started at 2026-05-07 09:01:31.113.
+Test Case '-[VitoraUITests.ABCommitmentUITests testNotSuitableFeedbackDoesNotCreatePressureCopy]' started.
+    t =     0.00s Start Test at 2026-05-07 09:01:31.114
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.03s     Launch com.vitora.app
+2026-05-07 09:01:31.202 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:01:31.202 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     0.29s         Setting up automation session
+objc[43085]: Class UIAccessibilityLoaderWebShared is implemented in both /Library/Developer/CoreSimulator/Volumes/iOS_23E254a/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.4.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebCore.axbundle/WebCore (0x10a2bc310) and /Library/Developer/CoreSimulator/Volumes/iOS_23E254a/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.4.simruntime/Contents/Resources/RuntimeRoot/System/Library/AccessibilityBundles/WebKit.axbundle/WebKit (0x10a388398). This may cause spurious casting failures and mysterious crashes. One of the duplicates must be removed or renamed.
+    t =     1.11s         Wait for com.vitora.app to idle
+    t =     2.45s Tap "today.suggestion.try" Button
+    t =     2.46s     Wait for com.vitora.app to idle
+    t =     2.46s     Find the "today.suggestion.try" Button
+    t =     2.57s     Check for interrupting elements affecting "today.suggestion.try" Button
+    t =     2.59s     Synthesize event
+    t =     2.60s         Scroll element to visible
+    t =     2.60s         Find the "today.suggestion.try" Button
+    t =     2.63s         Computed hit point {87, 701} after scrolling to visible
+    t =     2.92s     Wait for com.vitora.app to idle
+    t =     3.31s Waiting 3.0s for "两个可选方向" StaticText to exist
+    t =     4.39s     Checking `Expect predicate `existsNoRetry == 1` for object "两个可选方向" StaticText`
+    t =     4.39s         Checking existence of `"两个可选方向" StaticText`
+    t =     4.47s Tap "today.ab.notSuitable" Button
+    t =     4.47s     Wait for com.vitora.app to idle
+    t =     4.47s     Find the "today.ab.notSuitable" Button
+    t =     4.51s     Check for interrupting elements affecting "today.ab.notSuitable" Button
+    t =     4.54s     Synthesize event
+    t =     4.55s         Scroll element to visible
+    t =     4.56s         Find the "today.ab.notSuitable" Button
+    t =     4.60s         Computed hit point {201, 742.33333333333337} after scrolling to visible
+    t =     4.89s     Wait for com.vitora.app to idle
+    t =     5.51s Waiting 3.0s for "今天先不选也可以" StaticText to exist
+    t =     6.58s     Checking `Expect predicate `existsNoRetry == 1` for object "今天先不选也可以" StaticText`
+    t =     6.58s         Checking existence of `"今天先不选也可以" StaticText`
+    t =     6.63s Checking existence of `"未完成" StaticText`
+    t =     6.66s Checking existence of `"连续" StaticText`
+    t =     6.69s Tear Down
+Test Case '-[VitoraUITests.ABCommitmentUITests testNotSuitableFeedbackDoesNotCreatePressureCopy]' passed (6.952 seconds).
+Test Case '-[VitoraUITests.ABCommitmentUITests testSelectingABCreatesDurableIntentionAndReminderPreference]' started.
+    t =     0.00s Start Test at 2026-05-07 09:01:38.068
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43086
+2026-05-07 09:01:39.118 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:01:39.119 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.27s         Setting up automation session
+    t =     2.01s         Wait for com.vitora.app to idle
+    t =     3.31s Tap "today.suggestion.try" Button
+    t =     3.31s     Wait for com.vitora.app to idle
+    t =     3.32s     Find the "today.suggestion.try" Button
+    t =     3.39s     Check for interrupting elements affecting "today.suggestion.try" Button
+    t =     3.41s     Synthesize event
+    t =     3.42s         Scroll element to visible
+    t =     3.42s         Find the "today.suggestion.try" Button
+    t =     3.45s         Computed hit point {87, 701} after scrolling to visible
+    t =     3.73s     Wait for com.vitora.app to idle
+    t =     4.13s Waiting 3.0s for "两个可选方向" StaticText to exist
+    t =     5.21s     Checking `Expect predicate `existsNoRetry == 1` for object "两个可选方向" StaticText`
+    t =     5.21s         Checking existence of `"两个可选方向" StaticText`
+    t =     5.29s Tap "today.ab.choice.a" Button
+    t =     5.29s     Wait for com.vitora.app to idle
+    t =     5.29s     Find the "today.ab.choice.a" Button
+    t =     5.33s     Check for interrupting elements affecting "today.ab.choice.a" Button
+    t =     5.36s     Synthesize event
+    t =     5.37s         Scroll element to visible
+    t =     5.38s         Find the "today.ab.choice.a" Button
+    t =     5.42s         Computed hit point {201, 554.33334350585938} after scrolling to visible
+    t =     5.71s     Wait for com.vitora.app to idle
+    t =     6.35s Waiting 3.0s for "今天的小尝试" StaticText to exist
+    t =     7.43s     Checking `Expect predicate `existsNoRetry == 1` for object "今天的小尝试" StaticText`
+    t =     7.44s         Checking existence of `"今天的小尝试" StaticText`
+    t =     7.51s Checking existence of `"提前加餐 + 短走动" StaticText`
+    t =     7.54s Checking existence of `"晚间会用这个选择做一次轻复盘" StaticText`
+    t =     7.58s Checking existence of `"today.reminder.toggle" Switch`
+    t =     7.61s Tap "today.reminder.toggle" Switch
+    t =     7.61s     Wait for com.vitora.app to idle
+    t =     7.61s     Find the "today.reminder.toggle" Switch
+    t =     7.64s     Check for interrupting elements affecting "today.reminder.toggle" Switch
+    t =     7.67s     Synthesize event
+    t =     7.97s     Wait for com.vitora.app to idle
+    t =     9.26s Waiting 3.0s for "已准备轻提醒" StaticText to exist
+    t =    10.33s     Checking `Expect predicate `existsNoRetry == 1` for object "已准备轻提醒" StaticText`
+    t =    10.33s         Checking existence of `"已准备轻提醒" StaticText`
+    t =    10.40s Tap "today.analysis.close" Button
+    t =    10.40s     Wait for com.vitora.app to idle
+    t =    10.40s     Find the "today.analysis.close" Button
+    t =    10.44s     Check for interrupting elements affecting "today.analysis.close" Button
+    t =    10.48s     Synthesize event
+    t =    10.48s         Scroll element to visible
+    t =    10.48s         Find the "today.analysis.close" Button
+    t =    10.53s         Computed hit point {42.000000317891434, 124.00000031789142} after scrolling to visible
+    t =    10.81s     Wait for com.vitora.app to idle
+    t =    11.18s Waiting 3.0s for "今天的小尝试" StaticText to exist
+    t =    12.24s     Checking `Expect predicate `existsNoRetry == 1` for object "今天的小尝试" StaticText`
+    t =    12.24s         Checking existence of `"今天的小尝试" StaticText`
+    t =    12.30s Checking existence of `"提前加餐 + 短走动" StaticText`
+    t =    12.32s Tear Down
+Test Case '-[VitoraUITests.ABCommitmentUITests testSelectingABCreatesDurableIntentionAndReminderPreference]' passed (12.632 seconds).
+Test Suite 'ABCommitmentUITests' passed at 2026-05-07 09:01:50.700.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 19.584 (19.587) seconds
+Test Suite 'AIUnavailableUITests' started at 2026-05-07 09:01:50.702.
+Test Case '-[VitoraUITests.AIUnavailableUITests testAIUnavailableFallbackIsVisibleAndInputRemainsUsable]' started.
+    t =     0.00s Start Test at 2026-05-07 09:01:50.704
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43096
+2026-05-07 09:01:51.749 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:01:51.749 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.26s         Setting up automation session
+    t =     2.01s         Wait for com.vitora.app to idle
+    t =     3.31s Tap "tab.vitora" Button
+    t =     3.31s     Wait for com.vitora.app to idle
+    t =     3.32s     Find the "tab.vitora" Button
+    t =     3.38s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.41s     Synthesize event
+    t =     3.70s     Wait for com.vitora.app to idle
+    t =     3.70s Waiting 5.0s for "Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText to exist
+    t =     4.77s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText`
+    t =     4.77s         Checking existence of `"Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText`
+    t =     4.83s Checking existence of `"vitora.input.text" TextField`
+    t =     4.86s Tap "vitora.input.text" TextField
+    t =     4.86s     Wait for com.vitora.app to idle
+    t =     4.86s     Find the "vitora.input.text" TextField
+    t =     4.88s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     4.91s     Synthesize event
+    t =     5.20s     Wait for com.vitora.app to idle
+    t =     5.35s Type '我今天有点累' into "vitora.input.text" TextField
+    t =     5.35s     Wait for com.vitora.app to idle
+    t =     5.40s     Find the "vitora.input.text" TextField
+    t =     5.44s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     5.48s     Synthesize event
+    t =     5.78s     Wait for com.vitora.app to idle
+    t =     5.93s Tap "vitora.input.send" Button
+    t =     5.93s     Wait for com.vitora.app to idle
+    t =     5.94s     Find the "vitora.input.send" Button
+    t =     6.01s     Check for interrupting elements affecting "vitora.input.send" Button
+    t =     6.04s     Synthesize event
+    t =     6.33s     Wait for com.vitora.app to idle
+    t =     6.34s Waiting 3.0s for "Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText to exist
+    t =     7.42s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText`
+    t =     7.42s         Checking existence of `"Vitora 暂时无法生成新回复，你仍可以保存记录。" StaticText`
+    t =     7.46s Waiting 3.0s for "你刚刚说的内容已经保留在本地输入流里，稍后可以再让 Vitora 理解。" StaticText to exist
+    t =     8.54s     Checking `Expect predicate `existsNoRetry == 1` for object "你刚刚说的内容已经保留在本地输入流里，稍后可以再让 Vitora 理解。" StaticText`
+    t =     8.55s         Checking existence of `"你刚刚说的内容已经保留在本地输入流里，稍后可以再让 Vitora 理解。" StaticText`
+    t =     8.62s Tear Down
+Test Case '-[VitoraUITests.AIUnavailableUITests testAIUnavailableFallbackIsVisibleAndInputRemainsUsable]' passed (8.876 seconds).
+Test Suite 'AIUnavailableUITests' passed at 2026-05-07 09:01:59.580.
+	 Executed 1 test, with 0 failures (0 unexpected) in 8.876 (8.878) seconds
+Test Suite 'AccessibilityUITests' started at 2026-05-07 09:01:59.581.
+Test Case '-[VitoraUITests.AccessibilityUITests testDynamicTypeKeepsMainNavigationInputAndSheetsUsable]' started.
+    t =     0.00s Start Test at 2026-05-07 09:01:59.583
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43172
+2026-05-07 09:02:00.723 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:00.723 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.36s         Setting up automation session
+    t =     2.13s         Wait for com.vitora.app to idle
+    t =     3.48s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.54s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.54s         Checking existence of `"现在状态" StaticText`
+    t =     4.65s Tap "today.status.card" Button
+    t =     4.65s     Wait for com.vitora.app to idle
+    t =     4.65s     Find the "today.status.card" Button
+    t =     4.67s     Check for interrupting elements affecting "today.status.card" Button
+    t =     4.70s     Synthesize event
+    t =     4.99s     Wait for com.vitora.app to idle
+    t =     5.38s Waiting 3.0s for "今日状态详情" StaticText to exist
+    t =     6.44s     Checking `Expect predicate `existsNoRetry == 1` for object "今日状态详情" StaticText`
+    t =     6.44s         Checking existence of `"今日状态详情" StaticText`
+    t =     6.52s Checking existence of `"today.state.askVitora" Button`
+    t =     6.55s Tap "关闭" Button
+    t =     6.55s     Wait for com.vitora.app to idle
+    t =     6.55s     Find the "关闭" Button
+    t =     6.58s     Check for interrupting elements affecting "关闭" Button
+    t =     6.61s     Synthesize event
+    t =     6.90s     Wait for com.vitora.app to idle
+    t =     7.23s Tap "tab.vitora" Button
+    t =     7.23s     Wait for com.vitora.app to idle
+    t =     7.24s     Find the "tab.vitora" Button
+    t =     7.27s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     7.30s     Synthesize event
+    t =     7.59s     Wait for com.vitora.app to idle
+    t =     7.59s Waiting 3.0s for "vitora.input.text" TextField to exist
+    t =     8.65s     Checking `Expect predicate `existsNoRetry == 1` for object "vitora.input.text" TextField`
+    t =     8.65s         Checking existence of `"vitora.input.text" TextField`
+    t =     8.68s Find the "vitora.input.text" TextField
+    t =     8.71s Find the "primary.tabbar" Other
+    t =     8.74s Tap "tab.cycle" Button
+    t =     8.74s     Wait for com.vitora.app to idle
+    t =     8.74s     Find the "tab.cycle" Button
+    t =     8.77s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     8.79s     Synthesize event
+    t =     9.08s     Wait for com.vitora.app to idle
+    t =     9.09s Waiting 3.0s for "cycle.energy.card" Button to exist
+    t =    10.16s     Checking `Expect predicate `existsNoRetry == 1` for object "cycle.energy.card" Button`
+    t =    10.16s         Checking existence of `"cycle.energy.card" Button`
+    t =    10.20s Tear Down
+Test Case '-[VitoraUITests.AccessibilityUITests testDynamicTypeKeepsMainNavigationInputAndSheetsUsable]' passed (10.513 seconds).
+Test Case '-[VitoraUITests.AccessibilityUITests testPrimarySurfacesExposeAccessibleLabelsAndTouchTargets]' started.
+    t =     0.00s Start Test at 2026-05-07 09:02:10.100
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43178
+2026-05-07 09:02:11.241 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:11.241 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.36s         Setting up automation session
+    t =     2.11s         Wait for com.vitora.app to idle
+    t =     3.42s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.47s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.47s         Checking existence of `"现在状态" StaticText`
+    t =     4.55s Checking existence of `"tab.today" Button`
+    t =     4.57s Find the "tab.today" Button
+    t =     4.60s Find the "tab.today" Button
+    t =     4.62s Checking existence of `"tab.vitora" Button`
+    t =     4.64s Find the "tab.vitora" Button
+    t =     4.67s Find the "tab.vitora" Button
+    t =     4.69s Checking existence of `"tab.cycle" Button`
+    t =     4.71s Find the "tab.cycle" Button
+    t =     4.73s Find the "tab.cycle" Button
+    t =     4.75s Checking existence of `"today.status.card" Button`
+    t =     4.77s Find the "today.status.card" Button
+    t =     4.79s Find the "today.status.card" Button
+    t =     4.82s Find the "today.status.card" Button
+    t =     4.84s Tap "tab.vitora" Button
+    t =     4.84s     Wait for com.vitora.app to idle
+    t =     4.84s     Find the "tab.vitora" Button
+    t =     4.86s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     4.88s     Synthesize event
+    t =     5.17s     Wait for com.vitora.app to idle
+    t =     5.17s Waiting 3.0s for "Vitora 知道" StaticText to exist
+    t =     6.22s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 知道" StaticText`
+    t =     6.22s         Checking existence of `"Vitora 知道" StaticText`
+    t =     6.28s Checking existence of `"vitora.input.plus" Button`
+    t =     6.30s Find the "vitora.input.plus" Button
+    t =     6.33s Find the "vitora.input.plus" Button
+    t =     6.36s Checking existence of `"vitora.input.voice" Button`
+    t =     6.38s Find the "vitora.input.voice" Button
+    t =     6.41s Find the "vitora.input.voice" Button
+    t =     6.43s Checking existence of `"vitora.input.send" Button`
+    t =     6.46s Find the "vitora.input.send" Button
+    t =     6.48s Find the "vitora.input.send" Button
+    t =     6.51s Find the "vitora.input.voice" Button
+    t =     6.53s Find the "vitora.input.send" Button
+    t =     6.56s Tap "tab.cycle" Button
+    t =     6.56s     Wait for com.vitora.app to idle
+    t =     6.56s     Find the "tab.cycle" Button
+    t =     6.58s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     6.60s     Synthesize event
+    t =     6.89s     Wait for com.vitora.app to idle
+    t =     6.90s Waiting 3.0s for "当前周期阶段与今天" StaticText to exist
+    t =     7.98s     Checking `Expect predicate `existsNoRetry == 1` for object "当前周期阶段与今天" StaticText`
+    t =     7.98s         Checking existence of `"当前周期阶段与今天" StaticText`
+    t =     8.02s Checking existence of `"cycle.phase.card" Button`
+    t =     8.04s Find the "cycle.phase.card" Button
+    t =     8.06s Find the "cycle.phase.card" Button
+    t =     8.07s Checking existence of `"cycle.energy.card" Button`
+    t =     8.09s Find the "cycle.energy.card" Button
+    t =     8.11s Find the "cycle.energy.card" Button
+    t =     8.12s Checking existence of `"cycle.settings.open" Button`
+    t =     8.13s Find the "cycle.settings.open" Button
+    t =     8.15s Find the "cycle.settings.open" Button
+    t =     8.17s Tap "cycle.settings.open" Button
+    t =     8.17s     Wait for com.vitora.app to idle
+    t =     8.17s     Find the "cycle.settings.open" Button
+    t =     8.18s     Check for interrupting elements affecting "cycle.settings.open" Button
+    t =     8.20s     Synthesize event
+    t =     8.49s     Wait for com.vitora.app to idle
+    t =     8.87s Waiting 3.0s for "support.settings.panel" Other to exist
+    t =     9.94s     Checking `Expect predicate `existsNoRetry == 1` for object "support.settings.panel" Other`
+    t =     9.94s         Checking existence of `"support.settings.panel" Other`
+    t =    10.00s Checking existence of `"support.close" Button`
+    t =    10.03s Find the "support.close" Button
+    t =    10.06s Find the "support.close" Button
+    t =    10.08s Checking existence of `"support.route.profile" Button`
+    t =    10.10s Find the "support.route.profile" Button
+    t =    10.13s Find the "support.route.profile" Button
+    t =    10.16s Checking existence of `"support.route.dataSources" Button`
+    t =    10.18s Find the "support.route.dataSources" Button
+    t =    10.21s Find the "support.route.dataSources" Button
+    t =    10.24s Checking existence of `"support.route.nutrition" Button`
+    t =    10.26s Find the "support.route.nutrition" Button
+    t =    10.29s Find the "support.route.nutrition" Button
+    t =    10.31s Checking existence of `"support.route.reminders" Button`
+    t =    10.34s Find the "support.route.reminders" Button
+    t =    10.36s Find the "support.route.reminders" Button
+    t =    10.39s Checking existence of `"support.route.dataExport" Button`
+    t =    10.41s Find the "support.route.dataExport" Button
+    t =    10.44s Find the "support.route.dataExport" Button
+    t =    10.47s Checking existence of `"support.route.privacyAndAccountRemoval" Button`
+    t =    10.49s Find the "support.route.privacyAndAccountRemoval" Button
+    t =    10.52s Find the "support.route.privacyAndAccountRemoval" Button
+    t =    10.54s Tear Down
+Test Case '-[VitoraUITests.AccessibilityUITests testPrimarySurfacesExposeAccessibleLabelsAndTouchTargets]' passed (10.804 seconds).
+Test Case '-[VitoraUITests.AccessibilityUITests testReduceMotionAndTransparencyPathKeepsCoreInteractionsAvailable]' started.
+    t =     0.00s Start Test at 2026-05-07 09:02:20.905
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43293
+2026-05-07 09:02:22.037 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:22.037 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.34s         Setting up automation session
+    t =     2.10s         Wait for com.vitora.app to idle
+    t =     3.40s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.46s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.46s         Checking existence of `"现在状态" StaticText`
+    t =     4.55s Swipe down Target Application 'com.vitora.app'
+    t =     4.55s     Wait for com.vitora.app to idle
+    t =     4.56s     Find the Target Application 'com.vitora.app'
+    t =     4.57s     Check for interrupting elements affecting "Vitora" Application
+    t =     4.59s     Synthesize event
+    t =     5.01s     Wait for com.vitora.app to idle
+    t =     5.50s Waiting 3.0s for "today.energy.reveal.header" Other to exist
+    t =     6.53s     Checking `Expect predicate `existsNoRetry == 1` for object "today.energy.reveal.header" Other`
+    t =     6.53s         Checking existence of `"today.energy.reveal.header" Other`
+    t =     6.59s Swipe up Target Application 'com.vitora.app'
+    t =     6.59s     Wait for com.vitora.app to idle
+    t =     6.59s     Find the Target Application 'com.vitora.app'
+    t =     6.61s     Check for interrupting elements affecting "Vitora" Application
+    t =     6.63s     Synthesize event
+    t =     7.05s     Wait for com.vitora.app to idle
+    t =     7.55s Waiting 3.0s for "现在状态" StaticText to exist
+    t =     8.62s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     8.62s         Checking existence of `"现在状态" StaticText`
+    t =     8.67s Tap "today.calibration.tell" Button
+    t =     8.67s     Wait for com.vitora.app to idle
+    t =     8.68s     Find the "today.calibration.tell" Button
+    t =     8.70s     Check for interrupting elements affecting "today.calibration.tell" Button
+    t =     8.73s     Synthesize event
+    t =     9.02s     Wait for com.vitora.app to idle
+    t =     9.45s Waiting 4.0s for "Vitora 浮层 · 来源：今日状态" StaticText to exist
+    t =    10.51s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 浮层 · 来源：今日状态" StaticText`
+    t =    10.52s         Checking existence of `"Vitora 浮层 · 来源：今日状态" StaticText`
+    t =    10.59s Checking existence of `"vitora.context.close" Button`
+    t =    10.62s Tear Down
+Test Case '-[VitoraUITests.AccessibilityUITests testReduceMotionAndTransparencyPathKeepsCoreInteractionsAvailable]' passed (10.914 seconds).
+Test Suite 'AccessibilityUITests' passed at 2026-05-07 09:02:31.819.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 32.231 (32.238) seconds
+Test Suite 'AskableSurfaceUITests' started at 2026-05-07 09:02:31.821.
+Test Case '-[VitoraUITests.AskableSurfaceUITests testSingleTapOpensDetailAndLongPressRevealsVitoraActions]' started.
+    t =     0.00s Start Test at 2026-05-07 09:02:31.824
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43319
+2026-05-07 09:02:32.949 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:32.949 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.34s         Setting up automation session
+    t =     2.09s         Wait for com.vitora.app to idle
+    t =     3.39s Tap "today.status.card" Button
+    t =     3.39s     Wait for com.vitora.app to idle
+    t =     3.40s     Find the "today.status.card" Button
+    t =     3.47s     Check for interrupting elements affecting "today.status.card" Button
+    t =     3.49s     Synthesize event
+    t =     3.79s     Wait for com.vitora.app to idle
+    t =     4.17s Waiting 3.0s for "today.state.detail.sheet" Other to exist
+    t =     5.22s     Checking `Expect predicate `existsNoRetry == 1` for object "today.state.detail.sheet" Other`
+    t =     5.22s         Checking existence of `"today.state.detail.sheet" Other`
+    t =     5.29s Tap "关闭" Button
+    t =     5.29s     Wait for com.vitora.app to idle
+    t =     5.29s     Find the "关闭" Button
+    t =     5.32s     Check for interrupting elements affecting "关闭" Button
+    t =     5.35s     Synthesize event
+    t =     5.64s     Wait for com.vitora.app to idle
+    t =     5.98s Waiting 3.0s for "today.status.card" Button to exist
+    t =     7.02s     Checking `Expect predicate `existsNoRetry == 1` for object "today.status.card" Button`
+    t =     7.02s         Checking existence of `"today.status.card" Button`
+    t =     7.07s Press "today.status.card" Button for 0.8 seconds
+    t =     7.07s     Wait for com.vitora.app to idle
+    t =     7.08s     Find the "today.status.card" Button
+    t =     7.10s     Check for interrupting elements affecting "today.status.card" Button
+    t =     7.13s     Synthesize event
+    t =     8.15s     Wait for com.vitora.app to idle
+    t =     8.93s Waiting 3.0s for "问 Vitora 为什么" Button to exist
+    t =     9.98s     Checking `Expect predicate `existsNoRetry == 1` for object "问 Vitora 为什么" Button`
+    t =     9.98s         Checking existence of `"问 Vitora 为什么" Button`
+    t =    10.05s Checking existence of `"告诉 Vitora 这里不准" Button`
+    t =    10.08s Tear Down
+Test Case '-[VitoraUITests.AskableSurfaceUITests testSingleTapOpensDetailAndLongPressRevealsVitoraActions]' passed (10.409 seconds).
+Test Suite 'AskableSurfaceUITests' passed at 2026-05-07 09:02:42.233.
+	 Executed 1 test, with 0 failures (0 unexpected) in 10.409 (10.412) seconds
+Test Suite 'ComplianceSurfaceUITests' started at 2026-05-07 09:02:42.235.
+Test Case '-[VitoraUITests.ComplianceSurfaceUITests testCoreSurfacesExposeRequiredComplianceLabels]' started.
+    t =     0.00s Start Test at 2026-05-07 09:02:42.237
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43335
+2026-05-07 09:02:43.289 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:43.289 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.27s         Setting up automation session
+    t =     2.01s         Wait for com.vitora.app to idle
+    t =     3.31s Waiting 5.0s for "本内容仅供生活方式参考，不替代专业意见。" StaticText to exist
+    t =     4.37s     Checking `Expect predicate `existsNoRetry == 1` for object "本内容仅供生活方式参考，不替代专业意见。" StaticText`
+    t =     4.37s         Checking existence of `"本内容仅供生活方式参考，不替代专业意见。" StaticText`
+    t =     4.44s Tap "tab.vitora" Button
+    t =     4.44s     Wait for com.vitora.app to idle
+    t =     4.44s     Find the "tab.vitora" Button
+    t =     4.46s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     4.48s     Synthesize event
+    t =     4.78s     Wait for com.vitora.app to idle
+    t =     4.78s Waiting 5.0s for "Vitora 的理解来自你提供的数据和记录，可作为生活方式参考。" StaticText to exist
+    t =     5.84s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 的理解来自你提供的数据和记录，可作为生活方式参考。" StaticText`
+    t =     5.85s         Checking existence of `"Vitora 的理解来自你提供的数据和记录，可作为生活方式参考。" StaticText`
+    t =     5.90s Tap "tab.cycle" Button
+    t =     5.90s     Wait for com.vitora.app to idle
+    t =     5.91s     Find the "tab.cycle" Button
+    t =     5.93s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     5.95s     Synthesize event
+    t =     6.24s     Wait for com.vitora.app to idle
+    t =     6.25s Tap "cycle.settings.open" Button
+    t =     6.25s     Wait for com.vitora.app to idle
+    t =     6.25s     Find the "cycle.settings.open" Button
+    t =     6.28s     Check for interrupting elements affecting "cycle.settings.open" Button
+    t =     6.30s     Synthesize event
+    t =     6.59s     Wait for com.vitora.app to idle
+    t =     6.96s Waiting 5.0s for "support.settings.panel" Other to exist
+    t =     8.02s     Checking `Expect predicate `existsNoRetry == 1` for object "support.settings.panel" Other`
+    t =     8.02s         Checking existence of `"support.settings.panel" Other`
+    t =     8.08s Tap "support.route.dataSources" Button
+    t =     8.08s     Wait for com.vitora.app to idle
+    t =     8.08s     Find the "support.route.dataSources" Button
+    t =     8.11s     Check for interrupting elements affecting "support.route.dataSources" Button
+    t =     8.14s     Synthesize event
+    t =     8.43s     Wait for com.vitora.app to idle
+    t =     8.43s Waiting 3.0s for "当前可用信息较少，你可以继续手动记录，或稍后连接 HealthKit。" StaticText to exist
+    t =     9.46s     Checking `Expect predicate `existsNoRetry == 1` for object "当前可用信息较少，你可以继续手动记录，或稍后连接 HealthKit。" StaticText`
+    t =     9.46s         Checking existence of `"当前可用信息较少，你可以继续手动记录，或稍后连接 HealthKit。" StaticText`
+    t =     9.51s Tap "support.back" Button
+    t =     9.51s     Wait for com.vitora.app to idle
+    t =     9.52s     Find the "support.back" Button
+    t =     9.54s     Check for interrupting elements affecting "support.back" Button
+    t =     9.56s     Synthesize event
+    t =     9.85s     Wait for com.vitora.app to idle
+    t =     9.86s Tap "support.route.nutrition" Button
+    t =     9.86s     Wait for com.vitora.app to idle
+    t =     9.87s     Find the "support.route.nutrition" Button
+    t =     9.91s     Check for interrupting elements affecting "support.route.nutrition" Button
+    t =     9.94s     Synthesize event
+    t =    10.22s     Wait for com.vitora.app to idle
+    t =    10.23s Waiting 3.0s for "Vitora 只记录你已经在使用的内容，不引导你新增或购买。" StaticText to exist
+    t =    11.29s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 只记录你已经在使用的内容，不引导你新增或购买。" StaticText`
+    t =    11.29s         Checking existence of `"Vitora 只记录你已经在使用的内容，不引导你新增或购买。" StaticText`
+    t =    11.34s Tap "support.back" Button
+    t =    11.34s     Wait for com.vitora.app to idle
+    t =    11.34s     Find the "support.back" Button
+    t =    11.37s     Check for interrupting elements affecting "support.back" Button
+    t =    11.39s     Synthesize event
+    t =    11.68s     Wait for com.vitora.app to idle
+    t =    11.69s Tap "support.route.dataExport" Button
+    t =    11.69s     Wait for com.vitora.app to idle
+    t =    11.69s     Find the "support.route.dataExport" Button
+    t =    11.72s     Check for interrupting elements affecting "support.route.dataExport" Button
+    t =    11.74s     Synthesize event
+    t =    12.03s     Wait for com.vitora.app to idle
+    t =    12.03s Waiting 3.0s for "你可以导出个人数据，也可以移除账号和本地数据。" StaticText to exist
+    t =    13.08s     Checking `Expect predicate `existsNoRetry == 1` for object "你可以导出个人数据，也可以移除账号和本地数据。" StaticText`
+    t =    13.09s         Checking existence of `"你可以导出个人数据，也可以移除账号和本地数据。" StaticText`
+    t =    13.14s Tear Down
+Test Case '-[VitoraUITests.ComplianceSurfaceUITests testCoreSurfacesExposeRequiredComplianceLabels]' passed (13.380 seconds).
+Test Suite 'ComplianceSurfaceUITests' passed at 2026-05-07 09:02:55.617.
+	 Executed 1 test, with 0 failures (0 unexpected) in 13.380 (13.383) seconds
+Test Suite 'ContextualVitoraSheetUITests' started at 2026-05-07 09:02:55.618.
+Test Case '-[VitoraUITests.ContextualVitoraSheetUITests testTodayCalibrationOpensContextualSheetAndUnderstandingState]' started.
+    t =     0.00s Start Test at 2026-05-07 09:02:55.621
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43344
+2026-05-07 09:02:56.731 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:02:56.731 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.32s         Setting up automation session
+    t =     2.03s         Wait for com.vitora.app to idle
+    t =     3.32s Tap "today.calibration.tell" Button
+    t =     3.32s     Wait for com.vitora.app to idle
+    t =     3.33s     Find the "today.calibration.tell" Button
+    t =     3.40s     Check for interrupting elements affecting "today.calibration.tell" Button
+    t =     3.42s     Synthesize event
+    t =     3.71s     Wait for com.vitora.app to idle
+    t =     4.13s Waiting 4.0s for "Vitora 浮层 · 来源：今日状态" StaticText to exist
+    t =     5.18s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 浮层 · 来源：今日状态" StaticText`
+    t =     5.18s         Checking existence of `"Vitora 浮层 · 来源：今日状态" StaticText`
+    t =     5.26s Checking existence of `"Vitora 浮层 · 来源：今日状态" StaticText`
+    t =     5.29s Checking existence of `TextField (Element at index 0)`
+    t =     5.32s Tap TextField (Element at index 0)
+    t =     5.32s     Wait for com.vitora.app to idle
+    t =     5.32s     Find the TextField (Element at index 0)
+    t =     5.34s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     5.37s     Synthesize event
+    t =     5.66s     Wait for com.vitora.app to idle
+    t =     6.55s Type '昨晚醒了两次' into "vitora.input.text" TextField
+    t =     6.56s     Wait for com.vitora.app to idle
+    t =     6.56s     Find the "vitora.input.text" TextField
+    t =     6.62s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     6.66s     Synthesize event
+    t =     6.96s     Wait for com.vitora.app to idle
+    t =     7.14s Tap "vitora.input.send" Button
+    t =     7.14s     Wait for com.vitora.app to idle
+    t =     7.15s     Find the "vitora.input.send" Button
+    t =     7.22s     Check for interrupting elements affecting "vitora.input.send" Button
+    t =     7.26s     Synthesize event
+    t =     7.55s     Wait for com.vitora.app to idle
+    t =     7.55s Waiting 3.0s for "Vitora 理解为" StaticText to exist
+    t =     8.60s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 理解为" StaticText`
+    t =     8.60s         Checking existence of `"Vitora 理解为" StaticText`
+    t =     8.68s Tear Down
+Test Case '-[VitoraUITests.ContextualVitoraSheetUITests testTodayCalibrationOpensContextualSheetAndUnderstandingState]' passed (8.969 seconds).
+Test Suite 'ContextualVitoraSheetUITests' passed at 2026-05-07 09:03:04.590.
+	 Executed 1 test, with 0 failures (0 unexpected) in 8.969 (8.972) seconds
+Test Suite 'CyclePivotUITests' started at 2026-05-07 09:03:04.592.
+Test Case '-[VitoraUITests.CyclePivotUITests testCycleEnergyDetailShowsTrendExploration]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:04.593
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43472
+2026-05-07 09:03:05.701 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:05.701 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.32s         Setting up automation session
+    t =     2.10s         Wait for com.vitora.app to idle
+    t =     3.43s Tap "tab.cycle" Button
+    t =     3.43s     Wait for com.vitora.app to idle
+    t =     3.44s     Find the "tab.cycle" Button
+    t =     3.53s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     3.55s     Synthesize event
+    t =     3.85s     Wait for com.vitora.app to idle
+    t =     3.85s Tap "cycle.energy.card" Button
+    t =     3.85s     Wait for com.vitora.app to idle
+    t =     3.85s     Find the "cycle.energy.card" Button
+    t =     3.87s     Check for interrupting elements affecting "cycle.energy.card" Button
+    t =     3.89s     Synthesize event
+    t =     4.18s     Wait for com.vitora.app to idle
+    t =     4.54s Waiting 3.0s for "能量动态" StaticText to exist
+    t =     5.58s     Checking `Expect predicate `existsNoRetry == 1` for object "能量动态" StaticText`
+    t =     5.58s         Checking existence of `"能量动态" StaticText`
+    t =     5.65s Checking existence of `"本周平均 62% · 较上周 ↑5%" StaticText`
+    t =     5.68s Checking existence of `"Vitora 本周看到" StaticText`
+    t =     5.70s Tear Down
+Test Case '-[VitoraUITests.CyclePivotUITests testCycleEnergyDetailShowsTrendExploration]' passed (5.932 seconds).
+Test Case '-[VitoraUITests.CyclePivotUITests testCycleHomeIsLongHorizonRhythmAndEnergyDynamics]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:10.526
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43477
+2026-05-07 09:03:11.658 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:11.658 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.35s         Setting up automation session
+    t =     2.08s         Wait for com.vitora.app to idle
+    t =     3.37s Tap "tab.cycle" Button
+    t =     3.37s     Wait for com.vitora.app to idle
+    t =     3.37s     Find the "tab.cycle" Button
+    t =     3.44s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     3.46s     Synthesize event
+    t =     3.75s     Wait for com.vitora.app to idle
+    t =     3.75s Waiting 5.0s for "cycle.pivot.surface" Other to exist
+    t =     4.81s     Checking `Expect predicate `existsNoRetry == 1` for object "cycle.pivot.surface" Other`
+    t =     4.81s         Checking existence of `"cycle.pivot.surface" Other`
+    t =     4.85s Checking existence of `"cycle.phase.card" Button`
+    t =     4.87s Checking existence of `"cycle.energy.card" Button`
+    t =     4.89s Checking existence of `"cycle.settings.open" Button`
+    t =     4.90s Checking existence of `"周期日历" StaticText`
+    t =     4.91s Tear Down
+Test Case '-[VitoraUITests.CyclePivotUITests testCycleHomeIsLongHorizonRhythmAndEnergyDynamics]' passed (5.152 seconds).
+Test Suite 'CyclePivotUITests' passed at 2026-05-07 09:03:15.678.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 11.083 (11.087) seconds
+Test Suite 'EveningReviewUITests' started at 2026-05-07 09:03:15.679.
+Test Case '-[VitoraUITests.EveningReviewUITests testEveningReviewShowsBeforeAfterFeedbackAndLearningSignal]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:15.681
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43489
+2026-05-07 09:03:16.815 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:16.815 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.34s         Setting up automation session
+    t =     2.09s         Wait for com.vitora.app to idle
+    t =     3.37s Tap "tab.vitora" Button
+    t =     3.37s     Wait for com.vitora.app to idle
+    t =     3.38s     Find the "tab.vitora" Button
+    t =     3.45s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.47s     Synthesize event
+    t =     3.76s     Wait for com.vitora.app to idle
+    t =     3.76s Waiting 5.0s for "今晚复盘" StaticText to exist
+    t =     4.80s     Checking `Expect predicate `existsNoRetry == 1` for object "今晚复盘" StaticText`
+    t =     4.80s         Checking existence of `"今晚复盘" StaticText`
+    t =     4.86s Tap "vitora.review.open" Button
+    t =     4.86s     Wait for com.vitora.app to idle
+    t =     4.86s     Find the "vitora.review.open" Button
+    t =     4.89s     Check for interrupting elements affecting "vitora.review.open" Button
+    t =     4.91s     Synthesize event
+    t =     5.20s     Wait for com.vitora.app to idle
+    t =     5.58s Waiting 5.0s for "vitora.review.sheet" Other to exist
+    t =     6.61s     Checking `Expect predicate `existsNoRetry == 1` for object "vitora.review.sheet" Other`
+    t =     6.62s         Checking existence of `"vitora.review.sheet" Other`
+    t =     6.69s Checking existence of `"今天 Vitora 给过这个建议：" StaticText`
+    t =     6.73s Checking existence of `"早上" StaticText`
+    t =     6.76s Checking existence of `"后来感觉如何？" StaticText`
+    t =     6.80s Checking existence of `"完成了吗" StaticText`
+    t =     6.83s Tap "vitora.review.feedback.helpful" Button
+    t =     6.83s     Wait for com.vitora.app to idle
+    t =     6.83s     Find the "vitora.review.feedback.helpful" Button
+    t =     6.87s     Check for interrupting elements affecting "vitora.review.feedback.helpful" Button
+    t =     6.90s     Synthesize event
+    t =     7.19s     Wait for com.vitora.app to idle
+    t =     7.93s Waiting 3.0s for "Vitora 已记住这条反馈" StaticText to exist
+    t =     8.95s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 已记住这条反馈" StaticText`
+    t =     8.95s         Checking existence of `"Vitora 已记住这条反馈" StaticText`
+    t =     9.02s Checking existence of `"更新后的学习信号" StaticText`
+    t =     9.05s Tear Down
+Test Case '-[VitoraUITests.EveningReviewUITests testEveningReviewShowsBeforeAfterFeedbackAndLearningSignal]' passed (9.307 seconds).
+Test Suite 'EveningReviewUITests' passed at 2026-05-07 09:03:24.989.
+	 Executed 1 test, with 0 failures (0 unexpected) in 9.307 (9.310) seconds
+Test Suite 'HealthKitOptionalUITests' started at 2026-05-07 09:03:24.990.
+Test Case '-[VitoraUITests.HealthKitOptionalUITests testDenyingHealthKitStillShowsLowDataToday]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:24.992
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.03s     Launch com.vitora.app
+    t =     0.03s         Terminate com.vitora.app:43490
+2026-05-07 09:03:26.076 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:26.076 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.30s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.32s Waiting 5.0s for "onboarding.identity.name" TextField to exist
+    t =     4.38s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.identity.name" TextField`
+    t =     4.38s         Checking existence of `"onboarding.identity.name" TextField`
+    t =     4.46s Tap "onboarding.identity.name" TextField
+    t =     4.46s     Wait for com.vitora.app to idle
+    t =     4.46s     Find the "onboarding.identity.name" TextField
+    t =     4.47s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     4.48s     Synthesize event
+    t =     4.77s     Wait for com.vitora.app to idle
+    t =     4.86s Type '小维' into "onboarding.identity.name" TextField
+    t =     4.86s     Wait for com.vitora.app to idle
+    t =     4.86s     Find the "onboarding.identity.name" TextField
+    t =     4.89s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     4.91s     Synthesize event
+    t =     5.15s     Wait for com.vitora.app to idle
+    t =     5.34s Tap "onboarding.identity.continue" Button
+    t =     5.34s     Wait for com.vitora.app to idle
+    t =     5.34s     Find the "onboarding.identity.continue" Button
+    t =     5.38s     Check for interrupting elements affecting "onboarding.identity.continue" Button
+    t =     5.40s     Synthesize event
+    t =     5.69s     Wait for com.vitora.app to idle
+    t =     5.69s Waiting 3.0s for "onboarding.healthkit.deny" Button to exist
+    t =     6.72s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.healthkit.deny" Button`
+    t =     6.72s         Checking existence of `"onboarding.healthkit.deny" Button`
+    t =     6.76s Tap "onboarding.healthkit.deny" Button
+    t =     6.76s     Wait for com.vitora.app to idle
+    t =     6.77s     Find the "onboarding.healthkit.deny" Button
+    t =     6.79s     Check for interrupting elements affecting "onboarding.healthkit.deny" Button
+    t =     6.80s     Synthesize event
+    t =     7.09s     Wait for com.vitora.app to idle
+    t =     7.10s Tap "onboarding.context.continue" Button
+    t =     7.10s     Wait for com.vitora.app to idle
+    t =     7.10s     Find the "onboarding.context.continue" Button
+    t =     7.13s     Check for interrupting elements affecting "onboarding.context.continue" Button
+    t =     7.15s     Synthesize event
+    t =     7.44s     Wait for com.vitora.app to idle
+    t =     7.45s Tap "onboarding.ready.enterToday" Button
+    t =     7.45s     Wait for com.vitora.app to idle
+    t =     7.46s     Find the "onboarding.ready.enterToday" Button
+    t =     7.48s     Check for interrupting elements affecting "onboarding.ready.enterToday" Button
+    t =     7.50s     Synthesize event
+    t =     7.79s     Wait for com.vitora.app to idle
+    t =     7.80s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     8.82s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     8.83s         Checking existence of `"现在状态" StaticText`
+    t =     8.88s Checking existence of `"低数据模式" StaticText`
+    t =     8.91s Tear Down
+Test Case '-[VitoraUITests.HealthKitOptionalUITests testDenyingHealthKitStillShowsLowDataToday]' passed (9.180 seconds).
+Test Case '-[VitoraUITests.HealthKitOptionalUITests testSkippingHealthKitStillShowsAllPrimaryTabs]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:34.174
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43603
+2026-05-07 09:03:35.271 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:35.271 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.31s         Setting up automation session
+    t =     2.07s         Wait for com.vitora.app to idle
+    t =     3.37s Waiting 5.0s for "onboarding.identity.name" TextField to exist
+    t =     4.41s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.identity.name" TextField`
+    t =     4.41s         Checking existence of `"onboarding.identity.name" TextField`
+    t =     4.50s Tap "onboarding.identity.name" TextField
+    t =     4.50s     Wait for com.vitora.app to idle
+    t =     4.50s     Find the "onboarding.identity.name" TextField
+    t =     4.51s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     4.53s     Synthesize event
+    t =     4.82s     Wait for com.vitora.app to idle
+    t =     4.90s Type 'Vitora' into "onboarding.identity.name" TextField
+    t =     4.90s     Wait for com.vitora.app to idle
+    t =     4.90s     Find the "onboarding.identity.name" TextField
+    t =     4.93s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     4.96s     Synthesize event
+    t =     5.26s     Wait for com.vitora.app to idle
+    t =     5.40s Tap "onboarding.identity.continue" Button
+    t =     5.40s     Wait for com.vitora.app to idle
+    t =     5.41s     Find the "onboarding.identity.continue" Button
+    t =     5.46s     Check for interrupting elements affecting "onboarding.identity.continue" Button
+    t =     5.49s     Synthesize event
+    t =     5.78s     Wait for com.vitora.app to idle
+    t =     5.78s Waiting 3.0s for "onboarding.healthkit.skip" Button to exist
+    t =     6.80s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.healthkit.skip" Button`
+    t =     6.80s         Checking existence of `"onboarding.healthkit.skip" Button`
+    t =     6.85s Tap "onboarding.healthkit.skip" Button
+    t =     6.85s     Wait for com.vitora.app to idle
+    t =     6.85s     Find the "onboarding.healthkit.skip" Button
+    t =     6.87s     Check for interrupting elements affecting "onboarding.healthkit.skip" Button
+    t =     6.89s     Synthesize event
+    t =     7.17s     Wait for com.vitora.app to idle
+    t =     7.18s Tap "onboarding.context.continue" Button
+    t =     7.18s     Wait for com.vitora.app to idle
+    t =     7.18s     Find the "onboarding.context.continue" Button
+    t =     7.21s     Check for interrupting elements affecting "onboarding.context.continue" Button
+    t =     7.23s     Synthesize event
+    t =     7.52s     Wait for com.vitora.app to idle
+    t =     7.53s Tap "onboarding.ready.enterToday" Button
+    t =     7.53s     Wait for com.vitora.app to idle
+    t =     7.54s     Find the "onboarding.ready.enterToday" Button
+    t =     7.56s     Check for interrupting elements affecting "onboarding.ready.enterToday" Button
+    t =     7.58s     Synthesize event
+    t =     7.87s     Wait for com.vitora.app to idle
+    t =     7.87s Waiting 5.0s for "tab.today" Button to exist
+    t =     8.90s     Checking `Expect predicate `existsNoRetry == 1` for object "tab.today" Button`
+    t =     8.90s         Checking existence of `"tab.today" Button`
+    t =     8.95s Checking existence of `"tab.vitora" Button`
+    t =     8.98s Checking existence of `"tab.cycle" Button`
+    t =     9.00s Tear Down
+Test Case '-[VitoraUITests.HealthKitOptionalUITests testSkippingHealthKitStillShowsAllPrimaryTabs]' passed (9.289 seconds).
+Test Suite 'HealthKitOptionalUITests' passed at 2026-05-07 09:03:43.463.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 18.469 (18.473) seconds
+Test Suite 'LegacyLunaTextScanTests' started at 2026-05-07 09:03:43.464.
+Test Case '-[VitoraUITests.LegacyLunaTextScanTests testPrimaryPivotSurfacesDoNotShowLegacyLunaText]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:43.466
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43618
+2026-05-07 09:03:44.567 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:44.567 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.32s         Setting up automation session
+    t =     2.08s         Wait for com.vitora.app to idle
+    t =     3.40s Checking existence of `StaticText (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     3.52s Checking existence of `Button (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     3.54s Tap "tab.vitora" Button
+    t =     3.54s     Wait for com.vitora.app to idle
+    t =     3.54s     Find the "tab.vitora" Button
+    t =     3.56s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.58s     Synthesize event
+    t =     3.87s     Wait for com.vitora.app to idle
+    t =     3.87s Waiting 3.0s for "Vitora 知道" StaticText to exist
+    t =     4.94s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 知道" StaticText`
+    t =     4.94s         Checking existence of `"Vitora 知道" StaticText`
+    t =     5.00s Checking existence of `StaticText (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     5.02s Checking existence of `Button (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     5.05s Tap "tab.cycle" Button
+    t =     5.05s     Wait for com.vitora.app to idle
+    t =     5.05s     Find the "tab.cycle" Button
+    t =     5.07s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     5.09s     Synthesize event
+    t =     5.38s     Wait for com.vitora.app to idle
+    t =     5.39s Waiting 3.0s for "当前周期阶段与今天" StaticText to exist
+    t =     6.44s     Checking `Expect predicate `existsNoRetry == 1` for object "当前周期阶段与今天" StaticText`
+    t =     6.44s         Checking existence of `"当前周期阶段与今天" StaticText`
+    t =     6.48s Checking existence of `StaticText (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     6.50s Checking existence of `Button (Elements containing elements matching predicate 'label CONTAINS[c] "Luna"')`
+    t =     6.52s Tear Down
+Test Case '-[VitoraUITests.LegacyLunaTextScanTests testPrimaryPivotSurfacesDoNotShowLegacyLunaText]' passed (6.742 seconds).
+Test Suite 'LegacyLunaTextScanTests' passed at 2026-05-07 09:03:50.208.
+	 Executed 1 test, with 0 failures (0 unexpected) in 6.742 (6.744) seconds
+Test Suite 'LunaImmersiveChatUITests' started at 2026-05-07 09:03:50.209.
+Test Case '-[VitoraUITests.LunaImmersiveChatUITests testVitoraAssistantSurfaceSupportsInputVoiceAndContext]' started.
+    t =     0.00s Start Test at 2026-05-07 09:03:50.211
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43631
+2026-05-07 09:03:51.300 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:03:51.300 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.30s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.32s Tap "tab.vitora" Button
+    t =     3.32s     Wait for com.vitora.app to idle
+    t =     3.33s     Find the "tab.vitora" Button
+    t =     3.40s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.42s     Synthesize event
+    t =     3.71s     Wait for com.vitora.app to idle
+    t =     3.71s Waiting 5.0s for "Vitora 知道" StaticText to exist
+    t =     4.77s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 知道" StaticText`
+    t =     4.77s         Checking existence of `"Vitora 知道" StaticText`
+    t =     4.83s Checking existence of `"可以直接问" StaticText`
+    t =     4.85s Checking existence of `"快捷上下文" StaticText`
+    t =     4.87s Tap "睡眠" Button
+    t =     4.87s     Wait for com.vitora.app to idle
+    t =     4.88s     Find the "睡眠" Button
+    t =     4.90s     Check for interrupting elements affecting "vitora.quick.context.睡眠" Button
+    t =     4.92s     Synthesize event
+    t =     4.92s         Scroll element to visible
+    t =     4.92s         Find the "vitora.quick.context.睡眠" Button
+    t =     4.96s         Computed hit point {80.620001294761892, 672.56998909220101} after scrolling to visible
+    t =     5.24s     Wait for com.vitora.app to idle
+    t =     5.24s Waiting 3.0s for TextField (Element at index 0) to exist
+    t =     6.30s     Checking `Expect predicate `existsNoRetry == 1` for object TextField (Element at index 0)`
+    t =     6.30s         Checking existence of `TextField (Element at index 0)`
+    t =     6.35s Tap TextField (Element at index 0)
+    t =     6.35s     Wait for com.vitora.app to idle
+    t =     6.35s     Find the TextField (Element at index 0)
+    t =     6.37s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     6.40s     Synthesize event
+    t =     6.69s     Wait for com.vitora.app to idle
+    t =     6.75s Type '下午有点累' into "vitora.input.text" TextField
+    t =     6.75s     Wait for com.vitora.app to idle
+    t =     6.75s     Find the "vitora.input.text" TextField
+    t =     6.79s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     6.82s     Synthesize event
+    t =     7.10s     Wait for com.vitora.app to idle
+    t =     7.26s Checking existence of `"vitora.input.voice" Button`
+    t =     7.33s Checking existence of `"vitora.input.send" Button`
+    t =     7.37s Tap "vitora.input.send" Button
+    t =     7.37s     Wait for com.vitora.app to idle
+    t =     7.37s     Find the "vitora.input.send" Button
+    t =     7.41s     Check for interrupting elements affecting "vitora.input.send" Button
+    t =     7.44s     Synthesize event
+    t =     7.73s     Wait for com.vitora.app to idle
+    t =     7.73s Waiting 3.0s for "更新后的判断" StaticText to exist
+    t =     8.79s     Checking `Expect predicate `existsNoRetry == 1` for object "更新后的判断" StaticText`
+    t =     8.79s         Checking existence of `"更新后的判断" StaticText`
+    t =     8.87s Waiting 3.0s for "primary.tabbar" Other to exist
+    t =     9.91s     Checking `Expect predicate `existsNoRetry == 1` for object "primary.tabbar" Other`
+    t =     9.91s         Checking existence of `"primary.tabbar" Other`
+    t =     9.98s Tear Down
+Test Case '-[VitoraUITests.LunaImmersiveChatUITests testVitoraAssistantSurfaceSupportsInputVoiceAndContext]' passed (10.233 seconds).
+Test Suite 'LunaImmersiveChatUITests' passed at 2026-05-07 09:04:00.444.
+	 Executed 1 test, with 0 failures (0 unexpected) in 10.233 (10.235) seconds
+Test Suite 'LunaRecordUITests' started at 2026-05-07 09:04:00.446.
+Test Case '-[VitoraUITests.LunaRecordUITests testTodayCalibrationOpensContextualVitoraSheet]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:00.447
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43636
+2026-05-07 09:04:01.548 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:01.548 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.32s         Setting up automation session
+    t =     2.05s         Wait for com.vitora.app to idle
+    t =     3.37s Tap "today.calibration.tell" Button
+    t =     3.37s     Wait for com.vitora.app to idle
+    t =     3.38s     Find the "today.calibration.tell" Button
+    t =     3.49s     Check for interrupting elements affecting "today.calibration.tell" Button
+    t =     3.51s     Synthesize event
+    t =     3.80s     Wait for com.vitora.app to idle
+    t =     4.22s Waiting 4.0s for "Vitora 浮层 · 来源：今日状态" StaticText to exist
+    t =     5.28s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 浮层 · 来源：今日状态" StaticText`
+    t =     5.28s         Checking existence of `"Vitora 浮层 · 来源：今日状态" StaticText`
+    t =     5.35s Tear Down
+Test Case '-[VitoraUITests.LunaRecordUITests testTodayCalibrationOpensContextualVitoraSheet]' passed (5.570 seconds).
+Test Case '-[VitoraUITests.LunaRecordUITests testVitoraSurfaceCanSendNaturalLanguageContext]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:06.018
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43655
+2026-05-07 09:04:07.136 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:07.136 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.05s         Wait for com.vitora.app to idle
+    t =     3.34s Tap "tab.vitora" Button
+    t =     3.34s     Wait for com.vitora.app to idle
+    t =     3.35s     Find the "tab.vitora" Button
+    t =     3.42s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.44s     Synthesize event
+    t =     3.73s     Wait for com.vitora.app to idle
+    t =     3.73s Waiting 5.0s for "Vitora 知道" StaticText to exist
+    t =     4.77s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 知道" StaticText`
+    t =     4.77s         Checking existence of `"Vitora 知道" StaticText`
+    t =     4.81s Checking existence of `"可以直接问" StaticText`
+    t =     4.84s Waiting 3.0s for TextField (Element at index 0) to exist
+    t =     5.87s     Checking `Expect predicate `existsNoRetry == 1` for object TextField (Element at index 0)`
+    t =     5.87s         Checking existence of `TextField (Element at index 0)`
+    t =     5.92s Tap TextField (Element at index 0)
+    t =     5.92s     Wait for com.vitora.app to idle
+    t =     5.92s     Find the TextField (Element at index 0)
+    t =     5.94s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     5.97s     Synthesize event
+    t =     6.26s     Wait for com.vitora.app to idle
+    t =     6.32s Type '昨晚睡得浅' into "vitora.input.text" TextField
+    t =     6.32s     Wait for com.vitora.app to idle
+    t =     6.32s     Find the "vitora.input.text" TextField
+    t =     6.36s     Check for interrupting elements affecting "vitora.input.text" TextField
+    t =     6.39s     Synthesize event
+    t =     6.67s     Wait for com.vitora.app to idle
+    t =     6.84s Tap "vitora.input.send" Button
+    t =     6.84s     Wait for com.vitora.app to idle
+    t =     6.84s     Find the "vitora.input.send" Button
+    t =     6.90s     Check for interrupting elements affecting "vitora.input.send" Button
+    t =     6.93s     Synthesize event
+    t =     7.23s     Wait for com.vitora.app to idle
+    t =     7.23s Waiting 3.0s for "更新后的判断" StaticText to exist
+    t =     8.28s     Checking `Expect predicate `existsNoRetry == 1` for object "更新后的判断" StaticText`
+    t =     8.28s         Checking existence of `"更新后的判断" StaticText`
+    t =     8.36s Tear Down
+Test Case '-[VitoraUITests.LunaRecordUITests testVitoraSurfaceCanSendNaturalLanguageContext]' passed (8.629 seconds).
+Test Suite 'LunaRecordUITests' passed at 2026-05-07 09:04:14.647.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 14.198 (14.202) seconds
+Test Suite 'OnboardingLowDataUITests' started at 2026-05-07 09:04:14.649.
+Test Case '-[VitoraUITests.OnboardingLowDataUITests testSkipHealthKitEntersLowDataToday]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:14.650
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43656
+2026-05-07 09:04:15.876 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:15.876 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.44s         Setting up automation session
+    t =     2.21s         Wait for com.vitora.app to idle
+    t =     3.51s Waiting 5.0s for "onboarding.identity.name" TextField to exist
+    t =     4.55s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.identity.name" TextField`
+    t =     4.55s         Checking existence of `"onboarding.identity.name" TextField`
+    t =     4.64s Tap "onboarding.identity.name" TextField
+    t =     4.64s     Wait for com.vitora.app to idle
+    t =     4.64s     Find the "onboarding.identity.name" TextField
+    t =     4.65s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     4.67s     Synthesize event
+    t =     4.96s     Wait for com.vitora.app to idle
+    t =     5.05s Type '小维' into "onboarding.identity.name" TextField
+    t =     5.05s     Wait for com.vitora.app to idle
+    t =     5.05s     Find the "onboarding.identity.name" TextField
+    t =     5.08s     Check for interrupting elements affecting "onboarding.identity.name" TextField
+    t =     5.10s     Synthesize event
+    t =     5.34s     Wait for com.vitora.app to idle
+    t =     5.55s Tap "onboarding.identity.continue" Button
+    t =     5.55s     Wait for com.vitora.app to idle
+    t =     5.56s     Find the "onboarding.identity.continue" Button
+    t =     5.60s     Check for interrupting elements affecting "onboarding.identity.continue" Button
+    t =     5.63s     Synthesize event
+    t =     5.92s     Wait for com.vitora.app to idle
+    t =     5.92s Waiting 3.0s for "onboarding.healthkit.skip" Button to exist
+    t =     6.97s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.healthkit.skip" Button`
+    t =     6.97s         Checking existence of `"onboarding.healthkit.skip" Button`
+    t =     6.99s Tap "onboarding.healthkit.skip" Button
+    t =     6.99s     Wait for com.vitora.app to idle
+    t =     6.99s     Find the "onboarding.healthkit.skip" Button
+    t =     7.01s     Check for interrupting elements affecting "onboarding.healthkit.skip" Button
+    t =     7.02s     Synthesize event
+    t =     7.31s     Wait for com.vitora.app to idle
+    t =     7.32s Tap "onboarding.context.continue" Button
+    t =     7.32s     Wait for com.vitora.app to idle
+    t =     7.32s     Find the "onboarding.context.continue" Button
+    t =     7.35s     Check for interrupting elements affecting "onboarding.context.continue" Button
+    t =     7.37s     Synthesize event
+    t =     7.67s     Wait for com.vitora.app to idle
+    t =     7.68s Waiting 3.0s for "onboarding.ready.enterToday" Button to exist
+    t =     8.74s     Checking `Expect predicate `existsNoRetry == 1` for object "onboarding.ready.enterToday" Button`
+    t =     8.74s         Checking existence of `"onboarding.ready.enterToday" Button`
+    t =     8.78s Tap "onboarding.ready.enterToday" Button
+    t =     8.78s     Wait for com.vitora.app to idle
+    t =     8.78s     Find the "onboarding.ready.enterToday" Button
+    t =     8.80s     Check for interrupting elements affecting "onboarding.ready.enterToday" Button
+    t =     8.81s     Synthesize event
+    t =     9.10s     Wait for com.vitora.app to idle
+    t =     9.10s Waiting 5.0s for "现在状态" StaticText to exist
+    t =    10.15s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =    10.15s         Checking existence of `"现在状态" StaticText`
+    t =    10.20s Checking existence of `"低数据模式" StaticText`
+    t =    10.22s Tear Down
+Test Case '-[VitoraUITests.OnboardingLowDataUITests testSkipHealthKitEntersLowDataToday]' passed (10.489 seconds).
+Test Suite 'OnboardingLowDataUITests' passed at 2026-05-07 09:04:25.140.
+	 Executed 1 test, with 0 failures (0 unexpected) in 10.489 (10.491) seconds
+Test Suite 'PivotNavigationUITests' started at 2026-05-07 09:04:25.141.
+Test Case '-[VitoraUITests.PivotNavigationUITests testPrimaryNavigationIsTodayVitoraCycleWithFaceCTA]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:25.143
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43665
+2026-05-07 09:04:26.233 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:26.233 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.31s         Setting up automation session
+    t =     2.07s         Wait for com.vitora.app to idle
+    t =     3.38s Waiting 5.0s for "tab.today" Button to exist
+    t =     4.45s     Checking `Expect predicate `existsNoRetry == 1` for object "tab.today" Button`
+    t =     4.45s         Checking existence of `"tab.today" Button`
+    t =     4.55s Checking existence of `"tab.vitora" Button`
+    t =     4.57s Checking existence of `"tab.cycle" Button`
+    t =     4.59s Checking existence of `"tab.vitora.face" Other`
+    t =     4.61s Checking existence of `"tab.luna" Button`
+    t =     4.64s Tear Down
+Test Case '-[VitoraUITests.PivotNavigationUITests testPrimaryNavigationIsTodayVitoraCycleWithFaceCTA]' passed (4.868 seconds).
+Test Suite 'PivotNavigationUITests' passed at 2026-05-07 09:04:30.012.
+	 Executed 1 test, with 0 failures (0 unexpected) in 4.868 (4.871) seconds
+Test Suite 'SettingsPanelUITests' started at 2026-05-07 09:04:30.013.
+Test Case '-[VitoraUITests.SettingsPanelUITests testDataExportAndAccountRemovalRequireConfirmationAndShowResult]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:30.015
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43670
+2026-05-07 09:04:31.103 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:31.103 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.30s         Setting up automation session
+    t =     2.01s         Wait for com.vitora.app to idle
+    t =     3.29s Tap "tab.cycle" Button
+    t =     3.29s     Wait for com.vitora.app to idle
+    t =     3.29s     Find the "tab.cycle" Button
+    t =     3.36s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     3.38s     Synthesize event
+    t =     3.67s     Wait for com.vitora.app to idle
+    t =     3.67s Tap "cycle.settings.open" Button
+    t =     3.67s     Wait for com.vitora.app to idle
+    t =     3.67s     Find the "cycle.settings.open" Button
+    t =     3.69s     Check for interrupting elements affecting "cycle.settings.open" Button
+    t =     3.71s     Synthesize event
+    t =     4.00s     Wait for com.vitora.app to idle
+    t =     4.35s Waiting 5.0s for "support.settings.panel" Other to exist
+    t =     5.39s     Checking `Expect predicate `existsNoRetry == 1` for object "support.settings.panel" Other`
+    t =     5.39s         Checking existence of `"support.settings.panel" Other`
+    t =     5.46s Tap "support.route.dataExport" Button
+    t =     5.46s     Wait for com.vitora.app to idle
+    t =     5.46s     Find the "support.route.dataExport" Button
+    t =     5.49s     Check for interrupting elements affecting "support.route.dataExport" Button
+    t =     5.51s     Synthesize event
+    t =     5.80s     Wait for com.vitora.app to idle
+    t =     5.81s Waiting 3.0s for "数据导出" StaticText to exist
+    t =     6.84s     Checking `Expect predicate `existsNoRetry == 1` for object "数据导出" StaticText`
+    t =     6.84s         Checking existence of `"数据导出" StaticText`
+    t =     6.89s Tap "support.export.start" Button
+    t =     6.89s     Wait for com.vitora.app to idle
+    t =     6.89s     Find the "support.export.start" Button
+    t =     6.92s     Check for interrupting elements affecting "support.export.start" Button
+    t =     6.94s     Synthesize event
+    t =     7.23s     Wait for com.vitora.app to idle
+    t =     7.24s Waiting 2.0s for "确认导出" StaticText to exist
+    t =     8.28s     Checking `Expect predicate `existsNoRetry == 1` for object "确认导出" StaticText`
+    t =     8.29s         Checking existence of `"确认导出" StaticText`
+    t =     8.33s Tap "support.export.confirm" Button
+    t =     8.33s     Wait for com.vitora.app to idle
+    t =     8.34s     Find the "support.export.confirm" Button
+    t =     8.36s     Check for interrupting elements affecting "support.export.confirm" Button
+    t =     8.38s     Synthesize event
+    t =     8.67s     Wait for com.vitora.app to idle
+    t =     8.68s Waiting 2.0s for "导出准备好了" StaticText to exist
+    t =     9.71s     Checking `Expect predicate `existsNoRetry == 1` for object "导出准备好了" StaticText`
+    t =     9.71s         Checking existence of `"导出准备好了" StaticText`
+    t =     9.76s Tap "support.back" Button
+    t =     9.76s     Wait for com.vitora.app to idle
+    t =     9.76s     Find the "support.back" Button
+    t =     9.79s     Check for interrupting elements affecting "support.back" Button
+    t =     9.81s     Synthesize event
+    t =    10.10s     Wait for com.vitora.app to idle
+    t =    10.11s Tap "support.route.privacyAndAccountRemoval" Button
+    t =    10.11s     Wait for com.vitora.app to idle
+    t =    10.11s     Find the "support.route.privacyAndAccountRemoval" Button
+    t =    10.16s     Check for interrupting elements affecting "support.route.privacyAndAccountRemoval" Button
+    t =    10.18s     Synthesize event
+    t =    10.48s     Wait for com.vitora.app to idle
+    t =    10.48s Waiting 3.0s for "隐私与法律" StaticText to exist
+    t =    11.53s     Checking `Expect predicate `existsNoRetry == 1` for object "隐私与法律" StaticText`
+    t =    11.53s         Checking existence of `"隐私与法律" StaticText`
+    t =    11.58s Tap "support.account.start" Button
+    t =    11.58s     Wait for com.vitora.app to idle
+    t =    11.59s     Find the "support.account.start" Button
+    t =    11.61s     Check for interrupting elements affecting "support.account.start" Button
+    t =    11.63s     Synthesize event
+    t =    11.92s     Wait for com.vitora.app to idle
+    t =    11.92s Waiting 2.0s for "再次确认" StaticText to exist
+    t =    12.95s     Checking `Expect predicate `existsNoRetry == 1` for object "再次确认" StaticText`
+    t =    12.95s         Checking existence of `"再次确认" StaticText`
+    t =    13.00s Tap "support.account.confirm" Button
+    t =    13.00s     Wait for com.vitora.app to idle
+    t =    13.00s     Find the "support.account.confirm" Button
+    t =    13.02s     Check for interrupting elements affecting "support.account.confirm" Button
+    t =    13.04s     Synthesize event
+    t =    13.34s     Wait for com.vitora.app to idle
+    t =    13.35s Waiting 2.0s for "账号移除已完成" StaticText to exist
+    t =    14.39s     Checking `Expect predicate `existsNoRetry == 1` for object "账号移除已完成" StaticText`
+    t =    14.39s         Checking existence of `"账号移除已完成" StaticText`
+    t =    14.44s Tear Down
+Test Case '-[VitoraUITests.SettingsPanelUITests testDataExportAndAccountRemovalRequireConfirmationAndShowResult]' passed (14.725 seconds).
+Test Case '-[VitoraUITests.SettingsPanelUITests testSettingsPanelShowsOnlyP0SupportItemsAndChildPanels]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:44.742
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43791
+2026-05-07 09:04:45.849 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:45.849 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.32s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.32s Tap "tab.cycle" Button
+    t =     3.32s     Wait for com.vitora.app to idle
+    t =     3.32s     Find the "tab.cycle" Button
+    t =     3.39s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     3.41s     Synthesize event
+    t =     3.70s     Wait for com.vitora.app to idle
+    t =     3.70s Waiting 5.0s for "cycle.settings.open" Button to exist
+    t =     4.76s     Checking `Expect predicate `existsNoRetry == 1` for object "cycle.settings.open" Button`
+    t =     4.76s         Checking existence of `"cycle.settings.open" Button`
+    t =     4.81s Tap "cycle.settings.open" Button
+    t =     4.81s     Wait for com.vitora.app to idle
+    t =     4.81s     Find the "cycle.settings.open" Button
+    t =     4.83s     Check for interrupting elements affecting "cycle.settings.open" Button
+    t =     4.84s     Synthesize event
+    t =     5.14s     Wait for com.vitora.app to idle
+    t =     5.51s Waiting 5.0s for "support.settings.panel" Other to exist
+    t =     6.55s     Checking `Expect predicate `existsNoRetry == 1` for object "support.settings.panel" Other`
+    t =     6.56s         Checking existence of `"support.settings.panel" Other`
+    t =     6.61s Checking existence of `"我的" StaticText`
+    t =     6.64s Checking existence of `"support.route.profile" Button`
+    t =     6.67s Checking existence of `"support.route.dataSources" Button`
+    t =     6.69s Checking existence of `"support.route.nutrition" Button`
+    t =     6.71s Checking existence of `"support.route.reminders" Button`
+    t =     6.74s Checking existence of `"support.route.dataExport" Button`
+    t =     6.76s Checking existence of `"support.route.privacyAndAccountRemoval" Button`
+    t =     6.78s Checking existence of `"VIP" StaticText`
+    t =     6.81s Checking existence of `"主题商城" StaticText`
+    t =     6.83s Checking existence of `"小组件" StaticText`
+    t =     6.85s Checking existence of `"帮助墙" StaticText`
+    t =     6.88s Checking existence of `"Vitora 养成" StaticText`
+    t =     6.90s Tap "support.route.dataSources" Button
+    t =     6.90s     Wait for com.vitora.app to idle
+    t =     6.90s     Find the "support.route.dataSources" Button
+    t =     6.92s     Check for interrupting elements affecting "support.route.dataSources" Button
+    t =     6.95s     Synthesize event
+    t =     7.24s     Wait for com.vitora.app to idle
+    t =     7.25s Waiting 3.0s for "已跳过 HealthKit" StaticText to exist
+    t =     8.30s     Checking `Expect predicate `existsNoRetry == 1` for object "已跳过 HealthKit" StaticText`
+    t =     8.30s         Checking existence of `"已跳过 HealthKit" StaticText`
+    t =     8.35s Checking existence of `"当前为低数据模式" StaticText`
+    t =     8.37s Tap "support.back" Button
+    t =     8.37s     Wait for com.vitora.app to idle
+    t =     8.37s     Find the "support.back" Button
+    t =     8.39s     Check for interrupting elements affecting "support.back" Button
+    t =     8.41s     Synthesize event
+    t =     8.71s     Wait for com.vitora.app to idle
+    t =     8.72s Tap "support.route.nutrition" Button
+    t =     8.72s     Wait for com.vitora.app to idle
+    t =     8.72s     Find the "support.route.nutrition" Button
+    t =     8.77s     Check for interrupting elements affecting "support.route.nutrition" Button
+    t =     8.79s     Synthesize event
+    t =     9.08s     Wait for com.vitora.app to idle
+    t =     9.09s Waiting 3.0s for "营养补给管理" StaticText to exist
+    t =    10.14s     Checking `Expect predicate `existsNoRetry == 1` for object "营养补给管理" StaticText`
+    t =    10.15s         Checking existence of `"营养补给管理" StaticText`
+    t =    10.19s Tap "support.nutrition.add" Button
+    t =    10.19s     Wait for com.vitora.app to idle
+    t =    10.19s     Find the "support.nutrition.add" Button
+    t =    10.21s     Check for interrupting elements affecting "support.nutrition.add" Button
+    t =    10.23s     Synthesize event
+    t =    10.53s     Wait for com.vitora.app to idle
+    t =    10.53s Get number of matches for: Elements matching predicate '"support.nutrition.entry" IN identifiers'
+    t =    10.56s Tear Down
+Test Case '-[VitoraUITests.SettingsPanelUITests testSettingsPanelShowsOnlyP0SupportItemsAndChildPanels]' passed (10.832 seconds).
+Test Suite 'SettingsPanelUITests' passed at 2026-05-07 09:04:55.574.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 25.558 (25.561) seconds
+Test Suite 'TodayFlowUITests' started at 2026-05-07 09:04:55.575.
+Test Case '-[VitoraUITests.TodayFlowUITests testEnergyRitualCanCompleteOrSkipWithoutBlockingToday]' started.
+    t =     0.00s Start Test at 2026-05-07 09:04:55.576
+    t =     0.03s Set Up
+    t =     0.03s Open com.vitora.app
+    t =     0.03s     Launch com.vitora.app
+    t =     0.03s         Terminate com.vitora.app:43801
+2026-05-07 09:04:56.682 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:04:56.682 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.31s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.31s Swipe down Target Application 'com.vitora.app'
+    t =     3.31s     Wait for com.vitora.app to idle
+    t =     3.32s     Find the Target Application 'com.vitora.app'
+    t =     3.37s     Check for interrupting elements affecting "Vitora" Application
+    t =     3.39s     Synthesize event
+    t =     3.81s     Wait for com.vitora.app to idle
+    t =     4.31s Waiting 3.0s for "today.energy.reveal.header" Other to exist
+    t =     5.34s     Checking `Expect predicate `existsNoRetry == 1` for object "today.energy.reveal.header" Other`
+    t =     5.34s         Checking existence of `"today.energy.reveal.header" Other`
+    t =     5.40s Swipe up Target Application 'com.vitora.app'
+    t =     5.40s     Wait for com.vitora.app to idle
+    t =     5.41s     Find the Target Application 'com.vitora.app'
+    t =     5.43s     Check for interrupting elements affecting "Vitora" Application
+    t =     5.45s     Synthesize event
+    t =     5.87s     Wait for com.vitora.app to idle
+    t =     6.36s Waiting 3.0s for "现在状态" StaticText to exist
+    t =     7.40s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     7.40s         Checking existence of `"现在状态" StaticText`
+    t =     7.45s Tear Down
+Test Case '-[VitoraUITests.TodayFlowUITests testEnergyRitualCanCompleteOrSkipWithoutBlockingToday]' passed (7.710 seconds).
+Test Case '-[VitoraUITests.TodayFlowUITests testTodayAnalysisSheetShowsUsefulSummaryForRichData]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:03.288
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43807
+2026-05-07 09:05:04.378 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:04.378 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.31s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.32s Tap "today.suggestion.try" Button
+    t =     3.32s     Wait for com.vitora.app to idle
+    t =     3.32s     Find the "today.suggestion.try" Button
+    t =     3.39s     Check for interrupting elements affecting "today.suggestion.try" Button
+    t =     3.41s     Synthesize event
+    t =     3.42s         Scroll element to visible
+    t =     3.42s         Find the "today.suggestion.try" Button
+    t =     3.45s         Computed hit point {87, 701} after scrolling to visible
+    t =     3.73s     Wait for com.vitora.app to idle
+    t =     4.13s Waiting 3.0s for "今日分析" StaticText to exist
+    t =     5.18s     Checking `Expect predicate `existsNoRetry == 1` for object "今日分析" StaticText`
+    t =     5.19s         Checking existence of `"今日分析" StaticText`
+    t =     5.27s Checking existence of `"关键支撑" StaticText`
+    t =     5.30s Checking existence of `"今天可以轻轻试" StaticText`
+    t =     5.33s Checking existence of `"today.analysis.close" Button`
+    t =     5.36s Checking existence of `"高级分析" StaticText`
+    t =     5.40s Tear Down
+Test Case '-[VitoraUITests.TodayFlowUITests testTodayAnalysisSheetShowsUsefulSummaryForRichData]' passed (5.628 seconds).
+Test Case '-[VitoraUITests.TodayFlowUITests testTodayLowDataFirstOpenShowsStateAndNextStep]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:08.917
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43812
+2026-05-07 09:05:10.034 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:10.034 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.05s         Wait for com.vitora.app to idle
+    t =     3.31s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.35s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.35s         Checking existence of `"现在状态" StaticText`
+    t =     4.44s Checking existence of `"低数据模式" StaticText`
+    t =     4.47s Checking existence of `"身体要素" StaticText`
+    t =     4.49s Checking existence of `"Vitora 今日建议" StaticText`
+    t =     4.51s Checking existence of `"today.status.card" Button`
+    t =     4.53s Tear Down
+Test Case '-[VitoraUITests.TodayFlowUITests testTodayLowDataFirstOpenShowsStateAndNextStep]' passed (4.756 seconds).
+Test Suite 'TodayFlowUITests' passed at 2026-05-07 09:05:13.673.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 18.093 (18.098) seconds
+Test Suite 'TodayPivotUITests' started at 2026-05-07 09:05:13.674.
+Test Case '-[VitoraUITests.TodayPivotUITests testTodayCalendarIsTopEntry]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:13.676
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43816
+2026-05-07 09:05:14.796 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:14.796 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.05s         Wait for com.vitora.app to idle
+    t =     3.34s Tap "today.top.context" Button
+    t =     3.34s     Wait for com.vitora.app to idle
+    t =     3.34s     Find the "today.top.context" Button
+    t =     3.41s     Check for interrupting elements affecting "today.top.context" Button
+    t =     3.43s     Synthesize event
+    t =     3.72s     Wait for com.vitora.app to idle
+    t =     4.09s Waiting 3.0s for "周期日历" StaticText to exist
+    t =     5.13s     Checking `Expect predicate `existsNoRetry == 1` for object "周期日历" StaticText`
+    t =     5.13s         Checking existence of `"周期日历" StaticText`
+    t =     5.21s Checking existence of `"周期日历" StaticText`
+    t =     5.25s Checking existence of `"Vitora 今日建议已参考黄体期和睡眠变化。" StaticText`
+    t =     5.29s Tear Down
+Test Case '-[VitoraUITests.TodayPivotUITests testTodayCalendarIsTopEntry]' passed (5.531 seconds).
+Test Case '-[VitoraUITests.TodayPivotUITests testTodayUsesStateFactorsSuggestionWithoutStandaloneRecordSection]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:19.208
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43959
+2026-05-07 09:05:20.312 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:20.312 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.31s         Setting up automation session
+    t =     2.04s         Wait for com.vitora.app to idle
+    t =     3.34s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.38s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.38s         Checking existence of `"现在状态" StaticText`
+    t =     4.47s Checking existence of `"today.status.card" Button`
+    t =     4.49s Checking existence of `"身体要素" StaticText`
+    t =     4.52s Checking existence of `"today.bodyFactors.card" Button`
+    t =     4.54s Checking existence of `"Vitora 今日建议" StaticText`
+    t =     4.56s Checking existence of `"today.suggestion.card" Button`
+    t =     4.58s Checking existence of `"今日记录" StaticText`
+    t =     4.60s Checking existence of `"AI管家已生成今日建议" StaticText`
+    t =     4.61s Tear Down
+Test Case '-[VitoraUITests.TodayPivotUITests testTodayUsesStateFactorsSuggestionWithoutStandaloneRecordSection]' passed (4.827 seconds).
+Test Suite 'TodayPivotUITests' passed at 2026-05-07 09:05:24.036.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 10.358 (10.361) seconds
+Test Suite 'VisualLanguageSmokeTests' started at 2026-05-07 09:05:24.037.
+Test Case '-[VitoraUITests.VisualLanguageSmokeTests testAuraGlassAndPixelVitoraSurfacesArePresentAcrossTabs]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:24.039
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43985
+2026-05-07 09:05:25.152 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:25.153 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.06s         Wait for com.vitora.app to idle
+    t =     3.33s Waiting 5.0s for "现在状态" StaticText to exist
+    t =     4.38s     Checking `Expect predicate `existsNoRetry == 1` for object "现在状态" StaticText`
+    t =     4.38s         Checking existence of `"现在状态" StaticText`
+    t =     4.47s Checking existence of `"Vitora 今日建议" StaticText`
+    t =     4.49s Tap "tab.vitora" Button
+    t =     4.49s     Wait for com.vitora.app to idle
+    t =     4.49s     Find the "tab.vitora" Button
+    t =     4.51s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     4.53s     Synthesize event
+    t =     4.82s     Wait for com.vitora.app to idle
+    t =     4.83s Waiting 3.0s for TextField (Element at index 0) to exist
+    t =     5.87s     Checking `Expect predicate `existsNoRetry == 1` for object TextField (Element at index 0)`
+    t =     5.87s         Checking existence of `TextField (Element at index 0)`
+    t =     5.92s Checking existence of `"Vitora 知道" StaticText`
+    t =     5.94s Tap "tab.cycle" Button
+    t =     5.94s     Wait for com.vitora.app to idle
+    t =     5.95s     Find the "tab.cycle" Button
+    t =     5.97s     Check for interrupting elements affecting "tab.cycle" Button
+    t =     5.99s     Synthesize event
+    t =     6.28s     Wait for com.vitora.app to idle
+    t =     6.28s Waiting 3.0s for "当前周期阶段与今天" StaticText to exist
+    t =     7.34s     Checking `Expect predicate `existsNoRetry == 1` for object "当前周期阶段与今天" StaticText`
+    t =     7.34s         Checking existence of `"当前周期阶段与今天" StaticText`
+    t =     7.38s Tear Down
+Test Case '-[VitoraUITests.VisualLanguageSmokeTests testAuraGlassAndPixelVitoraSurfacesArePresentAcrossTabs]' passed (7.657 seconds).
+Test Suite 'VisualLanguageSmokeTests' passed at 2026-05-07 09:05:31.697.
+	 Executed 1 test, with 0 failures (0 unexpected) in 7.657 (7.660) seconds
+Test Suite 'VitoraAssistantSurfaceUITests' started at 2026-05-07 09:05:31.698.
+Test Case '-[VitoraUITests.VitoraAssistantSurfaceUITests testVitoraTabIsAssistantSurfaceNotEmptyChat]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:31.700
+    t =     0.03s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:43988
+2026-05-07 09:05:32.815 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:32.815 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.07s         Wait for com.vitora.app to idle
+    t =     3.35s Tap "tab.vitora" Button
+    t =     3.35s     Wait for com.vitora.app to idle
+    t =     3.35s     Find the "tab.vitora" Button
+    t =     3.43s     Check for interrupting elements affecting "tab.vitora" Button
+    t =     3.45s     Synthesize event
+    t =     3.74s     Wait for com.vitora.app to idle
+    t =     3.74s Waiting 5.0s for "Vitora 知道" StaticText to exist
+    t =     4.78s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora 知道" StaticText`
+    t =     4.78s         Checking existence of `"Vitora 知道" StaticText`
+    t =     4.83s Checking existence of `"可以直接问" StaticText`
+    t =     4.86s Checking existence of `"快捷上下文" StaticText`
+    t =     4.88s Checking existence of `TextField (Element at index 0)`
+    t =     4.90s Tear Down
+Test Case '-[VitoraUITests.VitoraAssistantSurfaceUITests testVitoraTabIsAssistantSurfaceNotEmptyChat]' passed (5.167 seconds).
+Test Suite 'VitoraAssistantSurfaceUITests' passed at 2026-05-07 09:05:36.867.
+	 Executed 1 test, with 0 failures (0 unexpected) in 5.167 (5.169) seconds
+Test Suite 'VitoraUITests' started at 2026-05-07 09:05:36.869.
+Test Case '-[VitoraUITests.VitoraUITests testAppLaunchesToOnboardingShell]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:36.870
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:44001
+2026-05-07 09:05:37.980 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:37.980 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.33s         Setting up automation session
+    t =     2.05s         Wait for com.vitora.app to idle
+    t =     3.32s Waiting 3.0s for "Vitora" StaticText to exist
+    t =     4.35s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora" StaticText`
+    t =     4.35s         Checking existence of `"Vitora" StaticText`
+    t =     4.43s Tear Down
+Test Case '-[VitoraUITests.VitoraUITests testAppLaunchesToOnboardingShell]' passed (4.681 seconds).
+Test Case '-[VitoraUITests.VitoraUITests testDefaultLaunchUsesChineseFallbackStrings]' started.
+    t =     0.00s Start Test at 2026-05-07 09:05:41.554
+    t =     0.04s Set Up
+    t =     0.04s Open com.vitora.app
+    t =     0.04s     Launch com.vitora.app
+    t =     0.04s         Terminate com.vitora.app:44010
+2026-05-07 09:05:42.680 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: The operation couldn’t be completed. (DebuggerLLDB.DebuggerVersionStore.StoreError error 0.)
+2026-05-07 09:05:42.680 xcodebuild[42954:330753] [MT] IDELaunchParametersSnapshot: no debugger version
+    t =     1.34s         Setting up automation session
+    t =     2.08s         Wait for com.vitora.app to idle
+    t =     3.36s Waiting 3.0s for "Vitora" StaticText to exist
+    t =     4.40s     Checking `Expect predicate `existsNoRetry == 1` for object "Vitora" StaticText`
+    t =     4.40s         Checking existence of `"Vitora" StaticText`
+    t =     4.48s Checking existence of `"先让 Vitora 知道怎么称呼你" StaticText`
+    t =     4.49s Checking existence of `"onboarding.identity.title" StaticText`
+    t =     4.50s Tear Down
+Test Case '-[VitoraUITests.VitoraUITests testDefaultLaunchUsesChineseFallbackStrings]' passed (4.736 seconds).
+Test Suite 'VitoraUITests' passed at 2026-05-07 09:05:46.290.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 9.417 (9.421) seconds
+Test Suite 'VitoraUITests.xctest' passed at 2026-05-07 09:05:46.291.
+	 Executed 31 tests, with 0 failures (0 unexpected) in 255.088 (255.178) seconds
+Test Suite 'All tests' passed at 2026-05-07 09:05:46.292.
+	 Executed 31 tests, with 0 failures (0 unexpected) in 255.088 (255.180) seconds
+2026-05-07 09:05:46.643 xcodebuild[42954:330753] [MT] IDETestOperationsObserverDebug: 260.531 elapsed -- Testing started completed.
+2026-05-07 09:05:46.643 xcodebuild[42954:330753] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-05-07 09:05:46.643 xcodebuild[42954:330753] [MT] IDETestOperationsObserverDebug: 260.531 sec, +260.531 sec -- end
+
+Test session results, code coverage, and logs:
+	/tmp/vitora-final-qa-20260507c.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

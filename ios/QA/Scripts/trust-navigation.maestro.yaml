@@ -1,0 +1,8 @@
+appId: com.vitora.app
+---
+- tapOn: "Vitora"
+- assertVisible: "Vitora 知道"
+- assertVisible: "可以直接问"
+- tapOn: "周期"
+- assertVisible: "当前周期阶段与今天"
+- assertVisible: "能量动态"

@@ -1,0 +1,5 @@
+appId: com.vitora.app
+---
+- tapOn: "Vitora"
+- assertVisible: "Vitora 知道"
+- assertVisible: "Vitora 暂时无法生成新回复，你仍可以保存记录。"

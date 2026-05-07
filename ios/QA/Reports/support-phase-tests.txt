@@ -1,0 +1,35 @@
+Phase 16 Support / Trust QA
+Date: 2026-05-06
+Device: iPhone 17 Simulator
+
+Targeted tests:
+xcodebuild test -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:VitoraTests/SupportServiceTests -only-testing:VitoraTests/NutritionServiceTests -only-testing:VitoraTests/DataControlServiceTests -only-testing:VitoraUITests/SettingsPanelUITests
+Result: passed, 10 tests.
+xcresult: /Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_14-04-12-+0800.xcresult
+
+Full suite:
+xcodebuild test -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17'
+Result: passed, 95 tests.
+xcresult: /Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_14-11-31-+0800.xcresult
+
+Manual simulator QA:
+- iosef attached to visible iPhone 17 Simulator.
+- Installed Debug Vitora.app and launched rich Today state with UI-test arguments.
+- Clicked Today -> Cycle.
+- Clicked Cycle profile/settings entry.
+- Confirmed settings home shows exactly six P0 support items.
+- Opened HealthKit/data sources panel.
+- Opened nutrition manager and added a nutrition context.
+- Opened data export, confirmed export flow, reached ready state.
+- Opened privacy/legal/account removal, confirmed dangerous action, reached completed state.
+- Opened Vitora tab and used the top-right more button to enter the same settings surface.
+
+Screenshots:
+- ios/QA/Screenshots/Support/00-launch.png
+- ios/QA/Screenshots/Support/01-cycle.png
+- ios/QA/Screenshots/Support/02-settings-home.png
+- ios/QA/Screenshots/Support/03-data-sources.png
+- ios/QA/Screenshots/Support/05-nutrition-after-add.png
+- ios/QA/Screenshots/Support/08-export-ready-confirmed.png
+- ios/QA/Screenshots/Support/10-account-removed.png
+- ios/QA/Screenshots/Support/12-vitora-support-entry.png

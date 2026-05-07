@@ -1,0 +1,22 @@
+Review phase QA summary
+Date: 2026-05-06
+
+Commands run:
+- xcodebuild test -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:VitoraTests/EveningReviewServiceTests -only-testing:VitoraUITests/EveningReviewUITests
+  Result: TEST SUCCEEDED
+  xcresult: /Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_11-52-16-+0800.xcresult
+
+- xcodebuild test -project ios/Vitora.xcodeproj -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17'
+  Result: TEST SUCCEEDED
+  Observed: 61 unit tests + 24 UI tests passed.
+  xcresult: /Users/bytedance/Library/Developer/Xcode/DerivedData/Vitora-axzymyapnnqblcawdisxryovaxfc/Logs/Test/Test-Vitora-2026.05.06_12-01-02-+0800.xcresult
+
+Manual simulator QA:
+- Installed Vitora.app on iPhone 17 simulator.
+- Launched with -vitoraUITestCompletedOnboarding -vitoraUITestRichToday -vitoraUITestReviewAvailable.
+- Used iosef to tap Vitora tab, open evening review, select 有帮助, and scroll to the learning signal.
+- Screenshots saved under ios/QA/Screenshots/Review/.
+
+Notes:
+- Xcode printed DebuggerVersionStore/no debugger version warnings during UI tests. They did not fail the test session.
+- Review copy intentionally asks 后来感觉如何？ and does not ask 完成了吗.

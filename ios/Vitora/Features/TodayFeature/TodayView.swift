@@ -31,8 +31,6 @@ struct TodayView: View {
                         onCalibrate: { value in openVitora(source: "今日状态", summary: value) }
                     )
 
-                    HealthMetricsStrip()
-
                     VitoraDailySuggestionCard(
                         mode: homeMetricMode,
                         sleepSeed: nil,

@@ -21,7 +21,7 @@ struct SettingsPanel: View {
 
     var body: some View {
         ZStack {
-            AuraBackground(intensity: 0.82)
+            PremiumAuraBackground(scene: .support, intensity: 0.86)
 
             if let route {
                 childPanel(route)

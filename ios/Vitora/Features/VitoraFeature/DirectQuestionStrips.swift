@@ -25,7 +25,7 @@ struct DirectQuestionStrips: View {
                     }
                     .padding(.horizontal, 14)
                     .frame(height: 42)
-                    .background(GlassSurface(cornerRadius: 18, opacity: 0.26))
+                    .background(GlassSurface(cornerRadius: 18, opacity: 0.38, shadowStrength: 0.55))
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("vitora.direct.question.\(question)")

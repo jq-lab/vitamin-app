@@ -4,6 +4,13 @@ enum VitoraTheme {
     enum ColorToken {
         static let canvas = Color(red: 250 / 255, green: 250 / 255, blue: 250 / 255)
         static let paper = Color.white
+        static let paperWarmBase = Color(red: 248 / 255, green: 246 / 255, blue: 244 / 255)
+        static let paperWarmLift = Color(red: 253 / 255, green: 251 / 255, blue: 248 / 255)
+        static let paperWarmPeachMist = Color(red: 255 / 255, green: 224 / 255, blue: 230 / 255)
+        static let paperWarmCyanMist = Color(red: 224 / 255, green: 244 / 255, blue: 248 / 255)
+        static let surfacePearlMain = Color(red: 255 / 255, green: 254 / 255, blue: 250 / 255)
+        static let surfacePearlInset = Color(red: 244 / 255, green: 242 / 255, blue: 239 / 255)
+        static let paperLiftShadow = Color(red: 116 / 255, green: 112 / 255, blue: 106 / 255)
         static let auraCanvas = Color(red: 243 / 255, green: 249 / 255, blue: 255 / 255)
         static let auraBlue = Color(red: 72 / 255, green: 151 / 255, blue: 246 / 255)
         static let auraCyan = Color(red: 100 / 255, green: 218 / 255, blue: 255 / 255)
@@ -50,7 +57,8 @@ enum VitoraTheme {
         static let touchTargetMin: CGFloat = 44
         static let inputDockHeight: CGFloat = 44
         static let iconButtonMedium: CGFloat = 38
-        static let tabBarHeight: CGFloat = 80
+        static let tabBarHeight: CGFloat = 74
+        static let globalVitoraDockHeight: CGFloat = 156
         static let contentWidth: CGFloat = 345
     }
 }

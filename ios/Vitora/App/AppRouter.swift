@@ -15,26 +15,29 @@ struct AppRouter: View {
 
 private struct MainTabShell: View {
     @ObservedObject var environment: AppEnvironment
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @StateObject private var vitoraViewModel = VitoraViewModel()
+    @State private var isChildSheetPresented = false
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Group {
-                switch environment.navigationState.selectedTab {
-                case .today:
-                    TodayView(environment: environment)
-                case .vitora:
-                    VitoraAssistantSurfaceView(environment: environment)
-                case .cycle:
-                    CycleView(environment: environment)
+        currentTabContent
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                if shouldShowGlobalDock {
+                    GlobalVitoraDock(
+                        selectedTab: environment.navigationState.selectedTab,
+                        viewModel: vitoraViewModel,
+                        onSelectTab: environment.selectTab,
+                        onQuickRecord: environment.openQuickRecord,
+                        onSubmitted: {
+                            if environment.navigationState.selectedTab != .vitora {
+                                environment.selectTab(.vitora)
+                            }
+                        }
+                    )
                 }
             }
-
-            if environment.navigationState.presentation != .vitoraFullContextMode {
-                PrimaryTabBar(
-                    selectedTab: environment.navigationState.selectedTab,
-                    onSelect: environment.selectTab
-                )
-            }
+        .onPreferenceChange(AppSheetPresentationPreferenceKey.self) { isPresented in
+            isChildSheetPresented = isPresented
         }
         .sheet(
             isPresented: Binding(
@@ -66,7 +69,9 @@ private struct MainTabShell: View {
             EveningReviewSheet(
                 review: environment.eveningReview,
                 learningSignal: environment.reviewLearningSignal,
+                sleepSeed: environment.sleepSeedCard,
                 onSubmit: environment.submitEveningReview,
+                onSelectSeed: environment.selectSleepSeed,
                 onTellVitora: {
                     environment.openVitoraContext(
                         sourceTitle: "晚间复盘",
@@ -80,6 +85,380 @@ private struct MainTabShell: View {
             .presentationDragIndicator(.visible)
         }
     }
+
+    @ViewBuilder
+    private var currentTabContent: some View {
+        switch environment.navigationState.selectedTab {
+        case .today:
+            TodayView(environment: environment)
+        case .vitora:
+            VitoraAssistantSurfaceView(environment: environment, viewModel: vitoraViewModel)
+        case .cycle:
+            CycleView(environment: environment)
+        }
+    }
+
+    private var shouldShowGlobalDock: Bool {
+        environment.navigationState.presentation == nil && !isChildSheetPresented
+    }
+}
+
+struct AppSheetPresentationPreferenceKey: PreferenceKey {
+    static let defaultValue = false
+
+    static func reduce(value: inout Bool, nextValue: () -> Bool) {
+        value = value || nextValue()
+    }
+}
+
+private struct GlobalVitoraDock: View {
+    let selectedTab: PrimaryTab
+    @ObservedObject var viewModel: VitoraViewModel
+    let onSelectTab: (PrimaryTab) -> Void
+    let onQuickRecord: () -> Void
+    let onSubmitted: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var shimmer = false
+    @State private var promptIndex = 0
+    @State private var inputFocusTrigger = 0
+
+    private let rotatingPrompts = [
+        "我可以补充一件事...",
+        "为什么今天容易低谷？",
+        "今天怎么安排更轻一点？",
+    ]
+    private let promptTimer = Timer.publish(every: 120, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        VStack(spacing: selectedTab == .vitora ? 7 : 0) {
+            dockTopRow
+
+            VitoraInputDock(
+                text: $viewModel.inputText,
+                placeholder: rotatingPrompts[promptIndex],
+                isVoiceRecording: viewModel.isVoiceRecording,
+                voiceSignal: viewModel.voiceSignal,
+                focusTrigger: selectedTab == .vitora ? inputFocusTrigger : 0,
+                exposesAccessibility: selectedTab == .vitora,
+                onVoice: viewModel.toggleVoice,
+                onSend: submit
+            )
+            .frame(height: selectedTab == .vitora ? VitoraTheme.Size.touchTargetMin + 16 : 0)
+            .opacity(selectedTab == .vitora ? 1 : 0)
+            .allowsHitTesting(selectedTab == .vitora)
+            .accessibilityHidden(selectedTab != .vitora)
+            .clipped()
+            .transition(.opacity.combined(with: .move(edge: .bottom)))
+        }
+        .padding(.horizontal, 8)
+        .padding(.top, 7)
+        .padding(.bottom, selectedTab == .vitora ? 7 : 6)
+        .background(alignment: .bottom) {
+            dockAmbientGlow
+        }
+        .offset(y: reduceMotion ? 0 : (shimmer ? -1 : 0))
+        .padding(.horizontal, 14)
+        .padding(.bottom, 4)
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("global.vitora.dock")
+        .onAppear {
+            guard !reduceMotion else {
+                return
+            }
+            withAnimation(.easeInOut(duration: 6.5).repeatForever(autoreverses: true)) {
+                shimmer = true
+            }
+        }
+        .onReceive(promptTimer) { _ in
+            guard viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  !viewModel.isVoiceRecording,
+                  selectedTab == .vitora
+            else {
+                return
+            }
+
+            withAnimation(.easeInOut(duration: 0.22)) {
+                promptIndex = (promptIndex + 1) % rotatingPrompts.count
+            }
+        }
+    }
+
+    private var dockTopRow: some View {
+        ZStack {
+            tabSwitcher
+
+            HStack {
+                Spacer(minLength: 0)
+                quickRecordButton
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
+    }
+
+    private var tabSwitcher: some View {
+        HStack(spacing: 2) {
+            dockTabButton(tab: .today, title: "今日") {
+                HomeTabGlyph(isSelected: selectedTab == .today)
+            }
+
+            Button {
+                onSelectTab(.vitora)
+                inputFocusTrigger += 1
+            } label: {
+                HStack(spacing: 6) {
+                    VitoraFaceTabButton(isSelected: selectedTab == .vitora)
+                        .frame(width: 28, height: 26)
+
+                    Text("AI管家")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
+                }
+                .padding(.leading, 7)
+                .padding(.trailing, 9)
+                .frame(width: 88)
+                .frame(minHeight: 35)
+                .background(tabButtonBackground(isSelected: selectedTab == .vitora))
+            }
+            .buttonStyle(.plain)
+            .frame(minHeight: VitoraTheme.Size.touchTargetMin)
+            .accessibilityLabel("AI管家")
+            .accessibilityIdentifier("tab.vitora")
+
+            dockTabButton(tab: .cycle, title: "周期") {
+                FlowerCycleGlyph(isSelected: selectedTab == .cycle)
+            }
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 4)
+        .frame(width: 208)
+        .frame(height: 47)
+        .background(tabSwitcherBackground)
+        .clipShape(Capsule(style: .continuous))
+        .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.70), lineWidth: 0.78))
+        .shadow(color: Color(red: 92 / 255, green: 190 / 255, blue: 220 / 255).opacity(0.13), radius: 13, x: -5, y: 6)
+        .shadow(color: Color(red: 246 / 255, green: 139 / 255, blue: 184 / 255).opacity(0.10), radius: 11, x: 5, y: 5)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("primary.tabbar")
+    }
+
+    private var quickRecordButton: some View {
+        Button(action: onQuickRecord) {
+            Image(systemName: "plus")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .frame(width: 43, height: 43)
+                .background(quickRecordBackground)
+                .accessibilityHidden(true)
+        }
+        .buttonStyle(.plain)
+        .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
+        .contentShape(Circle())
+        .accessibilityLabel("快捷记录")
+        .accessibilityHint("打开 Vitora 快捷补充，不切换页面")
+        .accessibilityIdentifier("global.record.quick")
+    }
+
+    private var quickRecordBackground: some View {
+        ZStack {
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.0),
+                            Color(red: 202 / 255, green: 214 / 255, blue: 218 / 255).opacity(0.16),
+                            Color.black.opacity(0.10),
+                            .clear,
+                        ],
+                        center: UnitPoint(x: 0.66, y: 0.64),
+                        startRadius: 6,
+                        endRadius: 42
+                    )
+                )
+                .scaleEffect(1.42)
+                .offset(x: 8, y: 9)
+
+            Circle()
+                .fill(.ultraThinMaterial)
+                .overlay(Circle().fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.42)))
+
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.58),
+                            Color(red: 255 / 255, green: 224 / 255, blue: 234 / 255).opacity(0.44),
+                            Color(red: 226 / 255, green: 245 / 255, blue: 250 / 255).opacity(0.44),
+                            Color(red: 228 / 255, green: 220 / 255, blue: 255 / 255).opacity(0.30),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.84),
+                            Color.white.opacity(0.30),
+                            .clear,
+                        ],
+                        center: UnitPoint(x: 0.28, y: 0.22),
+                        startRadius: 1,
+                        endRadius: 28
+                    )
+                )
+                .blendMode(.screen)
+
+            Circle()
+                .stroke(Color(red: 190 / 255, green: 199 / 255, blue: 210 / 255).opacity(0.18), lineWidth: 5)
+                .blur(radius: 3)
+                .offset(x: 6, y: 8)
+                .mask {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [.clear, .black],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+
+            Circle()
+                .stroke(Color.white.opacity(0.76), lineWidth: 0.82)
+        }
+        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.16), radius: 13, x: 0, y: 9)
+        .shadow(color: Color(red: 104 / 255, green: 214 / 255, blue: 206 / 255).opacity(0.10), radius: 12, x: -6, y: 5)
+    }
+
+    private func dockTabButton<Content: View>(
+        tab: PrimaryTab,
+        title: String,
+        @ViewBuilder glyph: () -> Content
+    ) -> some View {
+        Button {
+            onSelectTab(tab)
+        } label: {
+            HStack(spacing: 5) {
+                glyph()
+                    .frame(width: 18, height: 18)
+
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+            }
+            .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.secondaryText.opacity(0.78))
+            .frame(width: 58, height: 35)
+            .background(tabButtonBackground(isSelected: selectedTab == tab))
+        }
+        .buttonStyle(.plain)
+        .frame(width: 58, height: VitoraTheme.Size.touchTargetMin)
+        .contentShape(Rectangle())
+        .accessibilityLabel(title)
+        .accessibilityIdentifier("tab.\(tab.rawValue)")
+    }
+
+    private var tabSwitcherBackground: some View {
+        ZStack {
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(Capsule(style: .continuous).fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.38)))
+
+            Capsule(style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 223 / 255, green: 245 / 255, blue: 250 / 255).opacity(0.44),
+                            Color(red: 118 / 255, green: 224 / 255, blue: 199 / 255).opacity(0.28),
+                            Color(red: 252 / 255, green: 228 / 255, blue: 144 / 255).opacity(0.24),
+                            Color(red: 255 / 255, green: 217 / 255, blue: 232 / 255).opacity(0.36),
+                            Color(red: 226 / 255, green: 219 / 255, blue: 255 / 255).opacity(0.30),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+
+            Capsule(style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.70),
+                            Color.white.opacity(0.18),
+                            Color.white.opacity(0.44),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .blendMode(.screen)
+        }
+    }
+
+    private func tabButtonBackground(isSelected: Bool) -> some View {
+        Capsule()
+            .fill(.ultraThinMaterial.opacity(isSelected ? 0.74 : 0.18))
+            .overlay {
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: isSelected ? [
+                                Color.white.opacity(0.72),
+                                Color(red: 255 / 255, green: 232 / 255, blue: 239 / 255).opacity(0.40),
+                                Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.34),
+                            ] : [
+                                Color.white.opacity(0.18),
+                                Color(red: 255 / 255, green: 231 / 255, blue: 239 / 255).opacity(0.15),
+                                Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.12),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            }
+            .overlay(Capsule().stroke(Color.white.opacity(isSelected ? 0.80 : 0.24), lineWidth: 0.58))
+            .shadow(color: VitoraTheme.ColorToken.paper.opacity(isSelected ? 0.24 : 0.03), radius: 7, x: -1, y: -1)
+    }
+
+    private var dockAmbientGlow: some View {
+        ZStack {
+            Capsule(style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 211 / 255, green: 244 / 255, blue: 250 / 255).opacity(0.22),
+                            Color(red: 122 / 255, green: 226 / 255, blue: 199 / 255).opacity(0.14),
+                            Color(red: 250 / 255, green: 225 / 255, blue: 143 / 255).opacity(0.13),
+                            Color(red: 255 / 255, green: 214 / 255, blue: 231 / 255).opacity(0.18),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(width: 238, height: selectedTab == .vitora ? 108 : 52)
+                .blur(radius: selectedTab == .vitora ? 20 : 15)
+                .offset(y: 10)
+
+            Capsule(style: .continuous)
+                .fill(Color.white.opacity(0.10))
+                .frame(width: 176, height: 22)
+                .blur(radius: 12)
+                .offset(y: -2)
+        }
+        .allowsHitTesting(false)
+    }
+
+    private func submit() {
+        guard viewModel.send() else {
+            return
+        }
+        onSubmitted()
+    }
 }
 
 private struct PrimaryTabBar: View {
@@ -87,77 +466,155 @@ private struct PrimaryTabBar: View {
     let onSelect: (PrimaryTab) -> Void
 
     var body: some View {
-        HStack(alignment: .top) {
-            tabButton(tab: .today, title: String(localized: "tab.today"), systemImage: "circle.circle")
-                .padding(.top, 10)
-
-            Spacer()
+        HStack(spacing: 10) {
+            tabButton(tab: .today)
 
             Button {
                 onSelect(.vitora)
             } label: {
-                VStack(spacing: 2) {
-                    VitoraFaceTabButton(isSelected: selectedTab == .vitora)
+                HStack(spacing: 8) {
+                    VitoraFaceTabButton(isSelected: true)
+                        .frame(width: 38, height: 34)
 
-                    Text(String(localized: "tab.vitora"))
-                        .font(.caption2)
-                        .foregroundStyle(selectedTab == .vitora ? VitoraTheme.ColorToken.actionPrimaryDeep : VitoraTheme.ColorToken.secondaryText)
+                    Text("AI管家")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.82)
                 }
-                .offset(y: -10)
-                .frame(width: 74, height: 70, alignment: .top)
+                .padding(.leading, 8)
+                .padding(.trailing, 12)
+                .frame(minHeight: VitoraTheme.Size.touchTargetMin)
+                .layoutPriority(1)
+                .background(
+                    Capsule()
+                        .fill(VitoraTheme.ColorToken.paper.opacity(0.56))
+                        .background(.ultraThinMaterial.opacity(0.46), in: Capsule())
+                )
+                .overlay(Capsule().stroke(Color.white.opacity(0.82), lineWidth: 0.7))
+                .shadow(color: VitoraTheme.ColorToken.paper.opacity(0.34), radius: 10, x: -2, y: -2)
             }
             .buttonStyle(.plain)
+            .frame(minHeight: VitoraTheme.Size.touchTargetMin)
+            .accessibilityLabel("AI管家")
             .accessibilityIdentifier("tab.vitora")
 
-            Spacer()
-
-            tabButton(tab: .cycle, title: String(localized: "tab.cycle"), systemImage: "circle.lefthalf.filled")
-                .padding(.top, 10)
+            tabButton(tab: .cycle)
         }
-        .padding(.horizontal, 58)
-        .padding(.top, 8)
-        .padding(.bottom, 0)
-        .frame(height: 82, alignment: .top)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 8)
+        .frame(height: 62)
+        .background(tabCapsuleBackground)
+        .clipShape(Capsule(style: .continuous))
+        .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.56), lineWidth: 0.8))
+        .shadow(color: Color(red: 244 / 255, green: 87 / 255, blue: 151 / 255).opacity(0.15), radius: 20, x: 14, y: 8)
+        .shadow(color: Color(red: 104 / 255, green: 218 / 255, blue: 188 / 255).opacity(0.12), radius: 18, x: -12, y: 7)
+        .padding(.horizontal, 28)
+        .padding(.bottom, 10)
         .frame(maxWidth: .infinity)
-        .background(
-            UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24)
-                .fill(.ultraThinMaterial)
-                .background(
-                    UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24)
-                        .fill(VitoraTheme.ColorToken.paper.opacity(0.58))
-                )
-                .overlay(
-                    UnevenRoundedRectangle(topLeadingRadius: 24, topTrailingRadius: 24)
-                        .stroke(Color(red: 232 / 255, green: 232 / 255, blue: 236 / 255).opacity(0.85), lineWidth: 0.5)
-                )
-                .shadow(color: .black.opacity(0.07), radius: 16, x: 0, y: -4)
-                .ignoresSafeArea(edges: .bottom)
-        )
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("primary.tabbar")
     }
 
-    private func tabButton(tab: PrimaryTab, title: String, systemImage: String) -> some View {
+    private func tabButton(tab: PrimaryTab) -> some View {
         Button {
             onSelect(tab)
         } label: {
-            VStack(spacing: 7) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 21, weight: .medium))
-                    .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.primaryText : VitoraTheme.ColorToken.secondaryText)
-
-                Text(title)
-                    .font(.caption2.weight(selectedTab == tab ? .medium : .regular))
-                    .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.primaryText : VitoraTheme.ColorToken.secondaryText)
+            ZStack {
+                switch tab {
+                case .today:
+                    HomeTabGlyph(isSelected: selectedTab == tab)
+                case .cycle:
+                    FlowerCycleGlyph(isSelected: selectedTab == tab)
+                case .vitora:
+                    EmptyView()
+                }
             }
-            .frame(width: 54)
-            .frame(minHeight: VitoraTheme.Size.touchTargetMin)
+            .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.paper.opacity(0.88))
+            .frame(width: 58, height: VitoraTheme.Size.touchTargetMin)
+            .background {
+                Capsule()
+                    .fill(selectedTab == tab ? VitoraTheme.ColorToken.paper.opacity(0.52) : VitoraTheme.ColorToken.paper.opacity(0.13))
+                    .background(.ultraThinMaterial.opacity(selectedTab == tab ? 0.42 : 0.16), in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(selectedTab == tab ? 0.76 : 0.24), lineWidth: 0.58))
+                    .shadow(color: selectedHaloColor(for: tab).opacity(selectedTab == tab ? 0.16 : 0.04), radius: 10, x: 0, y: 5)
+            }
         }
         .buttonStyle(.plain)
-        .frame(width: 54, height: 54)
+        .frame(width: 58, height: VitoraTheme.Size.touchTargetMin)
         .contentShape(Rectangle())
-        .accessibilityLabel(title)
+        .accessibilityLabel(tab == .today ? "今日" : "周期")
         .accessibilityIdentifier("tab.\(tab.rawValue)")
+    }
+
+    private func selectedHaloColor(for tab: PrimaryTab) -> Color {
+        switch tab {
+        case .today:
+            return Color(red: 128 / 255, green: 216 / 255, blue: 184 / 255)
+        case .vitora:
+            return Color(red: 242 / 255, green: 105 / 255, blue: 164 / 255)
+        case .cycle:
+            return Color(red: 151 / 255, green: 135 / 255, blue: 255 / 255)
+        }
+    }
+
+    private var tabCapsuleBackground: some View {
+        ZStack {
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+
+            Capsule(style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 118 / 255, green: 222 / 255, blue: 181 / 255).opacity(0.56),
+                            Color(red: 246 / 255, green: 219 / 255, blue: 88 / 255).opacity(0.42),
+                            Color(red: 246 / 255, green: 101 / 255, blue: 157 / 255).opacity(0.48),
+                            Color(red: 151 / 255, green: 135 / 255, blue: 255 / 255).opacity(0.44),
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+
+            Capsule(style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            VitoraTheme.ColorToken.paper.opacity(0.22),
+                            VitoraTheme.ColorToken.paper.opacity(0.06),
+                            VitoraTheme.ColorToken.paper.opacity(0.18),
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .blendMode(.screen)
+        }
+    }
+}
+
+private struct PrimaryTabGlassBase: View {
+    var body: some View {
+        Rectangle()
+            .fill(.clear)
+            .overlay(alignment: .top) {
+                LinearGradient(
+                    colors: [
+                        Color(red: 118 / 255, green: 222 / 255, blue: 181 / 255).opacity(0.24),
+                        Color(red: 246 / 255, green: 219 / 255, blue: 88 / 255).opacity(0.18),
+                        Color(red: 246 / 255, green: 101 / 255, blue: 157 / 255).opacity(0.24),
+                        Color(red: 151 / 255, green: 135 / 255, blue: 255 / 255).opacity(0.20),
+                    ],
+                    startPoint: .leading,
+                    endPoint: .trailing
+                )
+                .frame(height: 18)
+                .blur(radius: 12)
+                .padding(.horizontal, 30)
+                .blendMode(.screen)
+            }
+            .ignoresSafeArea(edges: .bottom)
     }
 }
 

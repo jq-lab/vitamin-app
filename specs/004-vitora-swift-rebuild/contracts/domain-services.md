@@ -23,7 +23,7 @@
 | DS-001 | AppGateService | 判断 onboarding / Today / low-data 入口。 | DM-003, DM-004 | REQ-001, REQ-003 |
 | DS-002 | OnboardingService | 保存最小身份和初始上下文。 | DM-001, DM-002, DM-006 | REQ-001, REQ-002 |
 | DS-003 | TodayStateService | 汇总 Today 状态、身体要素、关键窗口和下一步。 | DM-005, DM-006, DM-011, DM-012 | REQ-004 |
-| DS-004 | EnergyRevealService | 控制 Energy Ball 首次、下拉、全屏 ritual、复盘对比状态。 | DM-013, DM-014, DM-019 | REQ-005 |
+| DS-004 | EnergyBowlStateService | 控制 Today Energy Bowl 状态、实时预测和复盘能量对比表达；不再负责顶部下拉 Energy Ball。 | DM-013, DM-014, DM-019 | REQ-005 |
 | DS-005 | SuggestionService | 生成和解释 Vitora 今日建议。 | DM-011, DM-012, DM-015 | REQ-007 |
 | DS-006 | DailyIntentionService | 保存当日意图、提醒偏好和轻反馈。 | DM-015, DM-016, DM-018 | REQ-007 |
 | DS-007 | VitoraAssistantStateService | 生成 Vitora Tab 所需上下文、直接问、快捷上下文和复盘入口。 | DM-011, DM-016, DM-019, DM-021 | REQ-010 |

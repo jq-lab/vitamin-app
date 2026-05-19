@@ -5,7 +5,7 @@ struct CurrentPhaseDetailSheet: View {
     let onAskVitora: () -> Void
 
     var body: some View {
-        cycleDetailContainer(title: "当前周期阶段", onClose: onClose) {
+        cycleDetailContainer(title: "当前周期阶段", subtitle: "解释 Vitora 如何判断今天的位置", onClose: onClose) {
             Text("Day 18 · 黄体期中段")
                 .font(.largeTitle.weight(.semibold))
                 .foregroundStyle(VitoraTheme.ColorToken.strongText)

@@ -30,8 +30,8 @@
 | Flow | User Step | Formal Reference | Visual Reference | Notes |
 | --- | --- | --- | --- | --- |
 | UF-001 | Onboarding | IA-001 to IA-003 | G2/G4 readable glass | HealthKit optional；不做 WeChat gate。 |
-| UF-002 | Today first open | WF-T-001 | Today aura + clear glass | 3 秒内状态/要素/建议。 |
-| UF-003 | Pull-to-reveal Energy Ball | WF-T-002 | EnergyRevealHeader tokens | 不是 refresh；默认隐藏。 |
+| UF-002 | Today first open | WF-T-001 | Today aura + clear glass | 3 秒内状态/周期线轴/建议。 |
+| UF-003 | Energy Bowl + 今日分析预测 | WF-T-002, WF-T-005 | Energy Bowl + cycle strip + realtime chart tokens | 首页不是 refresh；完整预测在今日分析。 |
 | UF-004 | Vitora daily suggestion | WF-T-006 | Suggestion card G2 glass | `我试试` 形成当日意图。 |
 | UF-005 | Tell Vitora contextual flow | WF-V-005 | Contextual sheet G3 glass | 不切 tab；保存前确认。 |
 | UF-006 | Full Vitora assistant | WF-V-001 to WF-V-004 | Pixel Vitora hero + input dock | 不是空聊天页。 |
@@ -44,11 +44,11 @@
 
 | IA | Screen / State | Reference | Must Show | Must Not Show |
 | --- | --- | --- | --- | --- |
-| IA-010 | Today Home | WF-T-001 | 日历 strip、Pixel Vitora 装饰、状态卡、身体要素、建议卡 | 独立记录区、常驻大球、dashboard 堆卡 |
-| IA-011 | Energy Reveal | WF-T-002 | 下拉揭示、半展开、全屏 ritual、可收起 | refresh 语义、长阻塞动画 |
+| IA-010 | Today Home | WF-T-001 | 日历 strip、Pixel Vitora 装饰、综合状态卡、周期线轴、建议卡 | 独立记录区、首页实时预测图、常驻大球、dashboard 堆卡 |
+| IA-011 | Energy Bowl / 今日分析预测 | WF-T-002, WF-T-005 | 分层能量碗、查看数据、周期线轴、今日分析实时预测和当前时间气泡 | 顶部下拉 Energy Ball、refresh 语义、文字压在碗体上、首页模式切换或长阻塞动画 |
 | IA-012 | Today Calendar | WF-T-003 | 月历/周历、今天、阶段/预测、Vitora 洞察 | Cycle 首页日历 |
 | IA-013 | Today State Detail | WF-T-004 | 曲线、关键窗口、告诉 Vitora | 直接拖曲线改模型 |
-| IA-014 | Body Factors Detail | WF-T-005 | 指标数值、趋势、对今天意义 | 高级图表堆叠 |
+| IA-014 | Today Analysis / Body Factors | WF-T-005 | 综合实时预测、横向身体要素卡、综合判断、对今天意义 | 首页重复图表或高级图表堆叠 |
 | IA-015 | Suggestion Detail | WF-T-006 | 建议、原因、提醒、我试试/换一个/不适合 | 任务完成率 |
 | IA-020 | Vitora Assistant Surface | WF-V-001 | Pixel Vitora、Vitora 知道、直接问、chips、input dock | 空白聊天页、功能 dashboard |
 | IA-021 | Contextual Vitora Sheet | WF-V-005 | 来源上下文、快捷补充、输入、语音、确认 | 直接切 tab |
@@ -74,7 +74,7 @@
 
 | Old Reference | Why Not Target |
 | --- | --- |
-| 旧 Figma Today 大能量球首页 | Energy Ball 改为下拉/首次/复盘 ritual，不常驻。 |
+| 旧 Figma Today 大能量球首页 | Today 首屏改为综合 Energy Bowl + 碗下周期线轴，完整实时预测移入今日分析；不恢复常驻大球或顶部下拉 Energy Ball。 |
 | 旧 Luna 首页/沉浸聊天 | 只保留 Pixel assistant 意图；正式目标是 Vitora Assistant Surface。 |
 | 旧 Luna record sheet | 只保留输入/确认保存意图；正式目标是 contextual Tell Vitora。 |
 | 旧 Cycle 日历页作为 Cycle 流程 | 日历归 Today 顶部；Cycle 负责长期节律和能量动态。 |

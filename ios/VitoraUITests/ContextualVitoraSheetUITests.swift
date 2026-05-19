@@ -5,10 +5,13 @@ final class ContextualVitoraSheetUITests: XCTestCase {
     func testTodayCalibrationOpensContextualSheetAndUnderstandingState() {
         let app = launchPivotApp()
 
-        app.buttons["today.calibration.tell"].tap()
+        XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["today.calibration.tell"].exists)
+        app.buttons["global.record.quick"].tap()
 
-        XCTAssertTrue(app.staticTexts["Vitora 浮层 · 来源：今日状态"].waitForExistence(timeout: 4))
-        XCTAssertTrue(app.staticTexts["Vitora 浮层 · 来源：今日状态"].exists)
+        XCTAssertTrue(app.staticTexts["告诉 Vitora"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["来源：快捷记录"].exists)
+        XCTAssertFalse(app.otherElements["global.vitora.dock"].exists)
 
         let input = app.textFields.element(boundBy: 0)
         XCTAssertTrue(input.exists)
@@ -17,6 +20,8 @@ final class ContextualVitoraSheetUITests: XCTestCase {
         app.buttons["vitora.input.send"].tap()
 
         XCTAssertTrue(app.staticTexts["Vitora 理解为"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["影响因素"].exists)
+        XCTAssertTrue(app.staticTexts["置信度"].exists)
     }
 
     @MainActor

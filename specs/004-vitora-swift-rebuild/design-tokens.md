@@ -37,20 +37,32 @@
 
 ## 2. Aura Background Tokens
 
+动态背景视频、周期色变体和 Reduce Motion 兜底以 `dynamic-aura-background/dynamic-aura-background-spec.md` 为准；本节只保留基础 token 方向。
+
 | Token | Value / Direction | Usage |
 | --- | --- | --- |
-| `vt.bg.base` | `#F7FBFF` | 全局浅蓝底，不用纯白。 |
+| `vt.bg.base` | `#F4EEE8 -> #FBF7F1` | 全局暖米纸底，不用纯白。 |
 | `vt.bg.aura.today` | radial cyan glow + soft blue wash + faint lavender edge | Today 首层。 |
 | `vt.bg.aura.vitora` | large cyan/blue diffuse sphere behind Pixel Vitora, lavender only secondary | Vitora Tab。 |
 | `vt.bg.aura.cycle` | light blue base + soft yellow/green/pink phase hints | Cycle 首层。 |
 | `vt.bg.aura.support` | subdued blue-white gradient | 支撑页和隐私页。 |
 | `vt.bg.overlay.dim` | rgba black/blue dim 8-16% | contextual sheet 背景压暗。 |
+| `vt.bg.aura.dynamicVideo` | clean looping fluid aura video + poster fallback | Today / Vitora / Cycle 首层动态背景。 |
+| `vt.bg.aura.premium` | warm white base + low-saturation mist + micro texture + bottom frosted fog | 全 App 原生浅霜背景；Today / Vitora / Cycle / Sheet / Onboarding / Support 按 scene 调整。 |
+| `vt.bg.paperWarm.base` | `#F4EEE8` | L0 页面底，形成比主卡更低的暖米纸背景。 |
+| `vt.bg.paperWarm.lift` | `#FBF7F1` | L0 顶部/中心轻提亮，不作为卡片填充。 |
+| `vt.bg.paperWarm.peachMist` | `#F2CDBE` at low opacity | 右上暖雾，用于注册页和页面空气层。 |
+| `vt.bg.paperWarm.cyanMist` | `#DDF2F1` at low opacity | 左下青雾，保留 Vitora 水感。 |
+| `vt.surface.pearl.main` | `#FFFCF7` | L1 主卡，比背景更亮、更实。 |
+| `vt.surface.pearl.inset` | `#F1EDE8` | L2 输入、chips、内嵌信息块。 |
+| `vt.shadow.paperLift` | warm gray `#857160` 8-16% | 主卡和内嵌控件短柔影。 |
 
 规则：
 
 - 弥散渐变是空间氛围，不是大块装饰图。
-- 蓝 / 青是主色；紫只做空气感，不能主导页面。
-- 首层页面背景必须比卡片更柔和，不能抢内容。
+- Warm Paper Aura 为当前色调：暖米纸负责前后关系，蓝 / 青只保留为水感空气层和关键强调。
+- 首层页面背景必须比卡片更低明度、更暖，不能和卡片同色。
+- 子页面背景必须比首页更白、更安静；阶段色只用于小面积点缀。
 
 ## 3. Color Tokens
 
@@ -78,7 +90,7 @@
 
 | Rule ID | Rule |
 | --- | --- |
-| DT-COLOR-001 | 主视觉优先蓝/青；紫色只能做柔和背景层。 |
+| DT-COLOR-001 | 当前主背景优先暖米纸；蓝/青用于 Vitora 水感、关键动作和局部空气层；紫色只能做柔和边缘层。 |
 | DT-COLOR-002 | `attention` 只用于局部数据点或不适合状态，不用于 badge、红点、连续提醒。 |
 | DT-COLOR-003 | Cycle 可使用四阶段色，但页面仍保持蓝色系统，不变成彩虹日历。 |
 | DT-COLOR-004 | Support 页减少高饱和色，优先可读和可信。 |
@@ -92,6 +104,9 @@
 | `vt.glass.g2.panel` | rgba white 62-76%, stronger edge, soft shadow | 信息承载更强 | 二层详情、Vitora 知道、建议卡。 |
 | `vt.glass.g3.sheet` | rgba white 78-88%, readable frosted | 任务型 sheet | 3/4 Vitora sheet、详情 sheet。 |
 | `vt.glass.g4.support` | rgba white 88-94%, minimal aura | 高可读、低装饰 | 隐私、导出、账号移除、长表单。 |
+| `vt.glass.clean.resting` | high white, low chroma edge, short shadow | 干净静息卡 | 主页面和二层普通信息卡。 |
+| `vt.glass.clean.elevated` | stronger white fill, clear rim, restrained shadow | 干净抬起态 | 主卡、选中态、可点击摘要卡。 |
+| `vt.glass.clean.inset` | lighter white fill, minimal shadow | 内嵌信息块 | 子页面内层说明和辅助容器。 |
 
 规则：
 
@@ -156,9 +171,14 @@
 
 ## 8. Pixel Vitora IP Tokens
 
+详细 IP baseline、禁用方向、状态/道具扩展规则以 `pixel-vitora-ip/pixel-vitora-ip-spec.md` 为准；本节只保留 token 摘要。
+
 | Token | Rule |
 | --- | --- |
 | `vt.ip.shape` | 像素风格球状体，外轮廓可柔和发光，但眼睛和表情必须 pixel。 |
+| `vt.ip.material.glassShell` | 玻璃球、厚白 rim、左上高光、右下透光、底部软阴影。 |
+| `vt.ip.color.core` | blue/cyan-first；lavender 只做边缘空气感。 |
+| `vt.ip.eye.pixelColumn` | 眼睛必须是发光像素柱，不用平滑线条或 emoji。 |
 | `vt.ip.eye.idle` | 两个像素竖眼或方块眼，轻微呼吸。 |
 | `vt.ip.eye.blink` | 眨眼 120-180ms。 |
 | `vt.ip.state.idle` | 稳定呼吸，低亮。 |
@@ -168,6 +188,7 @@
 | `vt.ip.size.hero` | Vitora Tab 顶部主 IP。 |
 | `vt.ip.size.decor` | Today / Cycle 右上装饰 IP。 |
 | `vt.ip.size.tab` | 底部中央 face tab。 |
+| `vt.ip.accessory.clipboard` | 玻璃小挂件，道具辅助 IP，不抢主体。 |
 
 Do:
 
@@ -187,8 +208,9 @@ Don’t:
 | Component | Required Tokens |
 | --- | --- |
 | Today 背景 | `vt.bg.aura.today`, `vt.glass.g1.clearCard` |
+| Dynamic Aura 背景 | `vt.bg.aura.dynamicVideo`, `dynamic-aura-background/*`, Reduce Motion poster |
 | Today 状态卡 | `vt.glass.g1.clearCard`, `vt.color.action.cyan`, `vt.type.energyNumber` |
-| Energy Reveal Header | `vt.bg.aura.today`, `vt.ip.state.thinking`, `vt.glass.g2.panel` |
+| Energy Bowl / 实时预测 | `vt.glass.g1.clearCard`, `vt.color.action.cyan`, `vt.type.energyNumber`, `vt.motion.tap` |
 | 身体要素 tiles | `vt.glass.g1.clearCard`, `vt.type.caption`, `vt.color.ink.primary` |
 | Vitora 今日建议 | `vt.glass.g2.panel`, `vt.color.action.blue`, `vt.shadow.glass.low` |
 | Vitora Tab background | `vt.bg.aura.vitora`, `vt.glow.pixel.idle` |
@@ -208,7 +230,7 @@ Don’t:
 | `vt.motion.tap` | 120-180ms scale/opacity feedback。 |
 | `vt.motion.contextMenuPress` | 长按时卡片微缩、背景轻暗、触觉反馈。 |
 | `vt.motion.sheet.spring` | 3/4 sheet 上下滑动使用 iOS-like spring。 |
-| `vt.motion.energyReveal` | 下拉 Energy Ball 弹性 reveal，不模拟刷新。 |
+| `vt.motion.energyBowl` | 能量碗点击、模式切换和当前时间气泡使用轻量反馈，不模拟刷新。 |
 | `vt.motion.pixelBreath` | 2.8-4s 低幅呼吸循环。 |
 | `vt.motion.pixelBlink` | 随机轻眨眼，不抢内容。 |
 | `vt.motion.reduce` | Reduce Motion 时关闭 shimmer、强弹性和长 glow 变化。 |
@@ -231,7 +253,7 @@ Don’t:
 | `#FAFAFA` flat dashboard canvas as page identity | `vt.bg.aura.*` |
 | Apple Health-like blue/white cards only | Aura background + clear glass hierarchy |
 | `Luna` user-facing tokens | `Vitora` user-facing tokens |
-| `TodayStateOrb` permanent hero sizing | `EnergyRevealHeader` hidden ritual tokens |
+| `TodayStateOrb` permanent hero sizing | `EnergyBowlRealtimePrediction` inline status tokens |
 | `CycleCalendarGrid` as Cycle home | Today calendar sheet + Cycle energy dynamics |
 | Smooth orb IP | Pixel Vitora ball with pixel eyes |
 | Human avatar recommendation card | Pixel Vitora / abstract companion only |

@@ -13,6 +13,7 @@ final class HealthKitOptionalUITests: XCTestCase {
         nameField.typeText("Vitora")
 
         app.buttons["onboarding.identity.continue"].tap()
+        XCTAssertTrue(app.buttons["onboarding.context.continue"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["onboarding.healthkit.skip"].waitForExistence(timeout: 3))
         app.buttons["onboarding.healthkit.skip"].tap()
         app.buttons["onboarding.context.continue"].tap()
@@ -35,6 +36,7 @@ final class HealthKitOptionalUITests: XCTestCase {
         nameField.typeText("小维")
 
         app.buttons["onboarding.identity.continue"].tap()
+        XCTAssertTrue(app.buttons["onboarding.context.continue"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["onboarding.healthkit.deny"].waitForExistence(timeout: 3))
         app.buttons["onboarding.healthkit.deny"].tap()
         app.buttons["onboarding.context.continue"].tap()

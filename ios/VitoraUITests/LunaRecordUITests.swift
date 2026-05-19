@@ -8,7 +8,8 @@ final class LunaRecordUITests: XCTestCase {
         app.buttons["tab.vitora"].tap()
 
         XCTAssertTrue(app.staticTexts["Vitora 知道"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["可以直接问"].exists)
+        XCTAssertFalse(app.staticTexts["可以直接问"].exists)
+        XCTAssertFalse(app.staticTexts["Vitora 理解为"].exists)
 
         let input = app.textFields.element(boundBy: 0)
         XCTAssertTrue(input.waitForExistence(timeout: 3))
@@ -23,9 +24,13 @@ final class LunaRecordUITests: XCTestCase {
     func testTodayCalibrationOpensContextualVitoraSheet() {
         let app = launchCompletedOnboarding()
 
-        app.buttons["today.calibration.tell"].tap()
+        XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["today.calibration.tell"].exists)
+        app.buttons["global.record.quick"].tap()
 
-        XCTAssertTrue(app.staticTexts["Vitora 浮层 · 来源：今日状态"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["告诉 Vitora"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["来源：快捷记录"].exists)
+        XCTAssertFalse(app.otherElements["global.vitora.dock"].exists)
     }
 
     @MainActor

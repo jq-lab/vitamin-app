@@ -25,7 +25,7 @@ P0 使用四类导航/呈现：
 | --- | --- | --- |
 | Primary Tab | 三主区：Today / Vitora / Cycle。 | 不增加第 4 个 Tab。 |
 | Contextual Sheet | 非 CTA 唤醒 Vitora、建议详情、状态详情、支撑编辑。 | 3/4 或 full-height sheet 保留来源上下文。 |
-| Detail Screen / Sheet | Today 周期日历、状态详情、身体要素详情、Cycle 阶段/能量二层。 | 单击主路径进入；长按只是快捷路径。 |
+| Detail Screen / Sheet | Today 周期日历、状态详情、今日分析/身体要素、Cycle 阶段/能量二层。 | 单击主路径进入；长按只是快捷路径。 |
 | Support / Settings | 个人资料、数据来源、营养、提醒、导出、隐私法律与账号移除。 | 从 Cycle 右上 profile/settings 或 Vitora 支撑入口进入。 |
 
 ### 1.1 Primary Tabs
@@ -66,12 +66,13 @@ P0 使用四类导航/呈现：
 | IA-002 | `/onboarding/context` | 周期上下文、关注点、HealthKit 选择 | Screen | Onboarding | P0 | UF-001 | F-P0-DATA-001, F-P0-DATA-002 | keep |
 | IA-003 | `/onboarding/ready` | 本地准备和学习循环说明 | Screen | Onboarding | P0 | UF-001 | F-P0-NAV-001 | keep |
 | IA-010 | `/today` | Today 首页 | Main tab | Primary nav | P0 | UF-002 | F-P0-TODAY-001 | redesign |
-| IA-011 | `/today/energy-ball` | Pull-to-reveal Energy Ball / Energy Ritual | Hidden header / full screen | Today | P0 | UF-003 | F-P0-ORB-001 | redesign |
+| IA-011 | `/today/energy-bowl` | Energy Bowl / 实时预测 / 查看数据 | Inline status interaction | Today | P0 | UF-003 | F-P0-ORB-001 | redesign |
 | IA-012 | `/today/calendar` | 周期日历 | Detail sheet/screen | Today | P0 | UF-002, UF-009 | F-P0-TODAY-002 | moved from Cycle |
 | IA-013 | `/today/state-detail` | 今日状态详情 | Full-height sheet | Today | P0 | UF-002, UF-005 | F-P0-TODAY-001 | new |
-| IA-014 | `/today/body-factors` | 身体要素详情 | Full-height sheet | Today | P0 | UF-002, UF-005 | F-P0-TODAY-001 | new |
+| IA-014 | `/today/body-factors` | 今日分析 / 身体要素 | Full-height sheet | Today | P0 | UF-002, UF-005 | F-P0-TODAY-001 | new |
 | IA-015 | `/today/suggestion` | Vitora 今日建议详情 | Full-height sheet | Today | P0 | UF-004 | F-P0-AB-001 | redesign |
 | IA-016 | `/today/low-data` | 低数据状态 | Inline state | Today | P0 | UF-002 | F-P0-DATA-002 | keep |
+| IA-017 | `/today/suggestion/sleep-seed` | 睡眠种子状态块 | Inline block | Today suggestion | P0 | UF-004, UF-007 | F-P0-REVIEW-001, F-P0-ORB-001 | new |
 | IA-020 | `/vitora` | Vitora Assistant Surface | Main tab | Primary nav | P0 | UF-006 | F-P0-VITORA-001 | renamed/redesign |
 | IA-021 | `/vitora/context-sheet` | 3/4 Contextual Vitora Sheet | Contextual sheet | Any source | P0 | UF-005 | F-P0-VITORA-002 | new |
 | IA-022 | `/vitora/full-context` | Full Vitora Context Mode | Full screen / tab surface | Vitora | P0 | UF-006 | F-P0-VITORA-001 | replaces old immersive chat |
@@ -99,9 +100,11 @@ Today
 │   ├── Calendar icon -> IA-012
 │   ├── Cycle phase/date
 │   └── Pixel Vitora decoration
-├── Pull-to-reveal Energy Ball -> IA-011
 ├── Current Status Card -> IA-013
-│   ├── rhythm curve
+│   ├── Energy Bowl -> IA-013
+│   ├── evidence button -> IA-014
+│   ├── realtime prediction -> IA-011
+│   ├── metric mode rail
 │   └── calibration chips -> IA-021
 ├── Body Factors -> IA-014
 ├── Vitora Daily Suggestion -> IA-015
@@ -113,7 +116,7 @@ Rules:
 | Rule ID | Rule |
 | --- | --- |
 | IAT-001 | Today 不放独立 `+记录` section。 |
-| IAT-002 | 状态卡是首页主视觉，Energy Ball 是隐藏仪式层。 |
+| IAT-002 | 状态卡和 Energy Bowl 是首页主视觉；Today 首屏不使用顶部下拉 Energy Ball。 |
 | IAT-003 | 日历从 Today 顶部进入，不进入 Cycle 首页。 |
 | IAT-004 | 任何校准都进入 Vitora contextual sheet，而不是切到 Vitora Tab。 |
 

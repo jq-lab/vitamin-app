@@ -11,34 +11,70 @@ struct CurrentPhaseRelationCard: View {
             onAskVitora: onAskVitora,
             onCorrectVitora: onAskVitora
         ) {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Text("当前周期阶段与今天")
-                            .font(.headline.weight(.bold))
-                        Text("Day 18 · 黄体期中段")
-                            .font(.title2.weight(.semibold))
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("当前周期阶段与今天")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("Day 18")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                        Text("· 黄体期中段")
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.lutealGold)
                     }
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-
-                    Spacer()
-
-                    PixelVitoraView(state: .thinking, size: 50)
                 }
 
                 PhaseAxisView()
-                    .frame(height: 76)
+                    .frame(height: 62)
 
-                Text("Vitora 今日建议已考虑这个阶段")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                HStack(alignment: .center, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 7) {
+                        phaseInfoRow(icon: "sparkles", text: "Vitora 今日建议已考虑这个阶段")
+                        phaseInfoRow(icon: "heart.text.square", text: "今天更适合稳定能量补给")
+                    }
 
-                Text("今天更适合稳定能量补给。")
-                    .font(.footnote)
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    Spacer(minLength: 8)
+
+                    HStack(spacing: 1) {
+                        PixelVitoraScene(
+                            state: .idle,
+                            size: 27,
+                            accessory: .none,
+                            showsSparkles: false,
+                            showsBaseShadow: true
+                        )
+                        .frame(width: 40, height: 34)
+                        .allowsHitTesting(false)
+
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText.opacity(0.70))
+                    }
+                }
             }
-            .padding(18)
-            .background(GlassSurface(cornerRadius: 24, opacity: 0.42))
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .background(GlassSurface(cornerRadius: 24, opacity: 0.58, shadowStrength: 0.70, variant: .cleanElevated))
+        }
+    }
+
+    private func phaseInfoRow(icon: String, text: String) -> some View {
+        HStack(spacing: 7) {
+            Image(systemName: icon)
+                .font(.system(size: 10, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                .frame(width: 17, height: 17)
+                .background(VitoraTheme.ColorToken.actionPrimary.opacity(0.16), in: Circle())
+
+            Text(text)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.86)
         }
     }
 }
@@ -49,7 +85,7 @@ struct PhaseAxisView: View {
     var body: some View {
         GeometryReader { proxy in
             let width = proxy.size.width
-            let lineY = proxy.size.height * 0.42
+            let lineY = proxy.size.height * 0.38
 
             ZStack(alignment: .topLeading) {
                 Path { path in
@@ -71,29 +107,36 @@ struct PhaseAxisView: View {
                         startPoint: .leading,
                         endPoint: .trailing
                     ),
-                    style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [5, 5])
+                    style: StrokeStyle(lineWidth: 1.45, lineCap: .round, dash: [4, 5])
                 )
 
                 ForEach(Array(phases.enumerated()), id: \.offset) { index, phase in
                     VStack(spacing: 5) {
                         Circle()
                             .fill(index == 3 ? VitoraTheme.ColorToken.lutealGold : VitoraTheme.ColorToken.paper)
-                            .frame(width: index == 3 ? 18 : 12, height: index == 3 ? 18 : 12)
-                            .overlay(Circle().stroke(phaseColor(index), lineWidth: 2))
+                            .frame(width: index == 3 ? 15 : 10, height: index == 3 ? 15 : 10)
+                            .overlay(Circle().stroke(phaseColor(index), lineWidth: index == 3 ? 2 : 1.6))
+                            .shadow(color: phaseColor(index).opacity(index == 3 ? 0.30 : 0.10), radius: index == 3 ? 6 : 3, x: 0, y: 2)
                         Text(phase)
-                            .font(.caption2.weight(index == 3 ? .semibold : .regular))
+                            .font(.system(size: 10, weight: index == 3 ? .semibold : .regular))
                             .foregroundStyle(index == 3 ? VitoraTheme.ColorToken.lutealGold : VitoraTheme.ColorToken.secondaryText)
                     }
-                    .position(x: xPosition(index: index, width: width), y: lineY + 26)
+                    .position(x: xPosition(index: index, width: width), y: lineY + 22)
                 }
 
-                Text("● 今天")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(VitoraTheme.ColorToken.lutealGold)
-                    .position(x: width * 0.85, y: 12)
+                HStack(spacing: 3) {
+                    Circle()
+                        .fill(VitoraTheme.ColorToken.lutealGold)
+                        .frame(width: 5, height: 5)
+                    Text("今天")
+                        .font(.system(size: 9, weight: .semibold))
+                }
+                .foregroundStyle(VitoraTheme.ColorToken.lutealGold)
+                .position(x: width * 0.86, y: 10)
             }
         }
         .accessibilityIdentifier("cycle.phase.axis")
+        .allowsHitTesting(false)
     }
 
     private func phaseColor(_ index: Int) -> Color {
@@ -114,4 +157,3 @@ struct PhaseAxisView: View {
         return width * positions[index]
     }
 }
-

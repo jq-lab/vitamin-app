@@ -9,22 +9,28 @@ final class AccessibilityUITests: XCTestCase {
         assertMinimumTouchTarget(app.buttons["tab.today"], name: "Today tab")
         assertMinimumTouchTarget(app.buttons["tab.vitora"], name: "Vitora tab")
         assertMinimumTouchTarget(app.buttons["tab.cycle"], name: "Cycle tab")
+        assertMinimumTouchTarget(app.buttons["global.record.quick"], name: "Global quick record")
         assertMinimumTouchTarget(app.buttons["today.status.card"], name: "Today status card")
         XCTAssertFalse(app.buttons["today.status.card"].label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
+        XCTAssertFalse(app.textFields["vitora.input.text"].exists)
 
         app.buttons["tab.vitora"].tap()
         XCTAssertTrue(app.staticTexts["Vitora 知道"].waitForExistence(timeout: 3))
-        assertMinimumTouchTarget(app.buttons["vitora.input.plus"], name: "Vitora input plus")
+        XCTAssertFalse(app.buttons["vitora.input.plus"].exists)
         assertMinimumTouchTarget(app.buttons["vitora.input.voice"], name: "Vitora voice")
         assertMinimumTouchTarget(app.buttons["vitora.input.send"], name: "Vitora send")
         XCTAssertEqual(app.buttons["vitora.input.voice"].label, "语音记录")
         XCTAssertEqual(app.buttons["vitora.input.send"].label, "发送给 Vitora")
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.staticTexts["当前周期阶段与今天"].waitForExistence(timeout: 3))
-        assertMinimumTouchTarget(app.buttons["cycle.phase.card"], name: "Cycle phase card")
+        XCTAssertTrue(app.staticTexts["周期回顾"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
+        XCTAssertFalse(app.textFields["vitora.input.text"].exists)
+        assertMinimumTouchTarget(app.buttons["cycle.review.tab.week"], name: "Cycle review week tab")
         assertMinimumTouchTarget(app.buttons["cycle.energy.card"], name: "Cycle energy card")
         assertMinimumTouchTarget(app.buttons["cycle.settings.open"], name: "Cycle settings")
+        assertMinimumTouchTarget(app.buttons["cycle.share.open"], name: "Cycle share")
 
         app.buttons["cycle.settings.open"].tap()
         XCTAssertTrue(app.otherElements["support.settings.panel"].waitForExistence(timeout: 3))
@@ -55,10 +61,16 @@ final class AccessibilityUITests: XCTestCase {
         XCTAssertTrue(app.textFields["vitora.input.text"].waitForExistence(timeout: 3))
         let inputFrame = app.textFields["vitora.input.text"].frame
         let tabFrame = app.otherElements["primary.tabbar"].frame
-        XCTAssertLessThan(inputFrame.maxY, tabFrame.minY, "Vitora input dock should not be covered by the tab bar under large text.")
+        let recordFrame = app.buttons["global.record.quick"].frame
+        XCTAssertLessThan(tabFrame.maxY, inputFrame.minY, "Global tab switcher should stay above the input field under large text.")
+        XCTAssertLessThan(recordFrame.maxY, inputFrame.minY, "Quick record should stay above the input field under large text.")
+        XCTAssertLessThan(tabFrame.maxX, recordFrame.minX, "Tab switcher and quick record should not overlap under large text.")
+        XCTAssertTrue(app.otherElements["global.vitora.dock"].frame.contains(inputFrame), "Vitora input field should remain inside the global dock under large text.")
 
         app.buttons["tab.cycle"].tap()
         XCTAssertTrue(app.buttons["cycle.energy.card"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
+        XCTAssertFalse(app.textFields["vitora.input.text"].exists)
     }
 
     @MainActor
@@ -71,13 +83,22 @@ final class AccessibilityUITests: XCTestCase {
         )
 
         XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
-        app.swipeDown()
-        XCTAssertTrue(app.otherElements["today.energy.reveal.header"].waitForExistence(timeout: 3))
-        app.swipeUp()
-        XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["today.cycle.phase.strip"].exists)
+        XCTAssertFalse(app.staticTexts["实时预测"].exists)
+        XCTAssertFalse(app.descendants(matching: .any)["today.realtime.chart"].exists)
+        app.buttons["today.evidence.open"].tap()
+        XCTAssertTrue(app.otherElements["today.bodyFactors.detail.sheet"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["今日分析"].exists)
+        XCTAssertTrue(app.staticTexts["综合实时预测"].exists)
+        XCTAssertTrue(app.descendants(matching: .any)["today.realtime.chart"].exists)
+        XCTAssertTrue(app.staticTexts["睡眠"].exists)
+        XCTAssertTrue(app.staticTexts["7.2h"].exists)
+        app.buttons["关闭"].tap()
 
-        app.buttons["today.calibration.tell"].tap()
-        XCTAssertTrue(app.staticTexts["Vitora 浮层 · 来源：今日状态"].waitForExistence(timeout: 4))
+        app.buttons["global.record.quick"].tap()
+        XCTAssertTrue(app.staticTexts["告诉 Vitora"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["来源：快捷记录"].exists)
+        XCTAssertFalse(app.otherElements["global.vitora.dock"].exists)
         XCTAssertTrue(app.buttons["vitora.context.close"].exists)
     }
 

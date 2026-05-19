@@ -32,7 +32,7 @@
 | --- | --- | --- |
 | QAJ-001 | New user completes onboarding without WeChat or HealthKit. | IAC-QA-001 |
 | QAJ-002 | Returning user opens Today and sees state/body/suggestion. | IAC-QA-002 |
-| QAJ-003 | Energy Ball reveal can half-expand, full-expand and dismiss. | IAC-QA-003 |
+| QAJ-003 | Energy Bowl opens state detail, evidence button opens body factors, realtime prediction shows current bubble. | IAC-QA-003 |
 | QAJ-004 | Today state card opens detail. | IAC-QA-004 |
 | QAJ-005 | Askable surface long-press opens context menu and Vitora sheet. | IAC-QA-005 |
 | QAJ-006 | Today calibration chip opens contextual Vitora and saves confirmed update. | IAC-QA-006 |

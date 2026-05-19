@@ -12,6 +12,12 @@ final class OnboardingViewModel: ObservableObject {
     @Published var displayLabel = ""
     @Published var selectedFocusAreas: Set<FocusArea> = [.energy]
     @Published var cycleSummary = ""
+    @Published var cycleLengthSummary = "不确定"
+    @Published var cycleRegularitySummary = "不确定"
+    @Published var shouldEstimateCycle = true
+    @Published var energyWindowPreference: EnergyWindowPreference = .unsure
+    @Published var guidanceStyle: VitoraGuidanceStyle = .explainFirst
+    @Published var reminderPreference: OnboardingReminderPreference = .eveningReview
     @Published private(set) var dataSourceAuthorization = DataSourceAuthorization.notAsked()
     @Published private(set) var completion: OnboardingCompletion?
 
@@ -35,6 +41,10 @@ final class OnboardingViewModel: ObservableObject {
         return selected.isEmpty ? [.energy] : selected
     }
 
+    var canContinueContext: Bool {
+        dataSourceAuthorization.state != .notAsked
+    }
+
     var isLowData: Bool {
         dataSourceAuthorization.isLowData
     }
@@ -49,9 +59,29 @@ final class OnboardingViewModel: ObservableObject {
     func toggleFocusArea(_ focusArea: FocusArea) {
         if selectedFocusAreas.contains(focusArea) {
             selectedFocusAreas.remove(focusArea)
-        } else {
+        } else if selectedFocusAreas.count < 3 {
             selectedFocusAreas.insert(focusArea)
         }
+    }
+
+    func chooseCycleLength(_ summary: String) {
+        cycleLengthSummary = summary
+    }
+
+    func chooseCycleRegularity(_ summary: String) {
+        cycleRegularitySummary = summary
+    }
+
+    func chooseEnergyWindow(_ preference: EnergyWindowPreference) {
+        energyWindowPreference = preference
+    }
+
+    func chooseGuidanceStyle(_ style: VitoraGuidanceStyle) {
+        guidanceStyle = style
+    }
+
+    func chooseReminderPreference(_ preference: OnboardingReminderPreference) {
+        reminderPreference = preference
     }
 
     func chooseDataSource(_ choice: HealthKitAuthorizationChoice) {
@@ -59,15 +89,22 @@ final class OnboardingViewModel: ObservableObject {
     }
 
     func goToReady() {
-        if dataSourceAuthorization.state == .notAsked {
-            chooseDataSource(.skip)
+        guard canContinueContext else {
+            return
         }
         completion = makeCompletion()
         step = .ready
     }
 
+    func editCustomization() {
+        step = .context
+    }
+
     func finish() -> OnboardingCompletion {
-        let nextCompletion = completion ?? makeCompletion()
+        if dataSourceAuthorization.state == .notAsked {
+            chooseDataSource(.skip)
+        }
+        let nextCompletion = makeCompletion()
         completion = nextCompletion
         return nextCompletion
     }
@@ -78,6 +115,12 @@ final class OnboardingViewModel: ObservableObject {
                 displayLabel: displayLabel,
                 focusAreas: selectedFocusAreasList,
                 cycleSummary: cycleSummary,
+                cycleLengthSummary: cycleLengthSummary,
+                cycleRegularitySummary: cycleRegularitySummary,
+                shouldEstimateCycle: shouldEstimateCycle,
+                energyWindowPreference: energyWindowPreference,
+                guidanceStyle: guidanceStyle,
+                reminderPreference: reminderPreference,
                 dataSourceAuthorization: dataSourceAuthorization
             ),
             completedAt: .now

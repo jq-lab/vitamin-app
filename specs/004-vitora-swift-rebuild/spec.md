@@ -33,8 +33,9 @@ P0 Swift MVP 要证明一个闭环：
 2. 用户不需要打卡，只在 Vitora 缺少事实时告诉它一件重要变化。
 3. Vitora 先理解确认，再保存事实并更新判断或建议。
 4. 用户接受或调整今日建议，形成当日意图。
-5. 晚间复盘对比当天 app 介入前后效果。
-6. Cycle 提供长期节律背景和能量动态，不重复 Today。
+5. 晚间复盘对比当天 app 介入前后效果，并可选择一颗睡眠种子作为明早验证方向。
+6. Today / Vitora / Cycle 用睡眠种子把“建议是否真的帮到你”可视化成低成本反馈证据。
+7. Cycle 提供长期节律背景、能量动态和花架证据，不重复 Today。
 
 ## 2. P0 成功标准
 
@@ -42,11 +43,11 @@ P0 Swift MVP 要证明一个闭环：
 | --- | --- | --- |
 | S-P0-001 | 用户无需 WeChat、无需 HealthKit 授权即可进入可用 Today。 | REQ-001 to REQ-003 |
 | S-P0-002 | Today 3 秒内回答状态、依据和下一步。 | REQ-004 |
-| S-P0-003 | Energy Ball 作为首次/下拉/复盘仪式层可用，不压住首页。 | REQ-005 |
-| S-P0-004 | Vitora 今日建议能形成当日意图和晚间复盘路径。 | REQ-006, REQ-007 |
+| S-P0-003 | Energy Bowl 在 Today 首屏承载综合状态和查看数据入口；完整实时预测进入今日分析，不依赖顶部下拉仪式层。 | REQ-005 |
+| S-P0-004 | Vitora 今日建议能形成当日意图、晚间复盘和睡眠种子反馈路径。 | REQ-006, REQ-007 |
 | S-P0-005 | Vitora contextual sheet 可从重要对象唤醒，完成理解确认保存。 | REQ-008, REQ-009 |
 | S-P0-006 | Vitora Tab 是完整 assistant surface，不是空聊天页。 | REQ-010 |
-| S-P0-007 | Cycle 展示周期阶段与今天、能量动态和二层探索。 | REQ-012 |
+| S-P0-007 | Cycle 展示周期回顾、花架证据、能量动态和二层探索。 | REQ-012 |
 | S-P0-008 | 支撑能力可达且不变成宽设置中心。 | REQ-013 to REQ-015 |
 | S-P0-009 | Aura Glass Pixel Companion 视觉系统进入正式规格。 | REQ-016 |
 
@@ -109,10 +110,10 @@ P0 Swift MVP 要证明一个闭环：
 | --- | --- |
 | 区域 | Today |
 | 优先级 | P0 Swift MVP |
-| 产品行为 | Today 首页按“现在状态 → 身体要素 → Vitora 今日建议”组织。 |
+| 产品行为 | Today 首页按“现在状态 → 周期线轴 → Vitora 今日建议”组织；身体要素进入 `查看数据 / 今日分析`。 |
 | 用户价值 | 用户 3 秒内知道今天状态、为什么、下一步。 |
 | 输入 | 今日能量状态、周期上下文、睡眠/HRV/心率、记录、建议状态。 |
-| 输出 | 状态卡、身体要素、今日建议、校准入口。 |
+| 输出 | 综合状态卡、周期线轴、今日建议、查看数据入口。 |
 | 状态 | richData、lowData、uncertain、calibrated、suggestionAvailable。 |
 | 关联事实 | F-P0-TODAY-001 |
 | 关联流程 | UF-002 |
@@ -120,22 +121,22 @@ P0 Swift MVP 要证明一个闭环：
 | 验收标准 | 无独立记录区；无 dashboard 堆叠；状态必须有数字+状态词+关键窗口；每个主卡可进入二层。 |
 | 不在范围 | 自定义任务卡、今日记录 carousel、连续天数、红点。 |
 
-### REQ-005 · Energy Ball 仪式层
+### REQ-005 · Energy Bowl / 实时预测
 
 | 字段 | 规格 |
 | --- | --- |
 | 区域 | Today / Energy |
 | 优先级 | P0 Swift MVP |
-| 产品行为 | Energy Ball 默认隐藏，可每日首次打开、顶部下拉和晚间复盘出现。 |
-| 用户价值 | 保留仪式感和品牌记忆，同时不压住 Today 主信息。 |
-| 输入 | 当日状态、首次打开状态、复盘状态、低数据状态。 |
-| 输出 | hidden、pulling、halfExpanded、fullRitual、reviewComparison 状态。 |
-| 状态 | hidden、pulling、half、full、review。 |
+| 产品行为 | Today 首屏直接使用综合 Energy Bowl 作为状态交互；能量碗可点开今日状态详情，并通过小入口查看睡眠、HRV、心率、周期等依据；首页碗下显示周期线轴，完整综合实时预测移入今日分析。 |
+| 用户价值 | 用户不需要发现下拉手势，也能看到当前状态、周期背景和判断依据；需要完整预测时进入今日分析。 |
+| 输入 | 当日状态、睡眠/HRV/心率/周期、低数据状态、当前时间点。 |
+| 输出 | 综合能量碗、周期线轴、依据入口、今日分析里的实时预测、当前时间气泡、详情路径。 |
+| 状态 | richData、lowData、uncertain、calibrated、reviewComparison。 |
 | 关联事实 | F-P0-ORB-001, F-P0-REVIEW-001 |
 | 关联流程 | UF-003, UF-007 |
 | 关联 IA | IA-011, IA-024 |
-| 验收标准 | 下拉不到阈值自动收回；全屏可退出；低数据不夸大确定性；复盘可显示前后对比。 |
-| 不在范围 | 首页常驻大球、长阻塞动画、刷新控件语义。 |
+| 验收标准 | 首屏无顶部下拉 Energy Ball 提示；首页不显示综合/睡眠/周期模式切换、实时预测图或校准 chips；碗下周期线轴可读；`查看数据` 的今日分析显示高/中/低纵轴、小时点位、当前时间气泡和身体要素依据；低数据不夸大确定性；复盘可显示前后对比。 |
+| 不在范围 | 顶部下拉能量球、长阻塞动画、刷新控件语义、未接入数据源的血糖状态。 |
 
 ### REQ-006 · 身体要素
 
@@ -160,15 +161,15 @@ P0 Swift MVP 要证明一个闭环：
 | --- | --- |
 | 区域 | Today / Suggestion |
 | 优先级 | P0 Swift MVP |
-| 产品行为 | Vitora 今日建议提供一个低负担行动，可形成当日意图并连接晚间复盘。 |
-| 用户价值 | 用户知道今天可以轻轻试什么，并能看到 app 是否有用。 |
+| 产品行为 | Vitora 今日建议提供一个低负担行动，可形成当日意图、连接晚间复盘，并推动睡眠种子从半开继续打开。 |
+| 用户价值 | 用户知道今天可以轻轻试什么，理解身体为什么这样，并能看到建议是否真的有用。 |
 | 输入 | 今日状态、身体要素、周期上下文、用户记录、提醒偏好。 |
-| 输出 | 建议卡、详情、我试试、换一个、不适合、提醒偏好、复盘引用。 |
-| 状态 | fresh、accepted、changed、notSuitable、reminderSet、reviewPending。 |
+| 输出 | 建议卡、睡眠种子状态解释、详情、我试试、换一个、不适合、提醒偏好、复盘引用。 |
+| 状态 | fresh、accepted、changed、notSuitable、reminderSet、reviewPending、seed、halfOpen、bloom、dormant。 |
 | 关联事实 | F-P0-AB-001, F-P0-REVIEW-001 |
 | 关联流程 | UF-004, UF-007 |
 | 关联 IA | IA-015, IA-024, IA-044 |
-| 验收标准 | `我试试` 保存意图；`换一个` 可调整；`不适合` 无压力；晚间复盘能引用。 |
+| 验收标准 | `我试试` 保存意图并可更新种子状态；`换一个` 可调整；`不适合` 无压力；晚间复盘能引用；Today 建议卡解释昨晚休息、生理反应和今天行动如何帮助这颗种子继续生长。 |
 | 不在范围 | 任务完成率、打卡、VIP 学习记忆。 |
 
 ### REQ-008 · 上下文告诉 Vitora
@@ -211,15 +212,15 @@ P0 Swift MVP 要证明一个闭环：
 | --- | --- |
 | 区域 | Vitora Tab |
 | 优先级 | P0 Swift MVP |
-| 产品行为 | Vitora Tab 默认显示 AI-native assistant surface：Pixel Vitora、Vitora 知道、对话、直接问、快捷上下文、输入 dock。 |
-| 用户价值 | 用户打开 Vitora 就知道它知道什么、能问什么、能补充什么。 |
-| 输入 | Today 状态、周期上下文、近期记录、建议、复盘可用性、用户输入。 |
-| 输出 | assistant surface、conversation、quick context chips、input dock、rich response、record confirmation。 |
+| 产品行为 | Vitora Tab 默认显示 AI-native assistant surface：Pixel Vitora、Vitora 知道、对话、直接问、快捷上下文、晚间复盘卡、睡眠种子解释、输入 dock。 |
+| 用户价值 | 用户打开 Vitora 就知道它知道什么、能问什么、能补充什么，以及为什么某颗种子处在当前状态。 |
+| 输入 | Today 状态、周期上下文、近期记录、建议、睡眠种子、复盘可用性、用户输入。 |
+| 输出 | assistant surface、conversation、quick context chips、晚间复盘入口、睡眠种子解释、input dock、rich response、record confirmation。 |
 | 状态 | default、scrolledCompressed、inputFocused、voiceRecording、contextCard、richResponse、lowData。 |
 | 关联事实 | F-P0-VITORA-001, F-P0-VITORA-003 |
 | 关联流程 | UF-006 |
-| 关联 IA | IA-020, IA-022, IA-023 |
-| 验收标准 | 不打开空白聊天；直接问是薄玻璃条；chips 在 input 上方；input 不被底部 CTA 遮挡。 |
+| 关联 IA | IA-020, IA-022, IA-023, IA-024 |
+| 验收标准 | 不打开空白聊天；直接问是薄玻璃条；chips 在 input 上方；全局 input dock 在 Today / Vitora / Cycle 常驻，Tab 和输入职责分离。 |
 | 不在范围 | 旧单一沉浸聊天页、功能宫格、dashboard 卡片堆叠。 |
 
 ### REQ-011 · Vitora 记录 / 理解确认
@@ -245,15 +246,15 @@ P0 Swift MVP 要证明一个闭环：
 | --- | --- |
 | 区域 | Cycle |
 | 优先级 | P0 Swift MVP |
-| 产品行为 | Cycle 首页展示当前周期阶段与今天，以及能量动态。 |
-| 用户价值 | 用户理解长期节律如何影响 Today，而不是只看日历。 |
+| 产品行为 | Cycle 首页展示 `周期回顾`：三件事总结、能量动态和三张节律洞察卡。 |
+| 用户价值 | 用户理解长期节律如何影响 Today，并看到 Vitora 从周期里学到了什么，而不是只看日历。 |
 | 输入 | 周期上下文、今日状态、历史能量、睡眠/HRV 摘要、记录事件。 |
-| 输出 | 阶段关系卡、能量动态卡、二层详情入口、设置入口。 |
+| 输出 | 周期回顾头部、三件事总结卡、能量动态卡、节律洞察卡、本周期花架证据、二层详情入口、设置入口。 |
 | 状态 | richData、lowData、phaseUncertain、daily、weekly、monthly。 |
 | 关联事实 | F-P0-CYCLE-001, F-P0-CYCLE-002 |
 | 关联流程 | UF-008, UF-009 |
 | 关联 IA | IA-030, IA-031, IA-032, IA-033 |
-| 验收标准 | 首页无日历预览；阶段卡和能量动态卡都可单击二层；可长按问 Vitora。 |
+| 验收标准 | 首页无日历预览或花田地图；花架证据和能量动态可单击二层；三件事总结包含本周/月/周期切换；可长按问 Vitora；不出现成长册进度、打卡、完成率、连续天数或任务清单。 |
 | 不在范围 | Cycle 日历首页、高级商业化表面、复杂多指标趋势。 |
 
 ### REQ-013 · Today 周期日历
@@ -331,6 +332,7 @@ P0 Swift MVP 要证明一个闭环：
 | Low Data | 明确“基于目前信息”，提供告诉 Vitora / 数据来源入口。 |
 | AI Unavailable | 保留输入，允许手动确认保存，不显示失败羞辱。 |
 | Suggestion Accepted | 保存当日意图，晚间可复盘，不显示任务债务。 |
+| Sleep Seed | 只表达建议反馈证据，可为 `seed / halfOpen / bloom / dormant`；不表达完成率、连续天数或惩罚。 |
 | Context Sheet Dismissed | 回来源，输入未保存时给明确取消或草稿策略。 |
 | Voice Planned | P0 可不实现完整对话语音，但 UI 和规格保留语音记录入口。 |
 | 旧代码命名 | 旧 Luna 代码命名可暂存，用户面对文案和正式 specs 必须使用 Vitora。 |
@@ -342,7 +344,7 @@ P0 Swift MVP 要证明一个闭环：
 | AC-001 | 所有 P0 主路径只显示 Today / Vitora / Cycle。 |
 | AC-002 | Today 首页没有独立记录区，只有状态校准和对象级告诉 Vitora。 |
 | AC-003 | Vitora Tab 首屏不是空聊天，也不是功能 dashboard。 |
-| AC-004 | Cycle 首页没有日历预览，只有阶段关系与能量动态。 |
+| AC-004 | Cycle 首页没有日历预览，展示周期回顾、花架证据、三件事总结、能量动态和节律洞察。 |
 | AC-005 | Askable surface 的单击、长按、callout、TipKit 逻辑可验收。 |
 | AC-006 | 设计语言符合 `design-language-demo.md`。 |
 | AC-007 | 旧 T102 Evening Review 不作为下一实施阶段；先执行 pivot adaptation。 |

@@ -30,6 +30,10 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
     var id: UUID
     var focusAreas: [FocusArea]
     var cycleContext: CycleContext?
+    var cycleSummary: String?
+    var energyWindowPreference: EnergyWindowPreference
+    var guidanceStyle: VitoraGuidanceStyle
+    var reminderPreference: OnboardingReminderPreference
     var dataSourceAuthorization: DataSourceAuthorization
     var completedAt: Date?
 
@@ -37,14 +41,47 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
         id: UUID = UUID(),
         focusAreas: [FocusArea] = [],
         cycleContext: CycleContext? = nil,
+        cycleSummary: String? = nil,
+        energyWindowPreference: EnergyWindowPreference = .unsure,
+        guidanceStyle: VitoraGuidanceStyle = .explainFirst,
+        reminderPreference: OnboardingReminderPreference = .eveningReview,
         dataSourceAuthorization: DataSourceAuthorization = .notAsked(),
         completedAt: Date? = nil
     ) {
         self.id = id
         self.focusAreas = focusAreas
         self.cycleContext = cycleContext
+        self.cycleSummary = cycleSummary
+        self.energyWindowPreference = energyWindowPreference
+        self.guidanceStyle = guidanceStyle
+        self.reminderPreference = reminderPreference
         self.dataSourceAuthorization = dataSourceAuthorization
         self.completedAt = completedAt
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case focusAreas
+        case cycleContext
+        case cycleSummary
+        case energyWindowPreference
+        case guidanceStyle
+        case reminderPreference
+        case dataSourceAuthorization
+        case completedAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        focusAreas = try container.decodeIfPresent([FocusArea].self, forKey: .focusAreas) ?? [.energy]
+        cycleContext = try container.decodeIfPresent(CycleContext.self, forKey: .cycleContext)
+        cycleSummary = try container.decodeIfPresent(String.self, forKey: .cycleSummary)
+        energyWindowPreference = try container.decodeIfPresent(EnergyWindowPreference.self, forKey: .energyWindowPreference) ?? .unsure
+        guidanceStyle = try container.decodeIfPresent(VitoraGuidanceStyle.self, forKey: .guidanceStyle) ?? .explainFirst
+        reminderPreference = try container.decodeIfPresent(OnboardingReminderPreference.self, forKey: .reminderPreference) ?? .eveningReview
+        dataSourceAuthorization = try container.decodeIfPresent(DataSourceAuthorization.self, forKey: .dataSourceAuthorization) ?? .notAsked()
+        completedAt = try container.decodeIfPresent(Date.self, forKey: .completedAt)
     }
 
     var isComplete: Bool {
@@ -62,6 +99,72 @@ enum FocusArea: String, CaseIterable, Codable, Equatable, Hashable {
     case sleep
     case mood
     case nutrition
+}
+
+enum EnergyWindowPreference: String, CaseIterable, Codable, Equatable, Hashable {
+    case morning
+    case afternoon
+    case evening
+    case unsure
+
+    var titleKey: String {
+        switch self {
+        case .morning:
+            "onboarding.energyWindow.morning"
+        case .afternoon:
+            "onboarding.energyWindow.afternoon"
+        case .evening:
+            "onboarding.energyWindow.evening"
+        case .unsure:
+            "onboarding.energyWindow.unsure"
+        }
+    }
+
+    var accessibilityID: String {
+        "onboarding.energyWindow.\(rawValue)"
+    }
+}
+
+enum VitoraGuidanceStyle: String, CaseIterable, Codable, Equatable, Hashable {
+    case explainFirst
+    case gentleSuggestion
+    case keyChangesOnly
+
+    var titleKey: String {
+        switch self {
+        case .explainFirst:
+            "onboarding.guidance.explainFirst"
+        case .gentleSuggestion:
+            "onboarding.guidance.gentleSuggestion"
+        case .keyChangesOnly:
+            "onboarding.guidance.keyChangesOnly"
+        }
+    }
+
+    var accessibilityID: String {
+        "onboarding.guidance.\(rawValue)"
+    }
+}
+
+enum OnboardingReminderPreference: String, CaseIterable, Codable, Equatable, Hashable {
+    case eveningReview
+    case keyChanges
+    case paused
+
+    var titleKey: String {
+        switch self {
+        case .eveningReview:
+            "onboarding.reminder.eveningReview"
+        case .keyChanges:
+            "onboarding.reminder.keyChanges"
+        case .paused:
+            "onboarding.reminder.paused"
+        }
+    }
+
+    var accessibilityID: String {
+        "onboarding.reminder.\(rawValue)"
+    }
 }
 
 enum AppGateState: String, Codable, Equatable {

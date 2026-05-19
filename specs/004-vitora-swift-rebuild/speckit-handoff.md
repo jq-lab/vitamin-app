@@ -38,6 +38,42 @@
 15. `contracts/`
 16. `wireframes-walkthrough-demo.md` and `design-language-demo.md` only as evidence
 
+如果任务涉及 Pixel Vitora 的造型、材质、表情、道具、动效或页面接入，必须先读取：
+
+```text
+pixel-vitora-ip/README.md
+pixel-vitora-ip/pixel-vitora-ip-spec.md
+pixel-vitora-ip/implementation-contract.md
+pixel-vitora-ip/qa-checklist.md
+```
+
+如果任务涉及 Cycle 页面首页视觉、布局、图表、Tip、Tab 避让或页面内 Pixel Vitora 接入，必须先读取：
+
+```text
+cycle-page/README.md
+cycle-page/cycle-page-spec.md
+cycle-page/implementation-contract.md
+cycle-page/qa-checklist.md
+```
+
+如果任务涉及 Vitora Tab assistant surface、Quick Context、Input Dock、周期上下文展开态或 Vitora 页面内 Pixel Vitora 接入，必须先读取：
+
+```text
+vitora-page/README.md
+vitora-page/vitora-page-spec.md
+vitora-page/implementation-contract.md
+vitora-page/qa-checklist.md
+```
+
+如果任务涉及首层背景、动态 aura、周期色变化、视频背景素材或 Reduce Motion 背景兜底，必须先读取：
+
+```text
+dynamic-aura-background/README.md
+dynamic-aura-background/dynamic-aura-background-spec.md
+dynamic-aura-background/implementation-contract.md
+dynamic-aura-background/qa-checklist.md
+```
+
 `spec_en.md` 不是当前默认产品真相。
 
 ## 3. 不要做的事
@@ -99,6 +135,10 @@
 - 不把 Vitora Tab 做成空聊天页或 dashboard。
 - 不把 Cycle 首页做成日历。
 - 不把 Pixel Vitora 替换成 smooth orb、人类头像、宠物或普通 icon。
+- 涉及 Pixel Vitora 的改动必须继承 `pixel-vitora-ip/` 中的玻璃像素小球 baseline，并更新 `pixel-vitora-ip/change-log.md`。
+- 涉及 Cycle 页面首页的改动必须继承 `cycle-page/` 中的当前 baseline，并更新 `cycle-page/change-log.md`。
+- 涉及 Vitora Tab assistant surface 的改动必须继承 `vitora-page/` 中的当前 baseline，并更新 `vitora-page/change-log.md`。
+- 涉及 Dynamic Aura Background 的改动必须继承 `dynamic-aura-background/` 中的视频素材和周期色规则，并更新 `dynamic-aura-background/change-log.md`。
 - 每个 UI phase 结束必须用 simulator / iosef 交互检查，并保存截图。
 
 ## 6. QA Evidence
@@ -108,6 +148,13 @@
 | Full test output | `ios/QA/Reports/xcodebuild-test.txt` |
 | Final QA report | `ios/QA/final-qa-report.md` |
 | Manual QA checklist | `ios/QA/manual-qa.md` |
+| Design handoff spec | `specs/004-vitora-swift-rebuild/design-handoff.md` |
+| Pixel Vitora IP spec pack | `specs/004-vitora-swift-rebuild/pixel-vitora-ip/` |
+| Cycle page spec pack | `specs/004-vitora-swift-rebuild/cycle-page/` |
+| Vitora Tab spec pack | `specs/004-vitora-swift-rebuild/vitora-page/` |
+| Dynamic Aura Background spec pack | `specs/004-vitora-swift-rebuild/dynamic-aura-background/` |
+| Design gap report | `ios/QA/design-handoff-gap-report.md` |
+| Design comparison screenshots | `ios/QA/Screenshots/ComparisonV2/` |
 | Quickstart result | `ios/QA/quickstart-results.md` |
 | Reverse acceptance | `ios/QA/Reports/reverse-acceptance-scan.txt` |
 | Final screenshots | `ios/QA/Screenshots/Final/` |

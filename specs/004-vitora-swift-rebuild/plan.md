@@ -131,7 +131,7 @@ ios/
 - `CalibrationChips`
 - `BodyFactorTiles`
 - `VitoraDailySuggestionCard`
-- `EnergyRevealHeader`
+- `EnergyBowlRealtimePrediction`
 - `TodayCalendarSheet`
 
 ### 6.4 Vitora
@@ -174,7 +174,7 @@ ios/
 | Phase 8 Pivot Baseline Tests | 已完成 T102-T108 | 新 IA / 视觉系统自动化验收。 |
 | Phase 9 Design System Pivot | 已完成 T109-T113 | AuraBackground、GlassSurface、PixelVitoraView、InputDock。 |
 | Phase 10 App Shell / Naming Pivot | 已完成 T114-T116 | 主 Tab、presentation、用户面对 Vitora 命名迁移。 |
-| Phase 11 Today Pivot | 已完成 T117-T123 | Today 收口为状态、身体要素、Vitora 今日建议和 Energy Reveal。 |
+| Phase 11 Today Pivot | 已完成 T117-T123 + D-041 adaptation | Today 收口为状态、身体要素、Vitora 今日建议和 Energy Bowl 实时预测。 |
 | Phase 12 Vitora Assistant Pivot | 已完成 T124-T130 | 旧 Luna surface 重构为完整 Vitora assistant surface。 |
 | Phase 13 Cycle Pivot | 已完成 T131-T135 | Cycle 收口为周期阶段与今天、能量动态、设置入口。 |
 | Phase 14 Pivot QA Gate | 已完成 T136-T138 | Simulator/iosef、截图、设计证据偏差报告。 |
@@ -197,7 +197,7 @@ ios/
 | 区域 | 正式来源 | 实现目标 |
 | --- | --- | --- |
 | Today home | REQ-004, WF-T-001, C-TODAY-003 to 007 | `TodayFeature` refactor |
-| Energy Ball | REQ-005, WF-T-002, C-TODAY-008 | `EnergyRevealHeader` |
+| Energy Bowl / 实时预测 | REQ-005, WF-T-002, C-TODAY-008 | `TodayStatusCard` / `EnergyBowlView` |
 | Contextual Vitora | REQ-008, WF-V-005, C-VITORA-010 | Global sheet/router |
 | Vitora Tab | REQ-010, WF-V-001 to 004, C-VITORA-001 to 009 | `VitoraFeature` |
 | Record confirm | REQ-011, WF-V-004, C-VITORA-012 | Record service + UI |

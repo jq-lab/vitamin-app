@@ -17,8 +17,6 @@ struct RichResponseCard: View {
                 .lineSpacing(3)
                 .foregroundStyle(VitoraTheme.ColorToken.strongText)
 
-            ComplianceLabel(.vitora)
-
             HStack(spacing: 8) {
                 ForEach(response.actions, id: \.self) { action in
                     Button(action) {}
@@ -32,6 +30,6 @@ struct RichResponseCard: View {
             }
         }
         .padding(15)
-        .background(GlassSurface(cornerRadius: 22, opacity: 0.40))
+        .background(GlassSurface(cornerRadius: 22, opacity: 0.52, shadowStrength: 0.9))
     }
 }

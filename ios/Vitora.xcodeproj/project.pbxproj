@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */; };
 		A10000000000000000000001 /* VitoraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* VitoraApp.swift */; };
 		A10000000000000000000002 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* AppEnvironment.swift */; };
 		A10000000000000000000003 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* AppRouter.swift */; };
@@ -14,6 +15,7 @@
 		A10000000000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* Assets.xcassets */; };
 		A10000000000000000000006 /* VitoraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* VitoraTests.swift */; };
 		A10000000000000000000007 /* VitoraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* VitoraUITests.swift */; };
+		A8D6AA5D3F0FEC68205F8248 /* libPods-Vitora.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D88FEBB099F05D0A2CCEE119 /* libPods-Vitora.a */; };
 		B10000000000000000000001 /* VitoraRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000001 /* VitoraRoute.swift */; };
 		B10000000000000000000002 /* VitoraTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000002 /* VitoraTheme.swift */; };
 		B10000000000000000000003 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000003 /* Primitives.swift */; };
@@ -28,7 +30,6 @@
 		B10000000000000000000012 /* LunaAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000012 /* LunaAIClient.swift */; };
 		B10000000000000000000013 /* AIContextBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000013 /* AIContextBuilder.swift */; };
 		B10000000000000000000014 /* LunaOutputGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000014 /* LunaOutputGuard.swift */; };
-		K10000000000000000000001 /* VitoraOutputGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = K20000000000000000000001 /* VitoraOutputGuard.swift */; };
 		B10000000000000000000015 /* OnboardingModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000015 /* OnboardingModels.swift */; };
 		B10000000000000000000016 /* CycleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000016 /* CycleModels.swift */; };
 		B10000000000000000000017 /* TodayModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20000000000000000000017 /* TodayModels.swift */; };
@@ -52,6 +53,8 @@
 		C10000000000000000000008 /* OnboardingDomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000008 /* OnboardingDomainTests.swift */; };
 		C10000000000000000000009 /* OnboardingLowDataUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000009 /* OnboardingLowDataUITests.swift */; };
 		C10000000000000000000010 /* HealthKitOptionalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000010 /* HealthKitOptionalUITests.swift */; };
+		C10000000000000000000050 /* OnboardingPageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000050 /* OnboardingPageCard.swift */; };
+		CE3CEB65EE6AC4D7C54CE569 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE9F9AFB414C2D46C3BE631E /* PrivacyInfo.xcprivacy */; };
 		D10000000000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* Localizable.strings */; };
 		E10000000000000000000001 /* TodayStateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* TodayStateService.swift */; };
 		E10000000000000000000002 /* EnergyRitualService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* EnergyRitualService.swift */; };
@@ -95,7 +98,6 @@
 		H10000000000000000000004 /* TodayStatusCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000004 /* TodayStatusCard.swift */; };
 		H10000000000000000000005 /* BodyFactorTiles.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000005 /* BodyFactorTiles.swift */; };
 		H10000000000000000000006 /* VitoraDailySuggestionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000006 /* VitoraDailySuggestionCard.swift */; };
-		H10000000000000000000007 /* EnergyRevealHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000007 /* EnergyRevealHeader.swift */; };
 		H10000000000000000000008 /* TodayDetailSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000008 /* TodayDetailSheets.swift */; };
 		H10000000000000000000009 /* VitoraViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000009 /* VitoraViewModel.swift */; };
 		H10000000000000000000010 /* VitoraCompressedHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000010 /* VitoraCompressedHeader.swift */; };
@@ -112,6 +114,15 @@
 		H10000000000000000000021 /* QuickContextChips.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000021 /* QuickContextChips.swift */; };
 		H10000000000000000000022 /* CurrentPhaseDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000022 /* CurrentPhaseDetailSheet.swift */; };
 		H10000000000000000000023 /* EnergyDynamicsDetailSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000023 /* EnergyDynamicsDetailSheet.swift */; };
+		H10000000000000000000050 /* NavigationGlyphs.swift in Sources */ = {isa = PBXBuildFile; fileRef = H20000000000000000000050 /* NavigationGlyphs.swift */; };
+		H30000000000000000000001 /* PivotNavigationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000001 /* PivotNavigationUITests.swift */; };
+		H30000000000000000000002 /* TodayPivotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000002 /* TodayPivotUITests.swift */; };
+		H30000000000000000000003 /* VitoraAssistantSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000003 /* VitoraAssistantSurfaceUITests.swift */; };
+		H30000000000000000000004 /* ContextualVitoraSheetUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000004 /* ContextualVitoraSheetUITests.swift */; };
+		H30000000000000000000005 /* CyclePivotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000005 /* CyclePivotUITests.swift */; };
+		H30000000000000000000006 /* AskableSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000006 /* AskableSurfaceUITests.swift */; };
+		H30000000000000000000007 /* VisualLanguageSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000007 /* VisualLanguageSmokeTests.swift */; };
+		H30000000000000000000008 /* LegacyLunaTextScanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000008 /* LegacyLunaTextScanTests.swift */; };
 		I10000000000000000000001 /* EveningReviewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000001 /* EveningReviewService.swift */; };
 		I10000000000000000000002 /* VitoraLearningSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000002 /* VitoraLearningSignalService.swift */; };
 		I10000000000000000000003 /* EveningReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000003 /* EveningReviewSheet.swift */; };
@@ -131,20 +142,15 @@
 		J30000000000000000000002 /* NutritionServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J40000000000000000000002 /* NutritionServiceTests.swift */; };
 		J30000000000000000000003 /* DataControlServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J40000000000000000000003 /* DataControlServiceTests.swift */; };
 		J30000000000000000000004 /* SettingsPanelUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = J40000000000000000000004 /* SettingsPanelUITests.swift */; };
+		K10000000000000000000001 /* VitoraOutputGuard.swift in Sources */ = {isa = PBXBuildFile; fileRef = K20000000000000000000001 /* VitoraOutputGuard.swift */; };
 		K30000000000000000000001 /* AIPrivacyBoundaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K40000000000000000000001 /* AIPrivacyBoundaryTests.swift */; };
 		K30000000000000000000002 /* PrivacyLoggingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K40000000000000000000002 /* PrivacyLoggingTests.swift */; };
 		K30000000000000000000003 /* ComplianceSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K40000000000000000000003 /* ComplianceSurfaceUITests.swift */; };
 		K30000000000000000000004 /* AIUnavailableUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = K40000000000000000000004 /* AIUnavailableUITests.swift */; };
 		L30000000000000000000001 /* PerformanceSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L40000000000000000000001 /* PerformanceSmokeTests.swift */; };
 		L30000000000000000000002 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L40000000000000000000002 /* AccessibilityUITests.swift */; };
-		H30000000000000000000001 /* PivotNavigationUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000001 /* PivotNavigationUITests.swift */; };
-		H30000000000000000000002 /* TodayPivotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000002 /* TodayPivotUITests.swift */; };
-		H30000000000000000000003 /* VitoraAssistantSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000003 /* VitoraAssistantSurfaceUITests.swift */; };
-		H30000000000000000000004 /* ContextualVitoraSheetUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000004 /* ContextualVitoraSheetUITests.swift */; };
-		H30000000000000000000005 /* CyclePivotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000005 /* CyclePivotUITests.swift */; };
-		H30000000000000000000006 /* AskableSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000006 /* AskableSurfaceUITests.swift */; };
-		H30000000000000000000007 /* VisualLanguageSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000007 /* VisualLanguageSmokeTests.swift */; };
-		H30000000000000000000008 /* LegacyLunaTextScanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000008 /* LegacyLunaTextScanTests.swift */; };
+		M10000000000000000000001 /* DynamicAuraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000001 /* DynamicAuraBackground.swift */; };
+		M10000000000000000000002 /* DynamicAura in Resources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000002 /* DynamicAura */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -165,16 +171,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.debug.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.debug.xcconfig"; sourceTree = "<group>"; };
+		58A4EB357FBA685658458C76 /* Pods-Vitora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.release.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.release.xcconfig"; sourceTree = "<group>"; };
 		A20000000000000000000001 /* VitoraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* AppRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRouter.swift; sourceTree = "<group>"; };
-		A20000000000000000000004 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = zh-Hans.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A20000000000000000000004 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		A20000000000000000000005 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A20000000000000000000006 /* VitoraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraTests.swift; sourceTree = "<group>"; };
 		A20000000000000000000007 /* VitoraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraUITests.swift; sourceTree = "<group>"; };
 		A20000000000000000000008 /* Vitora.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vitora.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000009 /* VitoraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VitoraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000010 /* VitoraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VitoraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Vitora/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		B20000000000000000000001 /* VitoraRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraRoute.swift; sourceTree = "<group>"; };
 		B20000000000000000000002 /* VitoraTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraTheme.swift; sourceTree = "<group>"; };
 		B20000000000000000000003 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
@@ -189,7 +198,6 @@
 		B20000000000000000000012 /* LunaAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LunaAIClient.swift; sourceTree = "<group>"; };
 		B20000000000000000000013 /* AIContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIContextBuilder.swift; sourceTree = "<group>"; };
 		B20000000000000000000014 /* LunaOutputGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LunaOutputGuard.swift; sourceTree = "<group>"; };
-		K20000000000000000000001 /* VitoraOutputGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraOutputGuard.swift; sourceTree = "<group>"; };
 		B20000000000000000000015 /* OnboardingModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingModels.swift; sourceTree = "<group>"; };
 		B20000000000000000000016 /* CycleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleModels.swift; sourceTree = "<group>"; };
 		B20000000000000000000017 /* TodayModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayModels.swift; sourceTree = "<group>"; };
@@ -203,6 +211,7 @@
 		B20000000000000000000025 /* NavigationContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationContractTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000026 /* HealthKitContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitContractTests.swift; sourceTree = "<group>"; };
 		B20000000000000000000027 /* NotificationContractTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationContractTests.swift; sourceTree = "<group>"; };
+		BE9F9AFB414C2D46C3BE631E /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = ../PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		C20000000000000000000001 /* AppGateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGateService.swift; sourceTree = "<group>"; };
 		C20000000000000000000002 /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 		C20000000000000000000003 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -213,7 +222,9 @@
 		C20000000000000000000008 /* OnboardingDomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingDomainTests.swift; sourceTree = "<group>"; };
 		C20000000000000000000009 /* OnboardingLowDataUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLowDataUITests.swift; sourceTree = "<group>"; };
 		C20000000000000000000010 /* HealthKitOptionalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitOptionalUITests.swift; sourceTree = "<group>"; };
+		C20000000000000000000050 /* OnboardingPageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPageCard.swift; sourceTree = "<group>"; };
 		D20000000000000000000001 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		D88FEBB099F05D0A2CCEE119 /* libPods-Vitora.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Vitora.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E20000000000000000000001 /* TodayStateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayStateService.swift; sourceTree = "<group>"; };
 		E20000000000000000000002 /* EnergyRitualService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyRitualService.swift; sourceTree = "<group>"; };
 		E20000000000000000000003 /* TodayAnalysisService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayAnalysisService.swift; sourceTree = "<group>"; };
@@ -256,7 +267,6 @@
 		H20000000000000000000004 /* TodayStatusCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayStatusCard.swift; sourceTree = "<group>"; };
 		H20000000000000000000005 /* BodyFactorTiles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyFactorTiles.swift; sourceTree = "<group>"; };
 		H20000000000000000000006 /* VitoraDailySuggestionCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraDailySuggestionCard.swift; sourceTree = "<group>"; };
-		H20000000000000000000007 /* EnergyRevealHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyRevealHeader.swift; sourceTree = "<group>"; };
 		H20000000000000000000008 /* TodayDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayDetailSheets.swift; sourceTree = "<group>"; };
 		H20000000000000000000009 /* VitoraViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraViewModel.swift; sourceTree = "<group>"; };
 		H20000000000000000000010 /* VitoraCompressedHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraCompressedHeader.swift; sourceTree = "<group>"; };
@@ -273,6 +283,7 @@
 		H20000000000000000000021 /* QuickContextChips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickContextChips.swift; sourceTree = "<group>"; };
 		H20000000000000000000022 /* CurrentPhaseDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentPhaseDetailSheet.swift; sourceTree = "<group>"; };
 		H20000000000000000000023 /* EnergyDynamicsDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnergyDynamicsDetailSheet.swift; sourceTree = "<group>"; };
+		H20000000000000000000050 /* NavigationGlyphs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationGlyphs.swift; sourceTree = "<group>"; };
 		H40000000000000000000001 /* PivotNavigationUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PivotNavigationUITests.swift; sourceTree = "<group>"; };
 		H40000000000000000000002 /* TodayPivotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayPivotUITests.swift; sourceTree = "<group>"; };
 		H40000000000000000000003 /* VitoraAssistantSurfaceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraAssistantSurfaceUITests.swift; sourceTree = "<group>"; };
@@ -300,12 +311,15 @@
 		J40000000000000000000002 /* NutritionServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionServiceTests.swift; sourceTree = "<group>"; };
 		J40000000000000000000003 /* DataControlServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataControlServiceTests.swift; sourceTree = "<group>"; };
 		J40000000000000000000004 /* SettingsPanelUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPanelUITests.swift; sourceTree = "<group>"; };
+		K20000000000000000000001 /* VitoraOutputGuard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraOutputGuard.swift; sourceTree = "<group>"; };
 		K40000000000000000000001 /* AIPrivacyBoundaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIPrivacyBoundaryTests.swift; sourceTree = "<group>"; };
 		K40000000000000000000002 /* PrivacyLoggingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyLoggingTests.swift; sourceTree = "<group>"; };
 		K40000000000000000000003 /* ComplianceSurfaceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceSurfaceUITests.swift; sourceTree = "<group>"; };
 		K40000000000000000000004 /* AIUnavailableUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIUnavailableUITests.swift; sourceTree = "<group>"; };
 		L40000000000000000000001 /* PerformanceSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceSmokeTests.swift; sourceTree = "<group>"; };
 		L40000000000000000000002 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
+		M20000000000000000000001 /* DynamicAuraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicAuraBackground.swift; sourceTree = "<group>"; };
+		M20000000000000000000002 /* DynamicAura */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DynamicAura; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -313,6 +327,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A8D6AA5D3F0FEC68205F8248 /* libPods-Vitora.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,6 +348,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		2F4A423AFE2F69D6B0AC8A57 /* Vitora */ = {
+			isa = PBXGroup;
+			children = (
+				A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */,
+			);
+			name = Vitora;
+			sourceTree = "<group>";
+		};
+		A1FF9CB7A32CEE3B47D8E4B7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D88FEBB099F05D0A2CCEE119 /* libPods-Vitora.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A50000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
@@ -340,6 +371,9 @@
 				A50000000000000000000012 /* VitoraTests */,
 				A50000000000000000000013 /* VitoraUITests */,
 				A50000000000000000000014 /* Products */,
+				F09F51AEC7D666A507144CD3 /* Pods */,
+				A1FF9CB7A32CEE3B47D8E4B7 /* Frameworks */,
+				A7B22D5DE61FD399FEA579AC /* ExpoModulesProviders */,
 			);
 			sourceTree = "<group>";
 		};
@@ -352,6 +386,7 @@
 				A50000000000000000000005 /* Domains */,
 				A50000000000000000000006 /* Features */,
 				A50000000000000000000007 /* Resources */,
+				BE9F9AFB414C2D46C3BE631E /* PrivacyInfo.xcprivacy */,
 			);
 			path = Vitora;
 			sourceTree = "<group>";
@@ -413,6 +448,7 @@
 				A20000000000000000000004 /* Localizable.strings */,
 				D20000000000000000000001 /* Localizable.strings */,
 				A20000000000000000000005 /* Assets.xcassets */,
+				M20000000000000000000002 /* DynamicAura */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -484,26 +520,254 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A50000000000000000000021 /* DesignSystem */ = {isa = PBXGroup; children = (B20000000000000000000002 /* VitoraTheme.swift */, B20000000000000000000003 /* Primitives.swift */, B20000000000000000000004 /* Surfaces.swift */, H20000000000000000000001 /* PixelVitoraView.swift */, H20000000000000000000002 /* AskableSurface.swift */, H20000000000000000000003 /* VitoraInputDock.swift */); path = DesignSystem; sourceTree = "<group>"; };
-		A50000000000000000000022 /* Navigation */ = {isa = PBXGroup; children = (B20000000000000000000001 /* VitoraRoute.swift */); path = Navigation; sourceTree = "<group>"; };
-		A50000000000000000000023 /* Persistence */ = {isa = PBXGroup; children = (B20000000000000000000008 /* PersistenceClient.swift */, B20000000000000000000009 /* Repositories.swift */); path = Persistence; sourceTree = "<group>"; };
-		A50000000000000000000024 /* Privacy */ = {isa = PBXGroup; children = (B20000000000000000000006 /* KeychainKeyStore.swift */, B20000000000000000000007 /* AppCapabilityState.swift */); path = Privacy; sourceTree = "<group>"; };
-		A50000000000000000000025 /* Logging */ = {isa = PBXGroup; children = (B20000000000000000000005 /* VitoraLogger.swift */); path = Logging; sourceTree = "<group>"; };
-		A50000000000000000000026 /* AI */ = {isa = PBXGroup; children = (B20000000000000000000012 /* LunaAIClient.swift */, B20000000000000000000013 /* AIContextBuilder.swift */, B20000000000000000000014 /* LunaOutputGuard.swift */, K20000000000000000000001 /* VitoraOutputGuard.swift */); path = AI; sourceTree = "<group>"; };
-		A50000000000000000000027 /* HealthKit */ = {isa = PBXGroup; children = (B20000000000000000000010 /* HealthKitClient.swift */); path = HealthKit; sourceTree = "<group>"; };
-		A50000000000000000000028 /* Notifications */ = {isa = PBXGroup; children = (B20000000000000000000011 /* NotificationScheduler.swift */); path = Notifications; sourceTree = "<group>"; };
-		A50000000000000000000031 /* Onboarding */ = {isa = PBXGroup; children = (B20000000000000000000015 /* OnboardingModels.swift */, C20000000000000000000001 /* AppGateService.swift */, C20000000000000000000002 /* OnboardingService.swift */); path = Onboarding; sourceTree = "<group>"; };
-		A50000000000000000000032 /* Today */ = {isa = PBXGroup; children = (B20000000000000000000017 /* TodayModels.swift */, E20000000000000000000001 /* TodayStateService.swift */, E20000000000000000000002 /* EnergyRitualService.swift */, E20000000000000000000003 /* TodayAnalysisService.swift */, F20000000000000000000001 /* DailyIntentionService.swift */); path = Today; sourceTree = "<group>"; };
-		A50000000000000000000033 /* Luna */ = {isa = PBXGroup; children = (B20000000000000000000018 /* LunaModels.swift */, G20000000000000000000001 /* LunaHomeService.swift */, G20000000000000000000002 /* LunaRecordService.swift */, G20000000000000000000014 /* LunaChatService.swift */); path = Luna; sourceTree = "<group>"; };
-		A50000000000000000000034 /* Cycle */ = {isa = PBXGroup; children = (B20000000000000000000016 /* CycleModels.swift */); path = Cycle; sourceTree = "<group>"; };
-		A50000000000000000000035 /* Support */ = {isa = PBXGroup; children = (B20000000000000000000020 /* SupportModels.swift */, J20000000000000000000001 /* SupportService.swift */, J20000000000000000000002 /* NutritionService.swift */, J20000000000000000000003 /* DataExportService.swift */, J20000000000000000000004 /* AccountRemovalService.swift */); path = Support; sourceTree = "<group>"; };
-		A50000000000000000000036 /* Review */ = {isa = PBXGroup; children = (B20000000000000000000019 /* ReviewModels.swift */, I20000000000000000000001 /* EveningReviewService.swift */, I20000000000000000000002 /* VitoraLearningSignalService.swift */); path = Review; sourceTree = "<group>"; };
-		A50000000000000000000041 /* OnboardingFeature */ = {isa = PBXGroup; children = (C20000000000000000000003 /* OnboardingViewModel.swift */, C20000000000000000000004 /* AppGateView.swift */, C20000000000000000000005 /* OnboardingIdentityView.swift */, C20000000000000000000006 /* OnboardingContextView.swift */, C20000000000000000000007 /* OnboardingReadyView.swift */); path = OnboardingFeature; sourceTree = "<group>"; };
-		A50000000000000000000042 /* TodayFeature */ = {isa = PBXGroup; children = (E20000000000000000000004 /* TodayViewModel.swift */, E20000000000000000000005 /* TodayHeaderComponents.swift */, E20000000000000000000006 /* TodaySignalCard.swift */, E20000000000000000000007 /* TodayAnalysisSheet.swift */, E20000000000000000000008 /* FullEnergyRitualView.swift */, E20000000000000000000009 /* TodayView.swift */, H20000000000000000000004 /* TodayStatusCard.swift */, H20000000000000000000019 /* CalibrationChips.swift */, H20000000000000000000005 /* BodyFactorTiles.swift */, H20000000000000000000006 /* VitoraDailySuggestionCard.swift */, H20000000000000000000007 /* EnergyRevealHeader.swift */, H20000000000000000000008 /* TodayDetailSheets.swift */, H20000000000000000000020 /* TodayCalendarSheet.swift */, F20000000000000000000002 /* ABChoiceGroup.swift */, F20000000000000000000003 /* ABIntentSummary.swift */); path = TodayFeature; sourceTree = "<group>"; };
-		A50000000000000000000043 /* LunaFeature */ = {isa = PBXGroup; children = (G20000000000000000000003 /* LunaView.swift */, G20000000000000000000004 /* LunaViewModel.swift */, G20000000000000000000005 /* LunaPixelHomeCard.swift */, G20000000000000000000006 /* LunaHomeComponents.swift */, G20000000000000000000007 /* LunaRecordSheet.swift */, G20000000000000000000008 /* RecordQuickTypeGrid.swift */, G20000000000000000000009 /* RecordParsePreview.swift */, G20000000000000000000015 /* LunaImmersiveChatView.swift */); path = LunaFeature; sourceTree = "<group>"; };
-		A50000000000000000000044 /* CycleFeature */ = {isa = PBXGroup; children = (H20000000000000000000015 /* CurrentPhaseRelationCard.swift */, H20000000000000000000016 /* EnergyDynamicsCard.swift */, H20000000000000000000022 /* CurrentPhaseDetailSheet.swift */, H20000000000000000000023 /* EnergyDynamicsDetailSheet.swift */, H20000000000000000000017 /* CycleDetailSheets.swift */, H20000000000000000000018 /* CycleView.swift */); path = CycleFeature; sourceTree = "<group>"; };
-		A50000000000000000000045 /* SupportFeature */ = {isa = PBXGroup; children = (J20000000000000000000005 /* SettingsPanel.swift */, J20000000000000000000006 /* ProfilePanel.swift */, J20000000000000000000007 /* DataSourcePanel.swift */, J20000000000000000000008 /* NutritionManager.swift */, F20000000000000000000004 /* ReminderPreferencePanel.swift */, J20000000000000000000009 /* DataExportPanel.swift */, J20000000000000000000010 /* LegalAccountPanel.swift */); path = SupportFeature; sourceTree = "<group>"; };
-		A50000000000000000000046 /* VitoraFeature */ = {isa = PBXGroup; children = (H20000000000000000000009 /* VitoraViewModel.swift */, H20000000000000000000010 /* VitoraCompressedHeader.swift */, H20000000000000000000011 /* DirectQuestionStrips.swift */, H20000000000000000000021 /* QuickContextChips.swift */, H20000000000000000000012 /* RichResponseCard.swift */, H20000000000000000000013 /* VitoraContextualSheet.swift */, I20000000000000000000003 /* EveningReviewSheet.swift */, H20000000000000000000014 /* VitoraAssistantSurfaceView.swift */); path = VitoraFeature; sourceTree = "<group>"; };
+		A50000000000000000000021 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000002 /* VitoraTheme.swift */,
+				B20000000000000000000003 /* Primitives.swift */,
+				B20000000000000000000004 /* Surfaces.swift */,
+				M20000000000000000000001 /* DynamicAuraBackground.swift */,
+				H20000000000000000000001 /* PixelVitoraView.swift */,
+				H20000000000000000000002 /* AskableSurface.swift */,
+				H20000000000000000000003 /* VitoraInputDock.swift */,
+				H20000000000000000000050 /* NavigationGlyphs.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000022 /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000001 /* VitoraRoute.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000023 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000008 /* PersistenceClient.swift */,
+				B20000000000000000000009 /* Repositories.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000024 /* Privacy */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000006 /* KeychainKeyStore.swift */,
+				B20000000000000000000007 /* AppCapabilityState.swift */,
+			);
+			path = Privacy;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000025 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000005 /* VitoraLogger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000026 /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000012 /* LunaAIClient.swift */,
+				B20000000000000000000013 /* AIContextBuilder.swift */,
+				B20000000000000000000014 /* LunaOutputGuard.swift */,
+				K20000000000000000000001 /* VitoraOutputGuard.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000027 /* HealthKit */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000010 /* HealthKitClient.swift */,
+			);
+			path = HealthKit;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000028 /* Notifications */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000011 /* NotificationScheduler.swift */,
+			);
+			path = Notifications;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000031 /* Onboarding */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000015 /* OnboardingModels.swift */,
+				C20000000000000000000001 /* AppGateService.swift */,
+				C20000000000000000000002 /* OnboardingService.swift */,
+			);
+			path = Onboarding;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000032 /* Today */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000017 /* TodayModels.swift */,
+				E20000000000000000000001 /* TodayStateService.swift */,
+				E20000000000000000000002 /* EnergyRitualService.swift */,
+				E20000000000000000000003 /* TodayAnalysisService.swift */,
+				F20000000000000000000001 /* DailyIntentionService.swift */,
+			);
+			path = Today;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000033 /* Luna */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000018 /* LunaModels.swift */,
+				G20000000000000000000001 /* LunaHomeService.swift */,
+				G20000000000000000000002 /* LunaRecordService.swift */,
+				G20000000000000000000014 /* LunaChatService.swift */,
+			);
+			path = Luna;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000034 /* Cycle */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000016 /* CycleModels.swift */,
+			);
+			path = Cycle;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000035 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000020 /* SupportModels.swift */,
+				J20000000000000000000001 /* SupportService.swift */,
+				J20000000000000000000002 /* NutritionService.swift */,
+				J20000000000000000000003 /* DataExportService.swift */,
+				J20000000000000000000004 /* AccountRemovalService.swift */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000036 /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				B20000000000000000000019 /* ReviewModels.swift */,
+				I20000000000000000000001 /* EveningReviewService.swift */,
+				I20000000000000000000002 /* VitoraLearningSignalService.swift */,
+			);
+			path = Review;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000041 /* OnboardingFeature */ = {
+			isa = PBXGroup;
+			children = (
+				C20000000000000000000003 /* OnboardingViewModel.swift */,
+				C20000000000000000000004 /* AppGateView.swift */,
+				C20000000000000000000050 /* OnboardingPageCard.swift */,
+				C20000000000000000000005 /* OnboardingIdentityView.swift */,
+				C20000000000000000000006 /* OnboardingContextView.swift */,
+				C20000000000000000000007 /* OnboardingReadyView.swift */,
+			);
+			path = OnboardingFeature;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000042 /* TodayFeature */ = {
+			isa = PBXGroup;
+			children = (
+				E20000000000000000000004 /* TodayViewModel.swift */,
+				E20000000000000000000005 /* TodayHeaderComponents.swift */,
+				E20000000000000000000006 /* TodaySignalCard.swift */,
+				E20000000000000000000007 /* TodayAnalysisSheet.swift */,
+				E20000000000000000000008 /* FullEnergyRitualView.swift */,
+				E20000000000000000000009 /* TodayView.swift */,
+				H20000000000000000000004 /* TodayStatusCard.swift */,
+				H20000000000000000000019 /* CalibrationChips.swift */,
+				H20000000000000000000005 /* BodyFactorTiles.swift */,
+				H20000000000000000000006 /* VitoraDailySuggestionCard.swift */,
+				H20000000000000000000008 /* TodayDetailSheets.swift */,
+				H20000000000000000000020 /* TodayCalendarSheet.swift */,
+				F20000000000000000000002 /* ABChoiceGroup.swift */,
+				F20000000000000000000003 /* ABIntentSummary.swift */,
+			);
+			path = TodayFeature;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000043 /* LunaFeature */ = {
+			isa = PBXGroup;
+			children = (
+				G20000000000000000000003 /* LunaView.swift */,
+				G20000000000000000000004 /* LunaViewModel.swift */,
+				G20000000000000000000005 /* LunaPixelHomeCard.swift */,
+				G20000000000000000000006 /* LunaHomeComponents.swift */,
+				G20000000000000000000007 /* LunaRecordSheet.swift */,
+				G20000000000000000000008 /* RecordQuickTypeGrid.swift */,
+				G20000000000000000000009 /* RecordParsePreview.swift */,
+				G20000000000000000000015 /* LunaImmersiveChatView.swift */,
+			);
+			path = LunaFeature;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000044 /* CycleFeature */ = {
+			isa = PBXGroup;
+			children = (
+				H20000000000000000000015 /* CurrentPhaseRelationCard.swift */,
+				H20000000000000000000016 /* EnergyDynamicsCard.swift */,
+				H20000000000000000000022 /* CurrentPhaseDetailSheet.swift */,
+				H20000000000000000000023 /* EnergyDynamicsDetailSheet.swift */,
+				H20000000000000000000017 /* CycleDetailSheets.swift */,
+				H20000000000000000000018 /* CycleView.swift */,
+			);
+			path = CycleFeature;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000045 /* SupportFeature */ = {
+			isa = PBXGroup;
+			children = (
+				J20000000000000000000005 /* SettingsPanel.swift */,
+				J20000000000000000000006 /* ProfilePanel.swift */,
+				J20000000000000000000007 /* DataSourcePanel.swift */,
+				J20000000000000000000008 /* NutritionManager.swift */,
+				F20000000000000000000004 /* ReminderPreferencePanel.swift */,
+				J20000000000000000000009 /* DataExportPanel.swift */,
+				J20000000000000000000010 /* LegalAccountPanel.swift */,
+			);
+			path = SupportFeature;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000046 /* VitoraFeature */ = {
+			isa = PBXGroup;
+			children = (
+				H20000000000000000000009 /* VitoraViewModel.swift */,
+				H20000000000000000000010 /* VitoraCompressedHeader.swift */,
+				H20000000000000000000011 /* DirectQuestionStrips.swift */,
+				H20000000000000000000021 /* QuickContextChips.swift */,
+				H20000000000000000000012 /* RichResponseCard.swift */,
+				H20000000000000000000013 /* VitoraContextualSheet.swift */,
+				I20000000000000000000003 /* EveningReviewSheet.swift */,
+				H20000000000000000000014 /* VitoraAssistantSurfaceView.swift */,
+			);
+			path = VitoraFeature;
+			sourceTree = "<group>";
+		};
+		A7B22D5DE61FD399FEA579AC /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				2F4A423AFE2F69D6B0AC8A57 /* Vitora */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		F09F51AEC7D666A507144CD3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */,
+				58A4EB357FBA685658458C76 /* Pods-Vitora.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -511,9 +775,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A70000000000000000000002 /* Build configuration list for PBXNativeTarget "Vitora" */;
 			buildPhases = (
+				369E803181257AD62DFE4DA3 /* [CP] Check Pods Manifest.lock */,
+				B50F56F067B99F033589FF0C /* [Expo] Configure project */,
 				A60000000000000000000001 /* Sources */,
 				A40000000000000000000001 /* Frameworks */,
 				A60000000000000000000002 /* Resources */,
+				7E3B0CEA20578498B3CD929A /* [CP] Embed Pods Frameworks */,
+				499CF0C8D0E8F9BD2D230F3E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -613,6 +881,8 @@
 				A10000000000000000000004 /* Localizable.strings in Resources */,
 				D10000000000000000000001 /* Localizable.strings in Resources */,
 				A10000000000000000000005 /* Assets.xcassets in Resources */,
+				M10000000000000000000002 /* DynamicAura in Resources */,
+				CE3CEB65EE6AC4D7C54CE569 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -632,6 +902,88 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		369E803181257AD62DFE4DA3 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Vitora-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		499CF0C8D0E8F9BD2D230F3E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7E3B0CEA20578498B3CD929A /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Vitora/Pods-Vitora-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B50F56F067B99F033589FF0C /* [Expo] Configure project */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env",
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/Pods/Target Support Files/Pods-Vitora/expo-configure-project.sh",
+			);
+			name = "[Expo] Configure project";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Pods/Target Support Files/Pods-Vitora/ExpoModulesProvider.swift",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-Vitora/expo-configure-project.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		A60000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -644,9 +996,11 @@
 				B10000000000000000000002 /* VitoraTheme.swift in Sources */,
 				B10000000000000000000003 /* Primitives.swift in Sources */,
 				B10000000000000000000004 /* Surfaces.swift in Sources */,
+				M10000000000000000000001 /* DynamicAuraBackground.swift in Sources */,
 				H10000000000000000000001 /* PixelVitoraView.swift in Sources */,
 				H10000000000000000000002 /* AskableSurface.swift in Sources */,
 				H10000000000000000000003 /* VitoraInputDock.swift in Sources */,
+				H10000000000000000000050 /* NavigationGlyphs.swift in Sources */,
 				B10000000000000000000005 /* VitoraLogger.swift in Sources */,
 				B10000000000000000000006 /* KeychainKeyStore.swift in Sources */,
 				B10000000000000000000007 /* AppCapabilityState.swift in Sources */,
@@ -678,6 +1032,7 @@
 				C10000000000000000000005 /* OnboardingIdentityView.swift in Sources */,
 				C10000000000000000000006 /* OnboardingContextView.swift in Sources */,
 				C10000000000000000000007 /* OnboardingReadyView.swift in Sources */,
+				C10000000000000000000050 /* OnboardingPageCard.swift in Sources */,
 				E10000000000000000000001 /* TodayStateService.swift in Sources */,
 				E10000000000000000000002 /* EnergyRitualService.swift in Sources */,
 				E10000000000000000000003 /* TodayAnalysisService.swift in Sources */,
@@ -691,7 +1046,6 @@
 				H10000000000000000000019 /* CalibrationChips.swift in Sources */,
 				H10000000000000000000005 /* BodyFactorTiles.swift in Sources */,
 				H10000000000000000000006 /* VitoraDailySuggestionCard.swift in Sources */,
-				H10000000000000000000007 /* EnergyRevealHeader.swift in Sources */,
 				H10000000000000000000008 /* TodayDetailSheets.swift in Sources */,
 				H10000000000000000000020 /* TodayCalendarSheet.swift in Sources */,
 				F10000000000000000000001 /* DailyIntentionService.swift in Sources */,
@@ -729,6 +1083,7 @@
 				H10000000000000000000023 /* EnergyDynamicsDetailSheet.swift in Sources */,
 				H10000000000000000000017 /* CycleDetailSheets.swift in Sources */,
 				H10000000000000000000018 /* CycleView.swift in Sources */,
+				9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -811,7 +1166,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -860,8 +1215,11 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				USE_HERMES = true;
 			};
 			name = Debug;
 		};
@@ -871,7 +1229,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -913,13 +1271,17 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = NO;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
+				USE_HERMES = true;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
 		A71000000000000000000003 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGNING_ALLOWED = NO;
@@ -938,6 +1300,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -948,6 +1311,7 @@
 		};
 		A71000000000000000000004 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 58A4EB357FBA685658458C76 /* Pods-Vitora.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGNING_ALLOWED = NO;
@@ -966,6 +1330,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -987,6 +1352,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -1008,6 +1374,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app.tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -1023,6 +1390,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;
@@ -1038,6 +1406,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.vitora.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 6.0;

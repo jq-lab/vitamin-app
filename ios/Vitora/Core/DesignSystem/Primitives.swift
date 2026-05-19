@@ -31,7 +31,7 @@ struct VitoraChip: View {
             .font(.callout)
             .padding(.horizontal, VitoraTheme.Spacing.md)
             .frame(minHeight: VitoraTheme.Size.touchTargetMin)
-            .background(isSelected ? VitoraTheme.ColorToken.actionPrimary.opacity(0.18) : VitoraTheme.ColorToken.softSurface)
+            .background(isSelected ? VitoraTheme.ColorToken.actionPrimary.opacity(0.16) : VitoraTheme.ColorToken.surfacePearlInset.opacity(0.78))
             .clipShape(Capsule())
             .foregroundStyle(isSelected ? VitoraTheme.ColorToken.actionPrimaryDeep : VitoraTheme.ColorToken.primaryText)
     }
@@ -46,8 +46,12 @@ struct VitoraTextField: View {
             .textFieldStyle(.plain)
             .padding(.horizontal, VitoraTheme.Spacing.md)
             .frame(minHeight: VitoraTheme.Size.touchTargetMin)
-            .background(VitoraTheme.ColorToken.softSurface)
+            .background(VitoraTheme.ColorToken.surfacePearlInset.opacity(0.70))
             .clipShape(RoundedRectangle(cornerRadius: VitoraTheme.Radius.md, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: VitoraTheme.Radius.md, style: .continuous)
+                    .stroke(Color.white.opacity(0.56), lineWidth: 0.8)
+            }
     }
 }
 

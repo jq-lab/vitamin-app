@@ -217,7 +217,7 @@
 ### Pivot 适配测试
 
 - [x] T102 [P] [PIVOT] 在 `ios/VitoraUITests/PivotNavigationUITests.swift` 添加主导航测试：tab 文案为 Today / Vitora / Cycle，中央为 Vitora face CTA，引用 `IA-010`、`IA-020`、`IA-030`、`IAC-G-001`
-- [x] T103 [P] [PIVOT] 在 `ios/VitoraUITests/TodayPivotUITests.swift` 添加 Today 新首页测试：状态卡、身体要素、Vitora 今日建议存在，独立记录区不存在，引用 `WF-T-001`、`IAC-T-001`
+- [x] T103 [P] [PIVOT] 在 `ios/VitoraUITests/TodayPivotUITests.swift` 添加 Today 新首页测试：状态卡、周期线轴、Vitora 今日建议存在，独立记录区不存在，引用 `WF-T-001`、`IAC-T-001`
 - [x] T104 [P] [PIVOT] 在 `ios/VitoraUITests/VitoraAssistantSurfaceUITests.swift` 添加 Vitora Tab 测试：PixelVitoraHero、Vitora 知道、直接问、快捷上下文、input dock 存在，引用 `WF-V-001`、`IAC-V-001`
 - [x] T105 [P] [PIVOT] 在 `ios/VitoraUITests/ContextualVitoraSheetUITests.swift` 添加对象级唤醒测试：Today 状态 chip 打开 3/4 sheet，保存后回 Today，引用 `WF-V-005`、`IAC-V-008`
 - [x] T106 [P] [PIVOT] 在 `ios/VitoraUITests/CyclePivotUITests.swift` 添加 Cycle 新首页测试：阶段关系卡与能量动态卡存在，日历首页不存在，引用 `WF-C-001`、`IAC-CY-001`
@@ -250,17 +250,17 @@
 
 ## Phase 11: Today Pivot（优先级：P1）
 
-**目标**：把 Today 收口为“现在状态 → 身体要素 → Vitora 今日建议”，并保留 Energy Ball 作为隐藏仪式层。
+**目标**：把 Today 收口为“现在状态 → 今日分析/身体要素 → Vitora 今日建议”。D-047 后首页固定综合 Energy Bowl + 周期线轴，完整实时预测移动到今日分析。
 
 - [x] T117 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 实现新 `C-TODAY-003 TodayStatusCard` 和 `C-TODAY-004 RhythmCurve`，引用 `WF-T-001`
 - [x] T118 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/CalibrationChips.swift` 实现 `C-TODAY-005`，点击 chip 打开 `VitoraContextualSheet`，引用 `REQ-008`
 - [x] T119 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/BodyFactorTiles.swift` 实现 `C-TODAY-006` 与二层入口，引用 `WF-T-005`
 - [x] T120 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/VitoraDailySuggestionCard.swift` 实现 `C-TODAY-007`，接入现有 DailyIntentionService，引用 `REQ-007`
-- [x] T121 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/EnergyRevealHeader.swift` 实现下拉 Energy Ball、半展开、全屏 ritual 状态，引用 `WF-T-002`
+- [x] T121 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 实现分层 Energy Bowl、查看数据、实时预测、当前时间气泡，引用 `WF-T-002`
 - [x] T122 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/TodayCalendarSheet.swift` 实现 Today 顶部日历 sheet，引用 `WF-T-003`
 - [x] T123 [PIVOT] [UI] 在 `ios/Vitora/Features/TodayFeature/TodayView.swift` 重组首页：移除独立记录区和旧常驻 orb，加入右上 Pixel Vitora decoration，并对照 `assets/design_04/today_tab.png` 记录偏差，引用 `WF-T-001`
 
-**检查点**：T117-T123 通过后，Today 必须可在 simulator 中独立 QA：无独立记录区、可下拉 Energy Ball、可从对象唤醒 Vitora。
+**检查点**：T117-T123/T185 通过后，Today 必须可在 simulator 中独立 QA：无独立记录区、首页无实时预测图和校准 chips、可点击能量碗/查看数据、今日分析实时预测可读、可从对象唤醒 Vitora。
 
 ## Phase 12: Vitora Assistant Pivot（优先级：P1）
 
@@ -396,3 +396,21 @@
 - Vitora Tab 不是空聊天页。
 - Pixel Vitora、clear glass、aura background 被实现和验收。
 - Today / Vitora / Cycle 首层 UI 必须对照 `assets/design_04/` 设计证据截图记录偏差。
+
+## Post-P0 Layout Refinements · 2026-05-16
+
+- [x] T178 [P] [D-043] 更新 004 规格与决策记录，明确 Vitora Dock 是 Today / Vitora / Cycle 全局 assistant layer。
+- [x] T179 [P] [D-043/D-046] 重构 `VitoraInputDock` 为纯输入组件：语音/键盘、文字或内联语音条、发送；移除输入区周期小花和内部 `+`。
+- [x] T180 [P] [D-043] 在 App Shell 中新增全局 Vitora Dock，并让 `VitoraViewModel` 在三个主 Tab 间共享。
+- [x] T181 [P] [D-043] 更新 UI tests，覆盖全局输入、跨 Tab 发送、语音内联态和 XXXL 字体避让。
+- [x] T182 [P] [D-044] 放大 Today 能量碗数字，移除 `今天` / `监测到` 说明字，并把首屏模式切换改为综合/睡眠/周期三项碗底光源托盘。
+- [x] T183 [P] [D-045] 将全局 Dock 上排改为左侧 Tab + 右侧 `记录` 快捷键，并让点击 `AI管家` 自动聚焦全局输入。
+- [x] T184 [P] [D-046] 收敛全局 Dock：Today / Cycle 隐藏输入条，右侧记录改为独立圆形 `+`，AI 管家输入条移除内部 `+` 并强化发送按钮。
+- [x] T185 [P] [D-047] 收敛 Today 首页为综合能量碗 + 碗下周期线轴 + 今日建议；移除首页三模式切换、实时预测图和校准 chips；将综合实时预测移入 `今日分析`，并把 Dock 修正为三 Tab 同胶囊 + 右侧独立圆形 `+`。
+- [x] T186 [P] [D-048] 修正 Today 能量数字为单层高对比，首页数据小标签只进入今日分析；周期线轴改为无背景阶段色平滑曲线；全局 Dock 改为 safe-area 承载并在 sheet 展示时隐藏，contextual sheet 使用稳定 title 和本地输入。
+- [x] T187 [P] [D-049] 调整 Today 首页为 `68%` 下方状态词 + 宽口能量碗 + 碗底三阶段周期圆弧；把 Vitora 今日建议改为大字号身体翻译、两条组合建议、`一件提醒` 和 icon `换一换` 本地循环。
+- [x] T188 [P] [D-050] 修正 Today 周期圆弧为中间下沉并上移到碗底光晕；将 `查看数据` 放到状态词同排；稳定 AI 管家进入态和上拉聊天聚焦态；统一周期/睡眠/营养上下文卡模板。
+- [x] T189 [P] [D-051] 将 Today 能量碗升级为屏幕顶部水滴入碗、水位按能量积累的动效；把周期圆弧嵌入碗底白色光晕；将 Cycle 首页升级为 `周期回顾`、等距花田、三件事总结、能量动态和三张节律洞察卡，并更新 UI tests。
+- [x] T190 [P] [D-052] 按花园手册 MVP 文档收敛轻闭环：Today 周期圆弧下移到碗外一个字间距；新增花园手册/成长反馈；AI 管家承接晚间复盘种子选择；Cycle 改为 `30 天成长册`，不保留花田地图入口。此方向已被 D-053/D-055 覆盖。
+- [x] T191 [P] [D-053] 移除 Today 花园手册、早晨成长反馈、Cycle `30 天成长册` 和花园化种子入口，回到 Today 建议、AI 管家复盘和 Cycle 长期节律三条主路径。
+- [x] T192 [P] [D-055] 实现睡眠种子实验层：晚间复盘反馈后选 3 类种子；Today 建议卡解释昨晚种子状态、生理原因和今日行动；AI 管家承接种子解释；Cycle 增加低权重 `本周期花架证据`，并保持无花田地图、无成长册进度、无打卡任务。

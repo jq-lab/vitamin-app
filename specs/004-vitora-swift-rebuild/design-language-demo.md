@@ -448,7 +448,7 @@ Pixel Vitora 是一个生活在 app 里的 **像素风格发光小球**。
 | Text field | 长 pill glass。 | Placeholder 随上下文变化。 |
 | Plus | 小圆按钮。 | 打开快捷记录类型。 |
 | Send | 蓝色圆按钮。 | 有文本或录音后启用。 |
-| Quick context chips | 输入上方小 icon chips。 | 周期、睡眠、营养、情绪、能量、+。 |
+| Quick context chips | 输入上方小 icon chips。 | 周期、睡眠、营养等上下文；记录 `+` 不在输入区内。 |
 
 规则：
 
@@ -495,8 +495,8 @@ Pixel Vitora 是一个生活在 app 里的 **像素风格发光小球**。
 | DateContextStrip | 时间和周期入口。 | Slim glass pill。 | `今天 5月5日` + `Day18 · 黄体期`。 | 点击周期日历或详情。 | 变成主日历模块。 |
 | AssistantMessageBubble | 对话主内容。 | G2 readable bubble。 | Vitora 文案 + 合规短句。 | 可长按复制/问来源。 | 过度解释、医疗语气。 |
 | DirectQuestionStrips | 冷启动建议。 | Thin horizontal G1/G3 glass strips。 | 一行一个问题，轻 chevron。 | 点击发起对话。 | 大卡片铺满屏幕。 |
-| QuickContextChips | 输入工具带。 | Small icon glass chips。 | 周期、睡眠、营养、情绪、能量、+。 | 点击部署上下文。 | 变成页面主导航。 |
-| VitoraInputDock | 文字/语音入口。 | G3 large pill。 | Mic、placeholder、plus、send。 | 输入、语音、发送。 | 被中心 Tab 遮挡、无发送按钮、无语音入口。 |
+| QuickContextChips | 输入工具带。 | Small icon glass chips。 | 周期、睡眠、营养等上下文；不放记录 `+`。 | 点击部署上下文。 | 变成页面主导航。 |
+| VitoraInputDock | 文字/语音入口。 | G3 large pill。 | Mic、placeholder、send；无内部 plus。 | 输入、语音、发送。 | 被中心 Tab 遮挡、无发送按钮、无语音入口。 |
 | RichResponseCard | AI 结构化回复。 | G2 card inside conversation。 | 图表、确认、保存、修改。 | 确认保存 / 修改 / 不更新。 | AI 直接写入数据，无确认。 |
 | VoiceStatePanel | 录音状态。 | G2 compact panel。 | 波形、时长、重录、转写。 | 录音、重录、转写理解。 | 语音结果直接保存。 |
 
@@ -568,8 +568,8 @@ Today 禁用：
 | 2 | Date/context strip | 今日日期和周期上下文是可进入的信息，不是主卡。 |
 | 3 | Assistant message | Conversation 是主线，Vitora 主动给出当前观察。 |
 | 4 | Direct question strips | 细长玻璃条，帮助冷启动；不铺满页面。 |
-| 5 | Quick context chips | 输入区上方小 icon chips，支持快速部署上下文。 |
-| 6 | Input dock | 文字、语音、plus、发送齐全。 |
+| 5 | Quick context chips | 输入区上方小 icon chips，支持快速部署上下文，不包含记录 `+`。 |
+| 6 | Input dock | 文字、语音、发送齐全；记录 `+` 独立在全局 Dock 右侧。 |
 | 7 | Bottom tab | 中央 Pixel Vitora face 低凸起，不遮挡 input。 |
 
 Vitora 禁用：

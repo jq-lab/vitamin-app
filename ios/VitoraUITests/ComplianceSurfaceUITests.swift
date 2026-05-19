@@ -5,10 +5,14 @@ final class ComplianceSurfaceUITests: XCTestCase {
     func testCoreSurfacesExposeRequiredComplianceLabels() {
         let app = launchTrustApp()
 
+        XCTAssertTrue(app.buttons["today.suggestion.try"].waitForExistence(timeout: 5))
+        app.buttons["today.suggestion.try"].tap()
         XCTAssertTrue(app.staticTexts["本内容仅供生活方式参考，不替代专业意见。"].waitForExistence(timeout: 5))
+        app.buttons["关闭"].tap()
 
         app.buttons["tab.vitora"].tap()
-        XCTAssertTrue(app.staticTexts["Vitora 的理解来自你提供的数据和记录，可作为生活方式参考。"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["Vitora 知道"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.staticTexts["Vitora 的理解来自你提供的数据和记录，可作为生活方式参考。"].exists)
 
         app.buttons["tab.cycle"].tap()
         app.buttons["cycle.settings.open"].tap()

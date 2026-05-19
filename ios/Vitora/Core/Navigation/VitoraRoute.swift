@@ -13,21 +13,10 @@ enum OnboardingStep: String, CaseIterable, Codable, Equatable {
 }
 
 enum ContextualPresentation: String, CaseIterable, Codable, Equatable {
-    case energyRitual
-    case todayAnalysis
-    case todayCalendar
-    case todayStateDetail
-    case bodyFactorsDetail
-    case suggestionDetail
     case vitoraContextualSheet
-    case vitoraFullContextMode
-    case cyclePhaseDetail
-    case cycleEnergyDetail
-    case settingsPanel
     case lunaRecord
     case lunaChat
     case eveningReview
-    case cycleCalendar
 
     var hasExitPath: Bool {
         true

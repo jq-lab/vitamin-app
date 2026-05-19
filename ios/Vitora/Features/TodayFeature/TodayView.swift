@@ -4,7 +4,8 @@ struct TodayView: View {
     @ObservedObject var environment: AppEnvironment
     @StateObject private var viewModel: TodayViewModel
     @State private var sheet: TodaySheet?
-    @State private var energyExpanded = false
+    @State private var energyBowlEventID = 0
+    private let homeMetricMode: TodayMetricMode = .energy
 
     init(environment: AppEnvironment) {
         self.environment = environment
@@ -13,37 +14,33 @@ struct TodayView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            AuraBackground(intensity: 1.05)
+            WaterAuraReferenceBackground(scene: .today, intensity: 1.04)
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
                     topContext
 
-                    EnergyRevealHeader(
-                        isExpanded: energyExpanded,
-                        onOpenDetail: { sheet = .status },
-                        onAskVitora: { openVitora(source: "今日能量球", summary: "68% · 能量平稳") }
-                    )
-
                     TodayStatusCard(
+                        selectedMode: .constant(homeMetricMode),
+                        cycleDay: environment.selectedCycleDay,
+                        cyclePhase: environment.selectedAuraVariant.phaseLabel,
+                        eventTrigger: energyBowlEventID,
                         onOpenDetail: { sheet = .status },
-                        onAskVitora: { openVitora(source: "今日状态", summary: "68% · 14:00 可能低谷") },
+                        onOpenEvidence: { sheet = .bodyFactors },
+                        onAskVitora: { openVitora(source: homeMetricMode.topLabel, summary: "\(homeMetricMode.number)\(homeMetricMode.unit) · \(homeMetricMode.statusText)") },
                         onCalibrate: { value in openVitora(source: "今日状态", summary: value) }
                     )
 
-                    ComplianceLabel(.defaultLifestyle)
-                        .padding(.horizontal, 4)
-
-                    BodyFactorTiles(
-                        onOpenDetail: { sheet = .bodyFactors },
-                        onAskVitora: { factor in openVitora(source: "身体要素", summary: factor) }
-                    )
-
                     VitoraDailySuggestionCard(
-                        onCommit: viewModel.openAnalysis,
-                        onSwap: { openVitora(source: "Vitora 今日建议", summary: "用户想换一个更轻方案") },
+                        mode: homeMetricMode,
+                        sleepSeed: nil,
+                        onCommit: {
+                            environment.nurtureSleepSeedFromTodaySuggestion()
+                            energyBowlEventID += 1
+                            viewModel.openAnalysis()
+                        },
                         onOpenDetail: { sheet = .suggestion },
-                        onAskVitora: { openVitora(source: "Vitora 今日建议", summary: "13:30 蛋白 + 轻走 10 分钟") }
+                        onAskVitora: { openVitora(source: "Vitora 今日建议", summary: homeMetricMode.suggestionTitle) }
                     )
 
                     if let selectedTitle = viewModel.selectedABOption?.title {
@@ -60,30 +57,25 @@ struct TodayView: View {
                         }
                         .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(GlassSurface(cornerRadius: 22, opacity: 0.38))
+                        .background(GlassSurface(cornerRadius: 22, opacity: 0.62, shadowStrength: 0.56, variant: .cleanElevated))
                         .accessibilityIdentifier("today.intention.confirmation")
                     }
                 }
-                .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
-                .padding(.top, 12)
-                .padding(.bottom, VitoraTheme.Size.tabBarHeight + 38)
+                .padding(.horizontal, 18)
+                .padding(.top, 4)
+                .padding(.bottom, 28)
             }
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 14)
-                    .onEnded { value in
-                        if value.translation.height > 58 {
-                            energyExpanded = true
-                        } else if value.translation.height < -42 {
-                            energyExpanded = false
-                        }
-                    }
-            )
             .accessibilityIdentifier("today.pivot.surface")
+        }
+        .onAppear {
+            energyBowlEventID += 1
         }
         .sheet(item: $sheet) { sheet in
             switch sheet {
             case .calendar:
                 TodayCalendarSheet(
+                    selectedCycleDay: environment.selectedCycleDay,
+                    onSelectCycleDay: environment.selectCycleDay,
                     onClose: { self.sheet = nil },
                     onAskVitora: { openVitora(source: "周期日历", summary: "日期或周期感受不准") }
                 )
@@ -100,7 +92,10 @@ struct TodayView: View {
             case .suggestion:
                 SuggestionDetailSheet(
                     onClose: { self.sheet = nil },
-                    onCommit: viewModel.openAnalysis,
+                    onCommit: {
+                        environment.nurtureSleepSeedFromTodaySuggestion()
+                        viewModel.openAnalysis()
+                    },
                     onSwap: { openVitora(source: "今日建议", summary: "换一个方案") },
                     onAskVitora: { openVitora(source: "今日建议", summary: "这个建议不适合") }
                 )
@@ -121,37 +116,58 @@ struct TodayView: View {
             .presentationDetents([.medium, .large])
             .presentationDragIndicator(.hidden)
         }
+        .preference(
+            key: AppSheetPresentationPreferenceKey.self,
+            value: sheet != nil || viewModel.isAnalysisPresented
+        )
     }
 
     private var topContext: some View {
-        HStack(spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             Button {
                 sheet = .calendar
             } label: {
-                Image(systemName: "calendar")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
+                HStack(spacing: 8) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .frame(width: 34, height: 34)
+                        .background(VitoraTheme.ColorToken.paper.opacity(0.28), in: Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.46), lineWidth: 0.6))
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("\(selectedDateText) · \(selectedCycleContextText)")
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+
+                        Text("黄体期中段 · 今天适合留余量")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.76)
+                    }
+                }
             }
             .buttonStyle(.plain)
             .accessibilityLabel("打开周期日历")
-            .accessibilityIdentifier("today.calendar.open")
-
-            Text(viewModel.isLowData ? "低数据模式" : viewModel.cycleContextText)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                .padding(.horizontal, 12)
-                .frame(height: 34)
-                .background(GlassSurface(cornerRadius: 17, opacity: 0.28))
+            .accessibilityIdentifier("today.top.context")
 
             Spacer()
 
-            Text("5月5日")
-                .font(.subheadline.weight(.medium))
-                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            if viewModel.isLowData {
+                Text("today.lowdata.badge")
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .padding(.horizontal, 9)
+                    .frame(height: 28)
+                    .background(VitoraTheme.ColorToken.paper.opacity(0.58), in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
+                    .accessibilityIdentifier("today.lowdata.badge")
+            }
         }
+        .frame(height: 38)
         .accessibilityIdentifier("today.top.context")
     }
 
@@ -162,6 +178,15 @@ struct TodayView: View {
             prompt: "Vitora 会用你的补充校准今天的理解。"
         )
         sheet = nil
+    }
+
+    private var selectedCycleContextText: String {
+        "\(environment.selectedAuraVariant.phaseLabel) Day \(environment.selectedCycleDay)"
+    }
+
+    private var selectedDateText: String {
+        let dateDay = ((environment.selectedCycleDay + 14) % 28) + 1
+        return "5月\(dateDay)日"
     }
 }
 

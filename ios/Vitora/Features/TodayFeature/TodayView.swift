@@ -41,6 +41,12 @@ struct TodayView: View {
                         onAskVitora: { openVitora(source: "Vitora 今日建议", summary: homeMetricMode.suggestionTitle) }
                     )
 
+                    EveningReviewCard(
+                        onStartReview: {
+                            environment.present(.eveningReview)
+                        }
+                    )
+
                     if let selectedTitle = viewModel.selectedABOption?.title {
                         VStack(alignment: .leading, spacing: 6) {
                             Text("今天的小尝试")
@@ -193,6 +199,163 @@ struct TodayView: View {
     private var selectedDateText: String {
         let dateDay = ((environment.selectedCycleDay + 14) % 28) + 1
         return "5月\(dateDay)日"
+    }
+}
+
+// MARK: - Evening Review Card
+
+private struct EveningReviewCard: View {
+    let onStartReview: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            // Header
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color(red: 0.22, green: 0.18, blue: 0.38))
+                        .frame(width: 38, height: 38)
+                    Text("🌙")
+                        .font(.system(size: 18))
+                }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("今晚复盘")
+                        .font(.title3.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("看看 Vitora 今天有没有更懂你")
+                        .font(.caption)
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+            }
+
+            // Progress + flower
+            HStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("开放进度  86 / 100")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            Capsule().fill(Color.gray.opacity(0.12)).frame(height: 8)
+                            Capsule()
+                                .fill(VitoraTheme.ColorToken.actionPrimaryDeep)
+                                .frame(width: proxy.size.width * 0.86, height: 8)
+                        }
+                    }
+                    .frame(height: 8)
+                }
+                .frame(maxWidth: .infinity)
+
+                HStack(spacing: 6) {
+                    VStack(spacing: 2) {
+                        Text("🌸").font(.system(size: 24))
+                        Text("半开").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+                    Image(systemName: "arrow.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    VStack(spacing: 2) {
+                        Text("🌺").font(.system(size: 24))
+                        Text("更舒展").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+                }
+            }
+
+            // Energy comparison + badges
+            HStack(spacing: 14) {
+                // Energy circles
+                HStack(spacing: 8) {
+                    energyCircle(value: "68%", label: "早上")
+                    Image(systemName: "arrow.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    energyCircle(value: "86%", label: "现在")
+                }
+
+                Spacer()
+
+                // Status badges
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(VitoraTheme.ColorToken.success)
+                        Text("已设置提醒")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    }
+                    HStack(spacing: 5) {
+                        Image(systemName: "clock.fill")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Color(red: 0.92, green: 0.72, blue: 0.32))
+                        Text("反馈待确认")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    }
+                }
+            }
+
+            // CTA
+            Button(action: onStartReview) {
+                HStack {
+                    Text("去复盘")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                }
+                .padding(.horizontal, 20)
+                .frame(height: 50)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.32), lineWidth: 1.5)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.52)))
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("today.evening.review.cta")
+        }
+        .padding(18)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
+                .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 12, x: 0, y: 4)
+        )
+        .accessibilityIdentifier("today.evening.review.card")
+    }
+
+    private func energyCircle(value: String, label: String) -> some View {
+        VStack(spacing: 4) {
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color.white.opacity(0.96),
+                                VitoraTheme.ColorToken.auraCyan.opacity(0.42),
+                                VitoraTheme.ColorToken.auraBlue.opacity(0.48),
+                            ],
+                            center: .topLeading,
+                            startRadius: 1,
+                            endRadius: 40
+                        )
+                    )
+                    .frame(width: 56, height: 56)
+                    .shadow(color: VitoraTheme.ColorToken.auraBlue.opacity(0.14), radius: 10, x: 0, y: 4)
+
+                Text(value)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+            }
+            Text(label)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+        }
     }
 }
 

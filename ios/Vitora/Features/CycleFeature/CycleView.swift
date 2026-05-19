@@ -77,6 +77,8 @@ struct CycleView: View {
                     onClose: { self.sheet = nil },
                     onAskVitora: { openVitora(source: insight.title, summary: insight.summary) }
                 )
+            case .hormoneCalendar:
+                HormoneCalendarView(onClose: { self.sheet = nil })
             }
         }
         .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil || isSharePresented)
@@ -99,6 +101,18 @@ struct CycleView: View {
             .accessibilityIdentifier("cycle.settings")
 
             Spacer()
+
+            // 激素日历
+            Button { sheet = .hormoneCalendar } label: {
+                Image(systemName: "calendar")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .frame(width: 38, height: 38)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("激素日历")
 
             // 分享
             Button { presentCycleShareCard() } label: {
@@ -974,17 +988,15 @@ private enum CycleSheet: Identifiable {
     case energy
     case settings
     case insight(CycleRhythmInsight)
+    case hormoneCalendar
 
     var id: String {
         switch self {
-        case .phase:
-            return "phase"
-        case .energy:
-            return "energy"
-        case .settings:
-            return "settings"
-        case let .insight(insight):
-            return "insight.\(insight.id)"
+        case .phase: return "phase"
+        case .energy: return "energy"
+        case .settings: return "settings"
+        case let .insight(insight): return "insight.\(insight.id)"
+        case .hormoneCalendar: return "hormoneCalendar"
         }
     }
 }

@@ -7,6 +7,7 @@ struct CycleView: View {
     @State private var shareImage: UIImage?
     @State private var isSharePresented = false
     @State private var shareFailurePresented = false
+    @State private var isSidebarOpen = false
 
     var body: some View {
         ZStack {
@@ -21,6 +22,28 @@ struct CycleView: View {
                 .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
                 .padding(.top, 4)
                 .padding(.bottom, VitoraTheme.Size.tabBarHeight + 42)
+            }
+
+            // Sidebar overlay
+            if isSidebarOpen {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeOut(duration: 0.24)) { isSidebarOpen = false }
+                    }
+                    .transition(.opacity)
+
+                SidebarProfileView(
+                    onClose: { withAnimation(.easeOut(duration: 0.24)) { isSidebarOpen = false } },
+                    onOpenSettings: {
+                        withAnimation(.easeOut(duration: 0.24)) { isSidebarOpen = false }
+                        sheet = .settings
+                    }
+                )
+                .frame(width: 300)
+                .frame(maxHeight: .infinity)
+                .transition(.move(edge: .leading))
+                .zIndex(10)
             }
         }
         .sheet(isPresented: $isSharePresented) {
@@ -62,8 +85,8 @@ struct CycleView: View {
 
     private var cycleTopBar: some View {
         HStack {
-            // 我的 (settings)
-            Button { sheet = .settings } label: {
+            // 我的 (sidebar)
+            Button { withAnimation(.easeOut(duration: 0.28)) { isSidebarOpen = true } } label: {
                 Image(systemName: "person.crop.circle")
                     .font(.system(size: 22, weight: .medium))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
@@ -1630,5 +1653,160 @@ private struct CycleMonthComparisonView: View {
         case .down: return Color(red: 0.92, green: 0.48, blue: 0.42)
         case .same: return VitoraTheme.ColorToken.tertiaryText
         }
+    }
+}
+
+// MARK: - Sidebar Profile
+
+private struct SidebarProfileView: View {
+    let onClose: () -> Void
+    let onOpenSettings: () -> Void
+
+    private struct MenuItem {
+        let icon: String
+        let title: String
+        let color: Color
+    }
+
+    private let items: [MenuItem] = [
+        MenuItem(icon: "heart.text.square", title: "数据来源", color: Color(red: 0.88, green: 0.44, blue: 0.62)),
+        MenuItem(icon: "leaf.fill", title: "营养管理", color: Color(red: 0.42, green: 0.76, blue: 0.52)),
+        MenuItem(icon: "bell.fill", title: "提醒设置", color: Color(red: 0.92, green: 0.72, blue: 0.32)),
+        MenuItem(icon: "square.and.arrow.up", title: "数据导出", color: Color(red: 0.52, green: 0.68, blue: 0.88)),
+        MenuItem(icon: "lock.shield", title: "隐私与账号", color: Color(red: 0.62, green: 0.58, blue: 0.82)),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // Header
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Button(action: onClose) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    }
+                    Spacer()
+                    Text("我的")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Spacer()
+                    Color.clear.frame(width: 18)
+                }
+
+                // Profile row
+                HStack(spacing: 14) {
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.90, green: 0.76, blue: 0.92),
+                                    Color(red: 0.72, green: 0.82, blue: 0.95),
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .frame(width: 54, height: 54)
+                        .overlay(
+                            Text("🌸")
+                                .font(.system(size: 26))
+                        )
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(spacing: 6) {
+                            Text("小雨")
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            Image(systemName: "pencil")
+                                .font(.caption)
+                                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        }
+                        Text("本地模式")
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+
+                    Spacer()
+                }
+
+                // VIP-style card
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Vitora Pro")
+                            .font(.headline.weight(.black))
+                            .foregroundStyle(.white)
+                        Text("解锁完整营养分析与长周期对比")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.78))
+                    }
+
+                    Spacer()
+
+                    Text("了解更多")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color(red: 0.22, green: 0.18, blue: 0.14))
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(
+                            Capsule().fill(Color(red: 0.95, green: 0.88, blue: 0.72))
+                        )
+                }
+                .padding(14)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color(red: 0.18, green: 0.16, blue: 0.22),
+                                    Color(red: 0.28, green: 0.24, blue: 0.32),
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                )
+            }
+            .padding(20)
+            .padding(.top, 8)
+
+            Divider().padding(.horizontal, 20)
+
+            // Menu items
+            VStack(spacing: 0) {
+                ForEach(items, id: \.title) { item in
+                    Button(action: onOpenSettings) {
+                        HStack(spacing: 14) {
+                            Image(systemName: item.icon)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(item.color)
+                                .frame(width: 34, height: 34)
+                                .background(item.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                            Text(item.title)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 14)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.top, 8)
+
+            Spacer()
+        }
+        .background(VitoraTheme.ColorToken.surfacePearlMain)
+        .clipShape(UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 24, topTrailingRadius: 24, style: .continuous))
+        .shadow(color: Color.black.opacity(0.14), radius: 20, x: 8, y: 0)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("sidebar.profile")
     }
 }

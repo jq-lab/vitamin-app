@@ -35,9 +35,7 @@ struct TodayView: View {
                         mode: homeMetricMode,
                         sleepSeed: nil,
                         onCommit: {
-                            environment.nurtureSleepSeedFromTodaySuggestion()
-                            energyBowlEventID += 1
-                            viewModel.openAnalysis()
+                            sheet = .seedPlanting
                         },
                         onOpenDetail: { sheet = .suggestion },
                         onAskVitora: { openVitora(source: "Vitora 今日建议", summary: homeMetricMode.suggestionTitle) }
@@ -98,6 +96,14 @@ struct TodayView: View {
                     },
                     onSwap: { openVitora(source: "今日建议", summary: "换一个方案") },
                     onAskVitora: { openVitora(source: "今日建议", summary: "这个建议不适合") }
+                )
+            case .seedPlanting:
+                SeedPlantingSheet(
+                    onClose: { self.sheet = nil },
+                    onPlant: { _ in
+                        self.sheet = nil
+                        energyBowlEventID += 1
+                    }
                 )
             }
         }
@@ -195,6 +201,7 @@ private enum TodaySheet: Identifiable {
     case status
     case bodyFactors
     case suggestion
+    case seedPlanting
 
     var id: String {
         switch self {
@@ -206,6 +213,8 @@ private enum TodaySheet: Identifiable {
             return "bodyFactors"
         case .suggestion:
             return "suggestion"
+        case .seedPlanting:
+            return "seedPlanting"
         }
     }
 }

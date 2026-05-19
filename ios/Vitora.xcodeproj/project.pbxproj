@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		SEED001 /* SeedPlantingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEED002 /* SeedPlantingSheet.swift */; };
 		9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */; };
 		A10000000000000000000001 /* VitoraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* VitoraApp.swift */; };
 		A10000000000000000000002 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* AppEnvironment.swift */; };
@@ -170,6 +171,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		SEED002 /* SeedPlantingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPlantingSheet.swift; sourceTree = "<group>"; };
 		2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.debug.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.debug.xcconfig"; sourceTree = "<group>"; };
 		58A4EB357FBA685658458C76 /* Pods-Vitora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.release.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.release.xcconfig"; sourceTree = "<group>"; };
 		A20000000000000000000001 /* VitoraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraApp.swift; sourceTree = "<group>"; };
@@ -678,6 +680,7 @@
 				E20000000000000000000007 /* TodayAnalysisSheet.swift */,
 				E20000000000000000000008 /* FullEnergyRitualView.swift */,
 				E20000000000000000000009 /* TodayView.swift */,
+				SEED002 /* SeedPlantingSheet.swift */,
 				H20000000000000000000004 /* TodayStatusCard.swift */,
 				H20000000000000000000019 /* CalibrationChips.swift */,
 				H20000000000000000000005 /* BodyFactorTiles.swift */,
@@ -1038,6 +1041,7 @@
 				E10000000000000000000007 /* TodayAnalysisSheet.swift in Sources */,
 				E10000000000000000000008 /* FullEnergyRitualView.swift in Sources */,
 				E10000000000000000000009 /* TodayView.swift in Sources */,
+				SEED001 /* SeedPlantingSheet.swift in Sources */,
 				H10000000000000000000004 /* TodayStatusCard.swift in Sources */,
 				H10000000000000000000019 /* CalibrationChips.swift in Sources */,
 				H10000000000000000000005 /* BodyFactorTiles.swift in Sources */,

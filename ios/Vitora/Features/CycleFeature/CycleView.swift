@@ -292,6 +292,7 @@ private struct CycleHeaderIllustration: View {
 private struct CycleReviewInsightCard: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedTab: CycleReviewTab = .week
+    @State private var selectedInsightRow: CycleReviewRowModel?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -337,7 +338,10 @@ private struct CycleReviewInsightCard: View {
                     // Week tab: rows + curve merged in one card
                     VStack(spacing: 0) {
                         ForEach(rowsForSelectedTab, id: \.title) { row in
-                            CycleReviewInsightRow(row: row)
+                            Button { selectedInsightRow = row } label: {
+                                CycleReviewInsightRow(row: row)
+                            }
+                            .buttonStyle(.plain)
                             if row.title != rowsForSelectedTab.last?.title {
                                 Divider()
                                     .overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12))
@@ -363,6 +367,13 @@ private struct CycleReviewInsightCard: View {
             }
             .id(selectedTab)
             .transition(.opacity)
+        }
+        .sheet(item: $selectedInsightRow) { row in
+            InsightDetailSheet(
+                title: "为什么\(row.title) \(row.value)？",
+                onAskVitora: { selectedInsightRow = nil },
+                onClose: { selectedInsightRow = nil }
+            )
         }
     }
 
@@ -574,7 +585,8 @@ private struct CycleReviewSnapshotItem: Identifiable {
     let caption: String
 }
 
-private struct CycleReviewRowModel {
+private struct CycleReviewRowModel: Identifiable {
+    var id: String { title }
     let icon: String
     let title: String
     let caption: String

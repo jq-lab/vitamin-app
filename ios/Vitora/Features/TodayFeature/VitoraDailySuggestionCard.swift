@@ -8,6 +8,7 @@ struct VitoraDailySuggestionCard: View {
     let onAskVitora: () -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var suggestionIndex = 0
+    @State private var showReminder = false
 
     private var currentPlan: TodaySuggestionPlan {
         TodaySuggestionPlan.all[suggestionIndex % TodaySuggestionPlan.all.count]
@@ -97,6 +98,11 @@ struct VitoraDailySuggestionCard: View {
                     suggestionButton("我试试", systemImage: "sparkle", filled: true, action: onCommit)
                         .accessibilityIdentifier("today.suggestion.try")
 
+                    suggestionButton("一键提醒", systemImage: "bell.fill", filled: false) {
+                        showReminder = true
+                    }
+                    .accessibilityIdentifier("today.suggestion.remind")
+
                     Button(action: rotateSuggestion) {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: 15, weight: .bold))
@@ -113,6 +119,11 @@ struct VitoraDailySuggestionCard: View {
             .padding(.horizontal, 15)
             .padding(.vertical, 14)
             .background(TodaySuggestionShell())
+        }
+        .sheet(isPresented: $showReminder) {
+            ReminderSetupSheet(plan: currentPlan, onClose: { showReminder = false })
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.hidden)
         }
     }
 
@@ -542,7 +553,7 @@ struct SleepSeedPixelView: View {
     }
 }
 
-private struct TodaySuggestionPlan {
+struct TodaySuggestionPlan {
     struct Item {
         let symbol: String
         let tint: Color
@@ -575,4 +586,277 @@ private struct TodaySuggestionPlan {
             ]
         ),
     ]
+}
+
+// MARK: - Reminder Setup Sheet
+
+struct ReminderSetupSheet: View {
+    let plan: TodaySuggestionPlan
+    let onClose: () -> Void
+    @State private var time1Hour = 13
+    @State private var time1Min = 20
+    @State private var time2Hour = 14
+    @State private var time2Min = 40
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Capsule().fill(Color.gray.opacity(0.35)).frame(width: 36, height: 5).padding(.top, 10).padding(.bottom, 14)
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 18) {
+                    // Header
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("设置提醒")
+                                .font(.title2.weight(.bold))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            Text("Vitora 会在合适的时间轻轻提醒你")
+                                .font(.subheadline)
+                                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        }
+                        Spacer()
+                        Text("🌸").font(.system(size: 38))
+                    }
+
+                    // Plan summary card
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(plan.title)
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                        ForEach(Array(plan.items.enumerated()), id: \.offset) { _, item in
+                            HStack(spacing: 10) {
+                                Image(systemName: item.symbol)
+                                    .font(.system(size: 14, weight: .semibold))
+                                    .foregroundStyle(item.tint)
+                                    .frame(width: 32, height: 32)
+                                    .background(item.tint.opacity(0.14), in: Circle())
+                                Text(item.text)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            }
+                        }
+                    }
+                    .padding(16)
+                    .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.white.opacity(0.72)))
+
+                    // Time pickers
+                    if plan.items.count >= 1 {
+                        timeRow(icon: "fork.knife", color: Color(red: 0.62, green: 0.52, blue: 0.82), title: "补充能量", subtitle: "提醒加一份蛋白", hour: $time1Hour, min: $time1Min)
+                    }
+                    if plan.items.count >= 2 {
+                        timeRow(icon: "bed.double.fill", color: Color(red: 0.52, green: 0.62, blue: 0.88), title: "安静恢复", subtitle: "提醒安静休息 20 分钟", hour: $time2Hour, min: $time2Min)
+                    }
+
+                    // Note
+                    HStack(spacing: 8) {
+                        Image(systemName: "info.circle")
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        Text("时间可以随时调整，不会变成打卡任务。")
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    }
+
+                    // Save button
+                    Button(action: onClose) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "sparkle")
+                                .font(.system(size: 16, weight: .bold))
+                            Text("保存提醒")
+                                .font(.headline.weight(.bold))
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                        .background(VitoraTheme.ColorToken.strongText, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+
+                    Button("稍后再说", action: onClose)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+                .padding(.horizontal, 22)
+                .padding(.bottom, 20)
+            }
+        }
+        .background(Color(red: 250 / 255, green: 248 / 255, blue: 245 / 255))
+    }
+
+    private func timeRow(icon: String, color: Color, title: String, subtitle: String, hour: Binding<Int>, min: Binding<Int>) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(color)
+                .frame(width: 38, height: 38)
+                .background(color.opacity(0.14), in: Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
+                Text(subtitle).font(.caption).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            }
+
+            Spacer()
+
+            HStack(spacing: 6) {
+                Button { if hour.wrappedValue > 0 { hour.wrappedValue -= 1 } } label: {
+                    Image(systemName: "minus").font(.caption.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .frame(width: 28, height: 28).background(Color.gray.opacity(0.10), in: Circle())
+                }.buttonStyle(.plain)
+
+                Text(String(format: "%d:%02d", hour.wrappedValue, min.wrappedValue))
+                    .font(.title3.weight(.bold).monospacedDigit())
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .frame(width: 62)
+
+                Button { if hour.wrappedValue < 23 { hour.wrappedValue += 1 } } label: {
+                    Image(systemName: "plus").font(.caption.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .frame(width: 28, height: 28).background(Color.gray.opacity(0.10), in: Circle())
+                }.buttonStyle(.plain)
+            }
+        }
+        .padding(14)
+        .background(RoundedRectangle(cornerRadius: 18, style: .continuous).fill(Color.white.opacity(0.72))
+            .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.52), lineWidth: 0.7)))
+    }
+}
+
+// MARK: - Insight Detail Sheet (low valley / recovery / factors)
+
+struct InsightDetailSheet: View {
+    let title: String
+    let onAskVitora: () -> Void
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 22) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                            Text(title)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        }
+                        Text("基于你最近的数据，Vitora 为你整理了非诊断性解释。")
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+
+                    // 1. Evidence
+                    insightSection(number: "1", icon: "chart.bar.fill", title: "Vitora 看到的证据") {
+                        insightRow(icon: "waveform.path.ecg", text: "本周 4 天在下午变慢")
+                        insightRow(icon: "moon.fill", text: "睡眠偏短日低谷更明显")
+                        insightRow(icon: "calendar", text: "黄体期 D18 附近波动更常见")
+                    }
+
+                    // 2. What it means
+                    insightSection(number: "2", icon: "heart.fill", title: "这对今天意味着") {
+                        HStack(spacing: 16) {
+                            VStack(spacing: 4) {
+                                Text("🌸").font(.system(size: 32))
+                                Text("68分 · 半开").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            }
+                            VStack(spacing: 4) {
+                                Text("- - - →").font(.caption).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                            }
+                            VStack(spacing: 4) {
+                                Text("🌺").font(.system(size: 32))
+                                Text("100分 · 盛开+露水").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(14)
+                        .background(Color.white.opacity(0.52), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+
+                        Text("如果下午保留恢复时间，晚间反馈更可能稳定。")
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+
+                    // 3. Actions
+                    insightSection(number: "3", icon: "leaf.fill", title: "可以怎么用") {
+                        insightRow(icon: "sun.max.fill", text: "把高负担事放到上午")
+                        insightRow(icon: "clock", text: "下午预留 20 分钟缓冲")
+                    }
+
+                    // 4. Calibrate
+                    insightSection(number: "4", icon: "scope", title: "继续校准") {
+                        insightRow(icon: "waveform.path", text: "还需要 3 天记录确认，不急着下结论。")
+                    }
+                }
+                .padding(.horizontal, 22)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
+            }
+
+            // Bottom buttons
+            HStack(spacing: 12) {
+                Button(action: onAskVitora) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "ellipsis.message.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("问 Vitora 这一点")
+                            .font(.subheadline.weight(.bold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(VitoraTheme.ColorToken.actionPrimaryDeep, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+                .buttonStyle(.plain)
+
+                Button("关闭", action: onClose)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .frame(width: 60, height: 50)
+                    .background(Color.white.opacity(0.62), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).stroke(Color.gray.opacity(0.18), lineWidth: 1))
+            }
+            .padding(.horizontal, 22)
+            .padding(.vertical, 12)
+            .background(Color(red: 250 / 255, green: 248 / 255, blue: 245 / 255))
+        }
+        .background(Color(red: 250 / 255, green: 248 / 255, blue: 245 / 255))
+    }
+
+    private func insightSection<Content: View>(number: String, icon: String, title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Text(number)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 22, height: 22)
+                    .background(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.72), in: Circle())
+                Text(title)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+            }
+            content()
+        }
+    }
+
+    private func insightRow(icon: String, text: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                .frame(width: 30, height: 30)
+                .background(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Text(text)
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+        }
+        .padding(12)
+        .background(Color.white.opacity(0.62), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
 }

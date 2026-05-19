@@ -79,6 +79,8 @@ struct CycleView: View {
                 )
             case .hormoneCalendar:
                 HormoneCalendarView(onClose: { self.sheet = nil })
+            case .sharePreview:
+                ShareCardPreviewSheet(onClose: { self.sheet = nil })
             }
         }
         .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil || isSharePresented)
@@ -115,7 +117,7 @@ struct CycleView: View {
             .accessibilityLabel("激素日历")
 
             // 分享
-            Button { presentCycleShareCard() } label: {
+            Button { sheet = .sharePreview } label: {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
@@ -314,8 +316,6 @@ private struct CycleReviewInsightCard: View {
                     }
 
                     CycleReviewSnapshotGrid()
-
-                    CyclePhaseDistributionBar()
                 }
                 .padding(14)
             }
@@ -334,7 +334,7 @@ private struct CycleReviewInsightCard: View {
                 } else if selectedTab == .trend {
                     CycleMonthComparisonView()
                 } else {
-                    // Week tab: insight rows + energy curve
+                    // Week tab: rows + curve merged in one card
                     VStack(spacing: 0) {
                         ForEach(rowsForSelectedTab, id: \.title) { row in
                             CycleReviewInsightRow(row: row)
@@ -344,13 +344,22 @@ private struct CycleReviewInsightCard: View {
                                     .padding(.leading, 34)
                             }
                         }
-                    }
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(GlassSurface(cornerRadius: 24, opacity: 0.70, shadowStrength: 0.34, variant: .cleanResting))
 
-                    CycleWeeklyEnergyCurve()
+                        Divider().overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12)).padding(.horizontal, 14)
+
+                        CycleWeeklyEnergyCurve()
+                            .padding(.horizontal, 0)
+                    }
+                    .background(
+                        RoundedRectangle(cornerRadius: 24, style: .continuous)
+                            .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
+                            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                            .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+                    )
                 }
+
+                // Phase distribution always at bottom
+                CyclePhaseDistributionBar()
             }
             .id(selectedTab)
             .transition(.opacity)
@@ -989,6 +998,7 @@ private enum CycleSheet: Identifiable {
     case settings
     case insight(CycleRhythmInsight)
     case hormoneCalendar
+    case sharePreview
 
     var id: String {
         switch self {
@@ -997,6 +1007,7 @@ private enum CycleSheet: Identifiable {
         case .settings: return "settings"
         case let .insight(insight): return "insight.\(insight.id)"
         case .hormoneCalendar: return "hormoneCalendar"
+        case .sharePreview: return "sharePreview"
         }
     }
 }
@@ -1355,34 +1366,80 @@ private struct CyclePeriodTabContent: View {
     }
 
     private var phaseAxis: some View {
-        VStack(spacing: 6) {
-            HStack { Spacer(); Text("黄体中段").font(.caption2.weight(.bold)).foregroundStyle(Color(red: 0.90, green: 0.68, blue: 0.22)).padding(.trailing, 12) }
+        VStack(spacing: 14) {
+            Text("阶段节律")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            // Arc with phase icons
             GeometryReader { proxy in
                 let w = proxy.size.width
-                ZStack(alignment: .leading) {
-                    HStack(spacing: 0) {
-                        Capsule().fill(Color(red: 0.88, green: 0.42, blue: 0.44)).frame(width: w * 0.18)
-                        Capsule().fill(Color(red: 0.55, green: 0.75, blue: 0.90)).frame(width: w * 0.29)
-                        Capsule().fill(Color(red: 0.60, green: 0.80, blue: 0.56)).frame(width: w * 0.14)
-                        Capsule().fill(Color(red: 0.95, green: 0.78, blue: 0.38)).frame(width: w * 0.39)
-                    }.frame(height: 6)
-                    Circle().fill(Color(red: 0.88, green: 0.42, blue: 0.44)).frame(width: 10, height: 10).position(x: w * 0.0, y: 3)
-                    Circle().fill(Color(red: 0.55, green: 0.75, blue: 0.90)).frame(width: 10, height: 10).position(x: w * 0.18, y: 3)
-                    Circle().fill(Color(red: 0.60, green: 0.80, blue: 0.56)).frame(width: 10, height: 10).position(x: w * 0.47, y: 3)
-                    Circle().fill(Color(red: 0.95, green: 0.78, blue: 0.38)).frame(width: 14, height: 14)
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2)).position(x: w * 0.82, y: 3)
+                let arcH: CGFloat = 36
+                Canvas { ctx, size in
+                    var path = Path()
+                    path.move(to: CGPoint(x: 12, y: arcH))
+                    path.addQuadCurve(to: CGPoint(x: w - 12, y: arcH), control: CGPoint(x: w / 2, y: -8))
+
+                    ctx.stroke(path, with: .linearGradient(
+                        Gradient(colors: [
+                            Color(red: 0.92, green: 0.52, blue: 0.58),
+                            Color(red: 0.55, green: 0.75, blue: 0.90),
+                            Color(red: 0.60, green: 0.80, blue: 0.56),
+                            Color(red: 0.95, green: 0.78, blue: 0.38),
+                        ]),
+                        startPoint: CGPoint(x: 0, y: arcH),
+                        endPoint: CGPoint(x: w, y: arcH)
+                    ), style: StrokeStyle(lineWidth: 5, lineCap: .round))
                 }
-            }.frame(height: 14)
-            HStack {
-                Text("月经").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-                Spacer()
-                Text("卵泡").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-                Spacer()
-                Text("排卵").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-                Spacer()
-                Text("今天").font(.caption2.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .frame(height: arcH + 4)
+
+                // Phase icons along the arc
+                let phases: [(x: CGFloat, emoji: String)] = [
+                    (0.05, "🩸"), (0.30, "🌱"), (0.55, "✨"), (0.85, "💛")
+                ]
+                ForEach(0..<phases.count, id: \.self) { i in
+                    let p = phases[i]
+                    let px = 12 + (w - 24) * p.x
+                    let t = p.x
+                    let py = arcH - sin(t * .pi) * (arcH + 8)
+                    Text(p.emoji)
+                        .font(.system(size: 18))
+                        .position(x: px, y: max(0, py))
+                }
             }
+            .frame(height: 44)
+
+            // Phase labels with day ranges
+            HStack(spacing: 0) {
+                phaseLabel(name: "月经期", days: "3-6天", color: Color(red: 0.92, green: 0.52, blue: 0.58), active: false)
+                phaseLabel(name: "卵泡期", days: "7-14天", color: Color(red: 0.55, green: 0.75, blue: 0.90), active: false)
+                phaseLabel(name: "排卵期", days: "1-2天", color: Color(red: 0.60, green: 0.80, blue: 0.56), active: false)
+                phaseLabel(name: "黄体期 D18", days: "12-14天", color: Color(red: 0.95, green: 0.68, blue: 0.22), active: true)
+            }
+
+            // Bottom insight
+            Text("本阶段更需要留余量，Vitora 会结合睡眠和 HRV 继续校准。")
+                .font(.caption)
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 10)
+                .frame(maxWidth: .infinity)
+                .background(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.06), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
+    }
+
+    private func phaseLabel(name: String, days: String, color: Color, active: Bool) -> some View {
+        VStack(spacing: 3) {
+            Text(name)
+                .font(.caption2.weight(active ? .bold : .medium))
+                .foregroundStyle(active ? color : VitoraTheme.ColorToken.secondaryText)
+            Text(days)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     // MARK: Nutrient Supplement Card

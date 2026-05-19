@@ -31,6 +31,8 @@ struct TodayView: View {
                         onCalibrate: { value in openVitora(source: "今日状态", summary: value) }
                     )
 
+                    HealthMetricsStrip()
+
                     VitoraDailySuggestionCard(
                         mode: homeMetricMode,
                         sleepSeed: nil,
@@ -199,6 +201,60 @@ struct TodayView: View {
     private var selectedDateText: String {
         let dateDay = ((environment.selectedCycleDay + 14) % 28) + 1
         return "5月\(dateDay)日"
+    }
+}
+
+// MARK: - Health Metrics Strip
+
+private struct HealthMetricsStrip: View {
+    private struct Metric {
+        let title: String
+        let value: String
+        let fill: Double
+        let gradient: [Color]
+    }
+
+    private let metrics: [Metric] = [
+        Metric(title: "综合", value: "68%", fill: 0.68, gradient: [Color(red: 0.95, green: 0.62, blue: 0.42), Color(red: 0.88, green: 0.42, blue: 0.38)]),
+        Metric(title: "恢复", value: "75%", fill: 0.75, gradient: [Color(red: 0.62, green: 0.88, blue: 0.78), Color(red: 0.42, green: 0.78, blue: 0.62)]),
+        Metric(title: "睡眠", value: "7.2h", fill: 0.52, gradient: [Color(red: 0.62, green: 0.68, blue: 0.92), Color(red: 0.48, green: 0.52, blue: 0.86)]),
+        Metric(title: "能量", value: "53%", fill: 0.53, gradient: [Color(red: 0.95, green: 0.85, blue: 0.52), Color(red: 0.92, green: 0.72, blue: 0.38)]),
+    ]
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(metrics, id: \.title) { metric in
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(metric.value)
+                        .font(.system(size: 18, weight: .bold, design: .rounded))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                    GeometryReader { proxy in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.gray.opacity(0.10))
+
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(LinearGradient(colors: metric.gradient, startPoint: .leading, endPoint: .trailing))
+                                .frame(width: proxy.size.width * metric.fill)
+                        }
+                    }
+                    .frame(height: 8)
+
+                    Text(metric.title)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(10)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(Color.white.opacity(0.62))
+                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.white.opacity(0.52), lineWidth: 0.7))
+                )
+            }
+        }
+        .accessibilityIdentifier("today.health.metrics")
     }
 }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		SHAR001 /* ShareCardPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAR002 /* ShareCardPreviewSheet.swift */; };
 		HCAL001 /* HormoneCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HCAL002 /* HormoneCalendarView.swift */; };
 		SEED001 /* SeedPlantingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEED002 /* SeedPlantingSheet.swift */; };
 		9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */; };
@@ -172,6 +173,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		SHAR002 /* ShareCardPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewSheet.swift; sourceTree = "<group>"; };
 		HCAL002 /* HormoneCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormoneCalendarView.swift; sourceTree = "<group>"; };
 		SEED002 /* SeedPlantingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPlantingSheet.swift; sourceTree = "<group>"; };
 		2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.debug.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.debug.xcconfig"; sourceTree = "<group>"; };
@@ -719,6 +721,7 @@
 				H20000000000000000000023 /* EnergyDynamicsDetailSheet.swift */,
 				H20000000000000000000017 /* CycleDetailSheets.swift */,
 				H20000000000000000000018 /* CycleView.swift */,
+				SHAR002 /* ShareCardPreviewSheet.swift */,
 				HCAL002 /* HormoneCalendarView.swift */,
 			);
 			path = CycleFeature;
@@ -1086,6 +1089,7 @@
 				H10000000000000000000023 /* EnergyDynamicsDetailSheet.swift in Sources */,
 				H10000000000000000000017 /* CycleDetailSheets.swift in Sources */,
 				H10000000000000000000018 /* CycleView.swift in Sources */,
+				SHAR001 /* ShareCardPreviewSheet.swift in Sources */,
 				HCAL001 /* HormoneCalendarView.swift in Sources */,
 				9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */,
 			);

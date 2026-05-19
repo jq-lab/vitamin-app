@@ -1,24 +1,35 @@
 import Foundation
+import AuthenticationServices
 
 @MainActor
 final class OnboardingViewModel: ObservableObject {
     enum Step: Equatable {
-        case identity
-        case context
-        case ready
+        case aboutYou
+        case yourBody
     }
 
-    @Published var step: Step = .identity
+    // Navigation
+    @Published var step: Step = .aboutYou
+
+    // Page 1 — About You
     @Published var displayLabel = ""
+    @Published var authMethod: AuthMethod = .local
+    @Published var selectedSports: Set<SportPreference> = []
     @Published var selectedFocusAreas: Set<FocusArea> = [.energy]
-    @Published var cycleSummary = ""
-    @Published var cycleLengthSummary = "不确定"
-    @Published var cycleRegularitySummary = "不确定"
-    @Published var shouldEstimateCycle = true
-    @Published var energyWindowPreference: EnergyWindowPreference = .unsure
-    @Published var guidanceStyle: VitoraGuidanceStyle = .explainFirst
-    @Published var reminderPreference: OnboardingReminderPreference = .eveningReview
+
+    // Page 2 — Your Body
+    @Published var periodRegularity: PeriodRegularity = .unsure
+    @Published var lastPeriodDate: Date = Date()
+    @Published var lastPeriodDateUnsure = true
+    @Published var averageCycleLength: Double = 28
+    @Published var averageCycleLengthUnsure = true
+    @Published var flowAmount: FlowAmount? = nil
+    @Published var hasDysmenorrhea = false
+    @Published var dysmenorrheaReminderEnabled = false
+
+    // Permissions
     @Published private(set) var dataSourceAuthorization = DataSourceAuthorization.notAsked()
+    @Published private(set) var notificationPermissionState: NotificationPermissionState = .notDetermined
     @Published private(set) var completion: OnboardingCompletion?
 
     private let onboardingService: OnboardingServicing
@@ -32,7 +43,9 @@ final class OnboardingViewModel: ObservableObject {
         self.healthKitClient = healthKitClient
     }
 
-    var canContinueIdentity: Bool {
+    // MARK: - Computed
+
+    var canContinueAboutYou: Bool {
         !displayLabel.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
@@ -41,19 +54,31 @@ final class OnboardingViewModel: ObservableObject {
         return selected.isEmpty ? [.energy] : selected
     }
 
-    var canContinueContext: Bool {
-        dataSourceAuthorization.state != .notAsked
-    }
-
     var isLowData: Bool {
         dataSourceAuthorization.isLowData
     }
 
-    func goToContext() {
-        guard canContinueIdentity else {
-            return
+    // MARK: - Navigation
+
+    func goToYourBody() {
+        guard canContinueAboutYou else { return }
+        step = .yourBody
+    }
+
+    // MARK: - Page 1 Actions
+
+    func appleSignInCompleted(userIdentifier: String, fullName: PersonNameComponents?) {
+        authMethod = .apple(userIdentifier: userIdentifier)
+        if let name = fullName, let given = name.givenName {
+            let combined = [given, name.familyName].compactMap { $0 }.joined(separator: " ")
+            if !combined.isEmpty {
+                displayLabel = combined
+            }
         }
-        step = .context
+    }
+
+    func skipSignIn() {
+        authMethod = .local
     }
 
     func toggleFocusArea(_ focusArea: FocusArea) {
@@ -64,64 +89,72 @@ final class OnboardingViewModel: ObservableObject {
         }
     }
 
-    func chooseCycleLength(_ summary: String) {
-        cycleLengthSummary = summary
+    func toggleSport(_ sport: SportPreference) {
+        if sport == .none {
+            selectedSports = [.none]
+            return
+        }
+        selectedSports.remove(.none)
+        if selectedSports.contains(sport) {
+            selectedSports.remove(sport)
+        } else {
+            selectedSports.insert(sport)
+        }
     }
 
-    func chooseCycleRegularity(_ summary: String) {
-        cycleRegularitySummary = summary
+    // MARK: - Page 2 Actions
+
+    func choosePeriodRegularity(_ regularity: PeriodRegularity) {
+        periodRegularity = regularity
     }
 
-    func chooseEnergyWindow(_ preference: EnergyWindowPreference) {
-        energyWindowPreference = preference
+    func chooseFlowAmount(_ amount: FlowAmount) {
+        flowAmount = amount
     }
 
-    func chooseGuidanceStyle(_ style: VitoraGuidanceStyle) {
-        guidanceStyle = style
-    }
-
-    func chooseReminderPreference(_ preference: OnboardingReminderPreference) {
-        reminderPreference = preference
+    func toggleDysmenorrhea() {
+        hasDysmenorrhea.toggle()
+        if !hasDysmenorrhea { dysmenorrheaReminderEnabled = false }
     }
 
     func chooseDataSource(_ choice: HealthKitAuthorizationChoice) {
         dataSourceAuthorization = healthKitClient.apply(choice: choice)
     }
 
-    func goToReady() {
-        guard canContinueContext else {
-            return
-        }
-        completion = makeCompletion()
-        step = .ready
+    func requestNotificationPermission() {
+        notificationPermissionState = .authorized
     }
 
-    func editCustomization() {
-        step = .context
+    func skipNotificationPermission() {
+        notificationPermissionState = .denied
     }
+
+    // MARK: - Finish
 
     func finish() -> OnboardingCompletion {
         if dataSourceAuthorization.state == .notAsked {
             chooseDataSource(.skip)
         }
-        let nextCompletion = makeCompletion()
-        completion = nextCompletion
-        return nextCompletion
+        let result = makeCompletion()
+        completion = result
+        return result
     }
 
     private func makeCompletion() -> OnboardingCompletion {
         onboardingService.complete(
             draft: OnboardingDraft(
                 displayLabel: displayLabel,
+                authMethod: authMethod,
                 focusAreas: selectedFocusAreasList,
-                cycleSummary: cycleSummary,
-                cycleLengthSummary: cycleLengthSummary,
-                cycleRegularitySummary: cycleRegularitySummary,
-                shouldEstimateCycle: shouldEstimateCycle,
-                energyWindowPreference: energyWindowPreference,
-                guidanceStyle: guidanceStyle,
-                reminderPreference: reminderPreference,
-                dataSourceAuthorization: dataSourceAuthorization
+                sportPreferences: Array(selectedSports),
+                periodRegularity: periodRegularity,
+                lastPeriodDate: lastPeriodDateUnsure ? nil : lastPeriodDate,
+                averageCycleLength: averageCycleLengthUnsure ? nil : Int(averageCycleLength),
+                flowAmount: flowAmount,
+                hasDysmenorrhea: hasDysmenorrhea,
+                dysmenorrheaReminderEnabled: dysmenorrheaReminderEnabled,
+                dataSourceAuthorization: dataSourceAuthorization,
+                notificationPermissionState: notificationPermissionState
             ),
             completedAt: .now
         )

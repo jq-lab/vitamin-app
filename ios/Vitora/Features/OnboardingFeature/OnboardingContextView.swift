@@ -1,221 +1,272 @@
 import SwiftUI
 
-struct OnboardingContextView: View {
+struct OnboardingYourBodyView: View {
     @ObservedObject var viewModel: OnboardingViewModel
+    var onFinish: (OnboardingCompletion) -> Void
 
-    private let cycleLengthOptions = ["约 28 天", "不确定", "不太规律"]
-    private let regularityOptions = ["比较规律", "偶尔变化", "不确定"]
-    private let contextColumns = [
-        GridItem(.adaptive(minimum: 118), spacing: VitoraTheme.Spacing.xs)
-    ]
-    private let preferenceColumns = [
+    private let regularityColumns = [
         GridItem(.adaptive(minimum: 92), spacing: VitoraTheme.Spacing.xs)
+    ]
+    private let flowColumns = [
+        GridItem(.adaptive(minimum: 80), spacing: VitoraTheme.Spacing.xs)
     ]
 
     var body: some View {
         OnboardingPageCard(
             pageNumber: 2,
-            eyebrow: "onboarding.context.eyebrow",
-            title: "onboarding.context.title",
-            bodyText: "onboarding.context.body",
+            eyebrow: "onboarding.yourBody.eyebrow",
+            title: "onboarding.yourBody.title",
+            bodyText: "onboarding.yourBody.body",
             ipState: .thinking,
             ipSize: 112
         ) {
             VStack(alignment: .leading, spacing: 20) {
-                focusSection
-                preferenceSection
-                rhythmSection
-                dataSourceSection
+                periodSection
+                permissionsSection
 
-                OnboardingContinueButton(
-                    title: "onboarding.context.continue",
-                    disabled: !viewModel.canContinueContext
-                ) {
-                    viewModel.goToReady()
+                OnboardingContinueButton(title: "onboarding.yourBody.enter") {
+                    onFinish(viewModel.finish())
                 }
-                .accessibilityIdentifier("onboarding.context.continue")
+                .accessibilityIdentifier("onboarding.yourBody.enter")
+            }
+        }
+    }
 
-                if !viewModel.canContinueContext {
-                    Text("onboarding.context.datasource.required")
-                        .font(.footnote)
+    // MARK: - Period
+
+    private var periodSection: some View {
+        onboardingSection {
+            VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
+                sectionHeader(icon: "waveform.path", title: "onboarding.period.title", body: "onboarding.period.body")
+
+                // Regularity
+                VStack(alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
+                    Text("onboarding.periodRegularity.title")
+                        .font(.footnote.weight(.semibold))
                         .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .accessibilityIdentifier("onboarding.context.requireDataSource")
-                }
-            }
-        }
-    }
 
-    private var focusSection: some View {
-        onboardingSection {
-            VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
-                sectionHeader(
-                    icon: "scope",
-                    title: "onboarding.context.focus.title",
-                    body: "onboarding.context.focus.body"
-                )
-
-                LazyVGrid(columns: contextColumns, alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
-                    ForEach(FocusArea.allCases, id: \.self) { focus in
-                        OnboardingChoiceButton(
-                            title: focus.titleKey,
-                            isSelected: viewModel.selectedFocusAreas.contains(focus)
-                        ) {
-                            viewModel.toggleFocusArea(focus)
+                    LazyVGrid(columns: regularityColumns, alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
+                        ForEach(PeriodRegularity.allCases, id: \.self) { option in
+                            OnboardingChoiceButton(
+                                title: LocalizedStringKey(option.titleKey),
+                                isSelected: viewModel.periodRegularity == option
+                            ) {
+                                viewModel.choosePeriodRegularity(option)
+                            }
+                            .accessibilityIdentifier(option.accessibilityID)
                         }
-                        .accessibilityIdentifier(focus.accessibilityID)
                     }
                 }
 
-                Text("onboarding.context.focus.limit")
-                    .font(.caption)
-                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-            }
-        }
-    }
-
-    private var dataSourceSection: some View {
-        onboardingSection {
-            VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
-                sectionHeader(
-                    icon: "heart.text.square",
-                    title: "onboarding.healthkit.title",
-                    body: "onboarding.healthkit.body"
-                )
-
-                Button {
-                    viewModel.chooseDataSource(.allow)
-                } label: {
-                    Label("onboarding.healthkit.allow", systemImage: "heart.text.square")
-                        .font(.callout.weight(.semibold))
-                        .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(VitoraTheme.ColorToken.strongText)
-                .accessibilityIdentifier("onboarding.healthkit.allow")
-
-                HStack(spacing: VitoraTheme.Spacing.sm) {
-                    Button {
-                        viewModel.chooseDataSource(.skip)
-                    } label: {
-                        Label("onboarding.healthkit.skip", systemImage: "forward")
-                            .font(.callout.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("onboarding.healthkit.skip")
-
-                    Button {
-                        viewModel.chooseDataSource(.deny)
-                    } label: {
-                        Label("onboarding.healthkit.deny", systemImage: "xmark.circle")
-                            .font(.callout.weight(.semibold))
-                            .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("onboarding.healthkit.deny")
-                }
-
-                Text(dataSourceStateText)
-                    .font(.footnote)
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .accessibilityIdentifier("onboarding.healthkit.state")
-            }
-        }
-    }
-
-    private var rhythmSection: some View {
-        onboardingSection {
-            VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
-                sectionHeader(
-                    icon: "waveform.path",
-                    title: "onboarding.context.rhythm.title",
-                    body: "onboarding.context.rhythm.body"
-                )
-
-                VitoraTextField(title: "onboarding.context.cycle.placeholder", text: $viewModel.cycleSummary)
-                    .accessibilityIdentifier("onboarding.context.cycle")
-
-                optionGroup(
-                    title: "onboarding.context.length.title",
-                    options: cycleLengthOptions,
-                    selected: viewModel.cycleLengthSummary,
-                    onSelect: viewModel.chooseCycleLength
-                )
-
-                optionGroup(
-                    title: "onboarding.context.regularity.title",
-                    options: regularityOptions,
-                    selected: viewModel.cycleRegularitySummary,
-                    onSelect: viewModel.chooseCycleRegularity
-                )
-
-                Toggle(isOn: $viewModel.shouldEstimateCycle) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("onboarding.context.estimate.title")
+                // Last period date
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: Binding(
+                        get: { !viewModel.lastPeriodDateUnsure },
+                        set: { viewModel.lastPeriodDateUnsure = !$0 }
+                    )) {
+                        Text("onboarding.period.lastDate.title")
                             .font(.callout.weight(.semibold))
                             .foregroundStyle(VitoraTheme.ColorToken.primaryText)
-                        Text("onboarding.context.estimate.body")
+                    }
+                    .toggleStyle(.switch)
+                    .tint(VitoraTheme.ColorToken.actionPrimary)
+
+                    if !viewModel.lastPeriodDateUnsure {
+                        DatePicker(
+                            "",
+                            selection: $viewModel.lastPeriodDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                    } else {
+                        Text("onboarding.period.lastDate.unsure")
                             .font(.footnote)
-                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
                     }
                 }
-                .toggleStyle(.switch)
-                .tint(VitoraTheme.ColorToken.actionPrimary)
+
+                // Average cycle length
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: Binding(
+                        get: { !viewModel.averageCycleLengthUnsure },
+                        set: { viewModel.averageCycleLengthUnsure = !$0 }
+                    )) {
+                        Text("onboarding.period.cycleLength.title")
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.primaryText)
+                    }
+                    .toggleStyle(.switch)
+                    .tint(VitoraTheme.ColorToken.actionPrimary)
+
+                    if !viewModel.averageCycleLengthUnsure {
+                        HStack(spacing: 12) {
+                            Text("\(Int(viewModel.averageCycleLength))")
+                                .font(.title3.weight(.bold).monospacedDigit())
+                                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                                .frame(width: 36)
+
+                            Slider(value: $viewModel.averageCycleLength, in: 21...35, step: 1)
+                                .tint(VitoraTheme.ColorToken.actionPrimary)
+
+                            Text("onboarding.period.cycleLength.unit")
+                                .font(.callout.weight(.medium))
+                                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        }
+                    } else {
+                        Text("onboarding.period.cycleLength.unsure")
+                            .font(.footnote)
+                            .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    }
+                }
+
+                // Flow amount
+                VStack(alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
+                    Text("onboarding.flowAmount.title")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+                    LazyVGrid(columns: flowColumns, alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
+                        ForEach(FlowAmount.allCases, id: \.self) { option in
+                            OnboardingChoiceButton(
+                                title: LocalizedStringKey(option.titleKey),
+                                isSelected: viewModel.flowAmount == option
+                            ) {
+                                viewModel.chooseFlowAmount(option)
+                            }
+                            .accessibilityIdentifier(option.accessibilityID)
+                        }
+                    }
+                }
+
+                // Dysmenorrhea
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: Binding(
+                        get: { viewModel.hasDysmenorrhea },
+                        set: { _ in viewModel.toggleDysmenorrhea() }
+                    )) {
+                        Text("onboarding.period.dysmenorrhea")
+                            .font(.callout.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.primaryText)
+                    }
+                    .toggleStyle(.switch)
+                    .tint(VitoraTheme.ColorToken.actionPrimary)
+
+                    if viewModel.hasDysmenorrhea {
+                        Toggle(isOn: $viewModel.dysmenorrheaReminderEnabled) {
+                            Text("onboarding.period.dysmenorrhea.reminder")
+                                .font(.callout.weight(.medium))
+                                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        }
+                        .toggleStyle(.switch)
+                        .tint(VitoraTheme.ColorToken.actionPrimary)
+                        .padding(.leading, 8)
+                    }
+                }
             }
         }
     }
 
-    private var preferenceSection: some View {
+    // MARK: - Permissions
+
+    private var permissionsSection: some View {
         onboardingSection {
             VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
-                sectionHeader(
-                    icon: "slider.horizontal.3",
-                    title: "onboarding.custom.title",
-                    body: "onboarding.custom.body"
-                )
+                sectionHeader(icon: "link", title: "onboarding.permissions.title", body: "onboarding.permissions.body")
 
-                enumOptionGrid(
-                    title: "onboarding.energyWindow.title",
-                    options: EnergyWindowPreference.allCases,
-                    selected: viewModel.energyWindowPreference,
-                    titleKey: \.titleKey,
-                    idKey: \.accessibilityID,
-                    onSelect: viewModel.chooseEnergyWindow
-                )
+                // HealthKit
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("onboarding.healthkit.title")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
 
-                enumOptionGrid(
-                    title: "onboarding.guidance.title",
-                    options: VitoraGuidanceStyle.allCases,
-                    selected: viewModel.guidanceStyle,
-                    titleKey: \.titleKey,
-                    idKey: \.accessibilityID,
-                    onSelect: viewModel.chooseGuidanceStyle
-                )
+                    HStack(spacing: VitoraTheme.Spacing.sm) {
+                        Button {
+                            viewModel.chooseDataSource(.allow)
+                        } label: {
+                            Label("onboarding.healthkit.allow", systemImage: "heart.text.square")
+                                .font(.callout.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 42)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(VitoraTheme.ColorToken.strongText)
+                        .accessibilityIdentifier("onboarding.healthkit.allow")
 
-                enumOptionGrid(
-                    title: "onboarding.reminder.title",
-                    options: OnboardingReminderPreference.allCases,
-                    selected: viewModel.reminderPreference,
-                    titleKey: \.titleKey,
-                    idKey: \.accessibilityID,
-                    onSelect: viewModel.chooseReminderPreference
-                )
+                        Button {
+                            viewModel.chooseDataSource(.skip)
+                        } label: {
+                            Label("onboarding.healthkit.skip", systemImage: "forward")
+                                .font(.callout.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 42)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("onboarding.healthkit.skip")
+                    }
+
+                    Text(healthKitStateText)
+                        .font(.footnote)
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        .accessibilityIdentifier("onboarding.healthkit.state")
+                }
+
+                // Notifications
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("onboarding.notification.title")
+                        .font(.footnote.weight(.semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+                    HStack(spacing: VitoraTheme.Spacing.sm) {
+                        Button {
+                            viewModel.requestNotificationPermission()
+                        } label: {
+                            Label("onboarding.notification.allow", systemImage: "bell.badge")
+                                .font(.callout.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 42)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(VitoraTheme.ColorToken.strongText)
+                        .accessibilityIdentifier("onboarding.notification.allow")
+
+                        Button {
+                            viewModel.skipNotificationPermission()
+                        } label: {
+                            Label("onboarding.notification.skip", systemImage: "forward")
+                                .font(.callout.weight(.semibold))
+                                .frame(maxWidth: .infinity, minHeight: 42)
+                        }
+                        .buttonStyle(.bordered)
+                        .accessibilityIdentifier("onboarding.notification.skip")
+                    }
+
+                    Text(notificationStateText)
+                        .font(.footnote)
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        .accessibilityIdentifier("onboarding.notification.state")
+                }
             }
         }
     }
 
-    private var dataSourceStateText: LocalizedStringKey {
+    // MARK: - State Text
+
+    private var healthKitStateText: LocalizedStringKey {
         switch viewModel.dataSourceAuthorization.state {
-        case .notAsked:
-            "onboarding.healthkit.notAsked"
-        case .authorized:
-            "onboarding.healthkit.connected.selected"
-        case .skipped, .denied, .revoked:
-            "onboarding.healthkit.lowdata.selected"
+        case .notAsked: "onboarding.healthkit.notAsked"
+        case .authorized: "onboarding.healthkit.connected.selected"
+        case .skipped, .denied, .revoked: "onboarding.healthkit.lowdata.selected"
         }
     }
+
+    private var notificationStateText: LocalizedStringKey {
+        switch viewModel.notificationPermissionState {
+        case .notDetermined: "onboarding.notification.notAsked"
+        case .authorized: "onboarding.notification.authorized"
+        case .denied: "onboarding.notification.denied"
+        }
+    }
+
+    // MARK: - Helpers
 
     private func onboardingSection<Content: View>(@ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: VitoraTheme.Spacing.md) {
@@ -238,88 +289,14 @@ struct OnboardingContextView: View {
                 Image(systemName: icon)
                     .font(.footnote.weight(.bold))
                     .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-
                 Text(title)
                     .font(.headline)
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
             }
-
             Text(body)
                 .font(.subheadline)
                 .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    private func enumOptionGrid<Option: Hashable>(
-        title: LocalizedStringKey,
-        options: [Option],
-        selected: Option,
-        titleKey: KeyPath<Option, String>,
-        idKey: KeyPath<Option, String>,
-        onSelect: @escaping (Option) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
-            Text(title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-
-            LazyVGrid(columns: preferenceColumns, alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
-                ForEach(options, id: \.self) { option in
-                    OnboardingChoiceButton(
-                        title: LocalizedStringKey(option[keyPath: titleKey]),
-                        isSelected: selected == option
-                    ) {
-                        onSelect(option)
-                    }
-                    .accessibilityIdentifier(option[keyPath: idKey])
-                }
-            }
-        }
-    }
-
-    private func optionGroup(
-        title: LocalizedStringKey,
-        options: [String],
-        selected: String,
-        onSelect: @escaping (String) -> Void
-    ) -> some View {
-        VStack(alignment: .leading, spacing: VitoraTheme.Spacing.xs) {
-            Text(title)
-                .font(.footnote.weight(.semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-
-            HStack(spacing: VitoraTheme.Spacing.xs) {
-                ForEach(options, id: \.self) { option in
-                    OnboardingChoiceButton(
-                        title: LocalizedStringKey(option),
-                        isSelected: selected == option
-                    ) {
-                        onSelect(option)
-                    }
-                }
-            }
-        }
-    }
-}
-
-extension FocusArea {
-    var titleKey: LocalizedStringKey {
-        switch self {
-        case .energy:
-            "focus.energy"
-        case .cycle:
-            "focus.cycle"
-        case .sleep:
-            "focus.sleep"
-        case .mood:
-            "focus.mood"
-        case .nutrition:
-            "focus.nutrition"
-        }
-    }
-
-    var accessibilityID: String {
-        "onboarding.focus.\(rawValue)"
     }
 }

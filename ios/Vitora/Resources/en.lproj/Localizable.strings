@@ -1,77 +1,93 @@
 "vitora.app.title" = "Vitora";
-"onboarding.progress.title" = "三步定制 Vitora";
-"onboarding.identity.eyebrow" = "Meet";
-"onboarding.identity.title" = "先认识 Vitora";
-"onboarding.identity.body" = "它会从你的记录和反馈里慢慢更懂你。现在只需要一个称呼，不需要账号登录。";
+
+// Onboarding — Page 1: About You
+"onboarding.aboutYou.eyebrow" = "About You";
+"onboarding.aboutYou.title" = "关于你";
+"onboarding.aboutYou.body" = "告诉 Vitora 一些基础信息，帮助个性化你的体验。";
+"onboarding.aboutYou.continue" = "继续";
+"onboarding.signIn.skip" = "跳过登录，本地使用";
+"onboarding.signIn.connected" = "已通过 Apple 登录";
 "onboarding.identity.placeholder" = "你的称呼";
 "onboarding.identity.privacy" = "这份信息只用于当前设备里的个人化称呼。";
-"onboarding.identity.required" = "先给 Vitora 一个称呼，再继续定制。";
-"onboarding.identity.continue" = "继续";
-"onboarding.context.eyebrow" = "Rhythm";
-"onboarding.context.title" = "定制 Vitora 的初始理解";
-"onboarding.context.body" = "只选几个轻量偏好。之后你随时可以告诉 Vitora 不准，让它慢慢校准。";
-"onboarding.context.rhythm.title" = "你现在大概处在周期的哪里？";
-"onboarding.context.rhythm.body" = "用于先估算今日综合能量和恢复负担，不作为医学判断。";
+"onboarding.identity.required" = "先给 Vitora 一个称呼，再继续。";
+
+// Sport Preferences
+"onboarding.sport.title" = "运动偏好";
+"onboarding.sport.body" = "选择你常做的运动，帮助 Vitora 理解身体营养和恢复需要。";
+"onboarding.sport.yoga" = "瑜伽";
+"onboarding.sport.running" = "跑步";
+"onboarding.sport.swimming" = "游泳";
+"onboarding.sport.strength" = "力量训练";
+"onboarding.sport.walking" = "散步";
+"onboarding.sport.cycling" = "骑行";
+"onboarding.sport.dance" = "舞蹈";
+"onboarding.sport.none" = "暂无";
+
+// Focus Areas
 "onboarding.context.focus.title" = "关注方向";
 "onboarding.context.focus.body" = "选择 Vitora 初期更该留意的内容。";
 "onboarding.context.focus.limit" = "最多 3 个";
-"onboarding.context.cycle.placeholder" = "上次月经开始日，可写“不确定”";
-"onboarding.context.length.title" = "平均周期";
-"onboarding.context.regularity.title" = "规律性";
-"onboarding.context.estimate.title" = "先让 Vitora 估算";
-"onboarding.context.estimate.body" = "进入 Today 后可以随时告诉 Vitora 日期或感受不准。";
-"onboarding.context.datasource.required" = "请选择是否连接 HealthKit；也可以直接跳过，App 仍可用。";
-"onboarding.context.continue" = "下一步";
-"onboarding.custom.title" = "今天先怎么陪你";
-"onboarding.custom.body" = "这些偏好只影响 Vitora 首日解释方式，不会形成任务或打卡压力。";
-"onboarding.energyWindow.title" = "常见能量窗口";
-"onboarding.energyWindow.morning" = "上午";
-"onboarding.energyWindow.afternoon" = "下午";
-"onboarding.energyWindow.evening" = "晚上";
-"onboarding.energyWindow.unsure" = "不确定";
-"onboarding.guidance.title" = "陪伴方式";
-"onboarding.guidance.explainFirst" = "先解释原因";
-"onboarding.guidance.gentleSuggestion" = "给轻建议";
-"onboarding.guidance.keyChangesOnly" = "只提醒变化";
-"onboarding.reminder.title" = "提醒偏好";
-"onboarding.reminder.eveningReview" = "晚间轻复盘";
-"onboarding.reminder.keyChanges" = "关键变化提醒";
-"onboarding.reminder.paused" = "暂不提醒";
-"onboarding.healthkit.title" = "HealthKit 可选";
-"onboarding.healthkit.body" = "授权后可以减少手动记录；跳过后应用仍然可用。";
-"onboarding.healthkit.skip" = "暂时跳过";
-"onboarding.healthkit.allow" = "允许读取";
-"onboarding.healthkit.deny" = "不允许读取";
-"onboarding.healthkit.notAsked" = "还没有选择数据来源。你可以稍后再连接。";
-"onboarding.healthkit.lowdata.selected" = "将以低数据模式开始，你仍可进入今日。";
-"onboarding.healthkit.connected.selected" = "已选择 HealthKit，稍后进入系统授权。";
-"onboarding.ready.eyebrow" = "Ready";
-"onboarding.ready.title" = "Vitora 已建立初始理解";
-"onboarding.ready.body" = "玩法很简单：看今天状态，向 AI 管家补充变化，再让 Cycle 学习长期节律。";
-"onboarding.ready.lowdata" = "你已进入低数据模式，今天可以先告诉 Vitora 一件重要变化。";
-"onboarding.ready.connected" = "你已准备好进入今日，稍后可管理数据来源。";
-"onboarding.ready.summary.title" = "定制完成";
-"onboarding.ready.summary.body" = "Vitora 会先按这些信息理解今天；确认进入后仍可随时修正。";
-"onboarding.ready.datasource" = "数据来源";
-"onboarding.ready.datasource.connected" = "HealthKit 可选增强";
-"onboarding.ready.datasource.lowdata" = "先用低数据开始";
-"onboarding.ready.editCustomization" = "调整定制";
-"onboarding.ready.item.today" = "Today";
-"onboarding.ready.item.today.body" = "先看今天适合轻安排还是高强度任务。";
-"onboarding.ready.item.vitora" = "AI 管家";
-"onboarding.ready.item.vitora.body" = "把重要变化放进聊天里，Vitora 会带着上下文理解。";
-"onboarding.ready.item.cycle" = "Cycle";
-"onboarding.ready.item.cycle.body" = "长期节律会随着你的反馈逐步变准。";
-"onboarding.ready.enterToday" = "进入今日";
 "focus.energy" = "能量";
 "focus.cycle" = "周期";
 "focus.sleep" = "睡眠";
 "focus.mood" = "心情";
 "focus.nutrition" = "营养";
+
+// Onboarding — Page 2: Your Body
+"onboarding.yourBody.eyebrow" = "Body";
+"onboarding.yourBody.title" = "你的身体";
+"onboarding.yourBody.body" = "填入身体信息帮助 Vitora 更准确理解节律。所有项目可选。";
+"onboarding.yourBody.enter" = "进入 Vitora";
+
+// Period
+"onboarding.period.title" = "月经周期";
+"onboarding.period.body" = "用于估算能量和恢复节律，不作为医学判断。";
+"onboarding.periodRegularity.title" = "你的月经规律吗？";
+"onboarding.periodRegularity.regular" = "比较规律";
+"onboarding.periodRegularity.sometimesChanges" = "偶尔变化";
+"onboarding.periodRegularity.veryIrregular" = "很不规律";
+"onboarding.periodRegularity.unsure" = "不确定";
+"onboarding.period.lastDate.title" = "填写上次月经开始日";
+"onboarding.period.lastDate.unsure" = "不确定，Vitora 会先估算";
+"onboarding.period.cycleLength.title" = "填写平均周期长度";
+"onboarding.period.cycleLength.unsure" = "不确定，默认按 28 天估算";
+"onboarding.period.cycleLength.unit" = "天";
+
+// Flow Amount
+"onboarding.flowAmount.title" = "经量";
+"onboarding.flowAmount.light" = "偏少";
+"onboarding.flowAmount.moderate" = "适中";
+"onboarding.flowAmount.heavy" = "偏多";
+"onboarding.flowAmount.varies" = "不固定";
+
+// Dysmenorrhea
+"onboarding.period.dysmenorrhea" = "是否痛经";
+"onboarding.period.dysmenorrhea.reminder" = "开启痛经模式提醒";
+
+// Permissions
+"onboarding.permissions.title" = "系统连接";
+"onboarding.permissions.body" = "可选连接，跳过后应用仍可使用。";
+"onboarding.healthkit.title" = "HealthKit";
+"onboarding.healthkit.body" = "授权后可以减少手动记录；跳过后应用仍然可用。";
+"onboarding.healthkit.skip" = "跳过";
+"onboarding.healthkit.allow" = "允许读取";
+"onboarding.healthkit.notAsked" = "还没有选择，可以稍后再连接。";
+"onboarding.healthkit.lowdata.selected" = "低数据模式，仍可进入。";
+"onboarding.healthkit.connected.selected" = "已选择 HealthKit。";
+"onboarding.notification.title" = "通知权限";
+"onboarding.notification.allow" = "允许通知";
+"onboarding.notification.skip" = "跳过";
+"onboarding.notification.notAsked" = "还没有选择通知权限。";
+"onboarding.notification.authorized" = "通知已开启。";
+"onboarding.notification.denied" = "已跳过，可在设置中开启。";
+
+// Tabs
 "tab.today" = "今日";
 "tab.luna" = "Vitora";
 "tab.vitora" = "Vitora";
 "tab.cycle" = "周期";
+
+// Today
 "today.shell.subtitle" = "今天先从一个清晰状态开始。";
 "today.lowdata.badge" = "低数据模式";
 "today.state.title" = "今日状态";
@@ -125,10 +141,14 @@
 "today.compliance.short" = "本内容仅供生活方式参考。";
 "today.compliance.default" = "本内容仅供生活方式参考，不替代专业意见。";
 "today.compliance.lowdata" = "当前可用信息较少，你可以继续手动记录，或稍后连接 HealthKit。";
+
+// Luna / Vitora Assistant
 "luna.shell.subtitle" = "记录、理解和复盘会在这里逐步完成。";
 "luna.home.prompt" = "今天发生了什么呢？";
 "luna.home.recordCue" = "随时随心，你来说，我来记";
 "luna.record.saved" = "Vitora 已保存这条记录";
 "luna.record.aiUnavailable" = "AI 暂不可用，仍可按你的确认保存。";
 "luna.record.confirmation" = "Vitora 只会把确认后的内容作为上下文。";
+
+// Cycle
 "cycle.shell.subtitle" = "这里展示长期节律背景和能量动态。";

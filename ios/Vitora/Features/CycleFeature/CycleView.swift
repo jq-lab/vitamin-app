@@ -14,19 +14,9 @@ struct CycleView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 14) {
-                    header
+                    cycleTopBar
 
                     CycleReviewInsightCard()
-
-                    EnergyDynamicsCard(
-                        onOpenDetail: { sheet = .energy },
-                        onAskVitora: { openVitora(source: "能量动态", summary: "本周平均 62% · 周三后恢复变慢") }
-                    )
-
-                    CycleInsightSwitcher(
-                        onOpenDetail: { insight in sheet = .insight(insight) },
-                        onAskVitora: { insight in openVitora(source: insight.title, summary: insight.summary) }
-                    )
                 }
                 .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
                 .padding(.top, 4)
@@ -68,6 +58,38 @@ struct CycleView: View {
         }
         .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil || isSharePresented)
         .accessibilityIdentifier("cycle.pivot.surface")
+    }
+
+    private var cycleTopBar: some View {
+        HStack {
+            // 我的 (settings)
+            Button { sheet = .settings } label: {
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .frame(width: 38, height: 38)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("我的")
+            .accessibilityIdentifier("cycle.settings")
+
+            Spacer()
+
+            // 分享
+            Button { presentCycleShareCard() } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .frame(width: 38, height: 38)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("分享周期卡片")
+            .accessibilityIdentifier("cycle.share")
+        }
     }
 
     private var header: some View {
@@ -143,8 +165,6 @@ struct CycleView: View {
                 }
 
                 Spacer(minLength: 0)
-
-                CycleHeaderIllustration()
             }
         }
     }
@@ -236,18 +256,16 @@ private struct CycleReviewInsightCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(alignment: .top, spacing: 10) {
-                    PixelVitoraScene(
-                        state: .idle,
-                        size: 34,
-                        accessory: .none,
-                        showsSparkles: true,
-                        showsBaseShadow: true
-                    )
-                    .frame(width: 50, height: 50)
-                    .allowsHitTesting(false)
+            VStack(alignment: .leading, spacing: 0) {
+                Image("PixelGarden")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(height: 150)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: 26, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 26, style: .continuous))
 
+                VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("这 30 天，Vitora 看见的三件事")
                             .font(.system(size: 18, weight: .bold))
@@ -258,31 +276,47 @@ private struct CycleReviewInsightCard: View {
                             .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                     }
 
-                    Spacer(minLength: 0)
-                }
+                    CycleReviewSnapshotGrid()
 
-                CycleReviewSnapshotGrid()
+                    CyclePhaseDistributionBar()
+                }
+                .padding(14)
             }
-            .padding(14)
-            .background(GlassSurface(cornerRadius: 26, opacity: 0.68, shadowStrength: 0.48, variant: .cleanElevated))
+            .background(
+                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                    .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.88))
+                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.10), radius: 14, x: 0, y: 6)
+            )
+            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
 
             segmentedTabs
 
-            VStack(spacing: 0) {
-                ForEach(rowsForSelectedTab, id: \.title) { row in
-                    CycleReviewInsightRow(row: row)
-                    if row.title != rowsForSelectedTab.last?.title {
-                        Divider()
-                            .overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12))
-                            .padding(.leading, 34)
+            VStack(spacing: 12) {
+                if selectedTab == .cycle {
+                    CyclePeriodTabContent()
+                } else if selectedTab == .trend {
+                    CycleMonthComparisonView()
+                } else {
+                    // Week tab: insight rows + energy curve
+                    VStack(spacing: 0) {
+                        ForEach(rowsForSelectedTab, id: \.title) { row in
+                            CycleReviewInsightRow(row: row)
+                            if row.title != rowsForSelectedTab.last?.title {
+                                Divider()
+                                    .overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12))
+                                    .padding(.leading, 34)
+                            }
+                        }
                     }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(GlassSurface(cornerRadius: 24, opacity: 0.70, shadowStrength: 0.34, variant: .cleanResting))
+
+                    CycleWeeklyEnergyCurve()
                 }
             }
             .id(selectedTab)
             .transition(.opacity)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 8)
-            .background(GlassSurface(cornerRadius: 24, opacity: 0.70, shadowStrength: 0.34, variant: .cleanResting))
         }
     }
 
@@ -357,7 +391,7 @@ private enum CycleReviewTab: String, CaseIterable, Identifiable {
         case .week:
             return "本周"
         case .trend:
-            return "趋势（月）"
+            return "趋势（对比）"
         case .cycle:
             return "周期"
         }
@@ -928,6 +962,673 @@ private enum CycleSheet: Identifiable {
             return "settings"
         case let .insight(insight):
             return "insight.\(insight.id)"
+        }
+    }
+}
+
+// MARK: - 30天成长册
+
+private struct CycleGrowthJournal: View {
+    let currentDay: Int
+    let recordedDays: Set<Int>
+    let confirmedDays: Set<Int>
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
+
+    private var completedCount: Int {
+        (1...30).filter { recordedDays.contains($0) || confirmedDays.contains($0) }.count
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header
+            HStack {
+                Text("30天成长册")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                Spacer()
+
+                Text("\(completedCount) / 30")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(
+                        Capsule().fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.12))
+                    )
+            }
+
+            Text("每天一张能量花卡，回看哪里更像你")
+                .font(.caption)
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+            // Grid
+            LazyVGrid(columns: columns, spacing: 6) {
+                ForEach(1...30, id: \.self) { day in
+                    FlowerDayCell(
+                        day: day,
+                        state: flowerState(for: day),
+                        isCurrent: day == currentDay,
+                        isFuture: day > currentDay
+                    )
+                }
+            }
+
+            // Legend
+            HStack(spacing: 16) {
+                legendItem(emoji: "🌱", label: "花苞", caption: "待确认")
+                legendItem(emoji: "🌸", label: "半开", caption: "已记录")
+                legendItem(emoji: "🌺", label: "盛开", caption: "已反馈")
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 4)
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(Color.white.opacity(0.72), lineWidth: 0.8)
+                )
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 12, x: 0, y: 4)
+        )
+        .accessibilityIdentifier("cycle.growth.journal")
+    }
+
+    private func flowerState(for day: Int) -> FlowerDayCell.FlowerState {
+        if confirmedDays.contains(day) { return .fullBloom }
+        if recordedDays.contains(day) { return .halfBloom }
+        return .bud
+    }
+
+    private func legendItem(emoji: String, label: String, caption: String) -> some View {
+        HStack(spacing: 5) {
+            Text(emoji)
+                .font(.system(size: 16))
+            VStack(alignment: .leading, spacing: 0) {
+                Text(label)
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                Text(caption)
+                    .font(.caption2)
+                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+            }
+        }
+    }
+}
+
+private struct FlowerDayCell: View {
+    enum FlowerState {
+        case bud, halfBloom, fullBloom
+    }
+
+    let day: Int
+    let state: FlowerState
+    let isCurrent: Bool
+    let isFuture: Bool
+
+    private var flowerEmoji: String {
+        if isFuture { return "🪴" }
+        switch state {
+        case .bud: return "🌱"
+        case .halfBloom: return "🌸"
+        case .fullBloom: return "🌺"
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Text("\(day)")
+                .font(.system(size: 11, weight: isCurrent ? .bold : .medium))
+                .foregroundStyle(isCurrent
+                    ? VitoraTheme.ColorToken.actionPrimaryDeep
+                    : (isFuture ? VitoraTheme.ColorToken.tertiaryText : VitoraTheme.ColorToken.strongText))
+
+            Text(flowerEmoji)
+                .font(.system(size: isFuture ? 18 : 22))
+                .opacity(isFuture ? 0.35 : 1)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 58)
+        .background(
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .fill(isCurrent ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.06) : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .stroke(isCurrent ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.52) : Color.clear, lineWidth: 1.5)
+                )
+        )
+        .overlay(alignment: .bottomTrailing) {
+            if isCurrent {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 14))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .offset(x: 2, y: 2)
+            }
+        }
+    }
+}
+
+// MARK: - Weekly Energy Curve
+
+private struct CycleWeeklyEnergyCurve: View {
+    @State private var selectedPoint: Int? = nil
+
+    private struct PointData {
+        let day: String
+        let pct: Int
+        let tag: String
+        let tagColor: Color
+        let relation: String
+        let observation: String
+    }
+
+    private let points: [PointData] = [
+        PointData(day: "周日", pct: 68, tag: "", tagColor: .clear, relation: "状态平稳", observation: "基线水平"),
+        PointData(day: "周一", pct: 48, tag: "低谷", tagColor: Color(red: 0.95, green: 0.72, blue: 0.28), relation: "睡眠偏短 · HRV 回落", observation: "恢复变慢"),
+        PointData(day: "周二", pct: 64, tag: "恢复", tagColor: Color(red: 0.38, green: 0.78, blue: 0.52), relation: "深睡增加", observation: "开始回升"),
+        PointData(day: "周三", pct: 36, tag: "", tagColor: .clear, relation: "睡眠偏短 · HRV 回落", observation: "恢复变慢"),
+        PointData(day: "周四", pct: 82, tag: "高点", tagColor: Color(red: 0.92, green: 0.52, blue: 0.52), relation: "运动 + 深睡充足", observation: "能量峰值"),
+        PointData(day: "周五", pct: 72, tag: "", tagColor: .clear, relation: "节奏平稳", observation: "维持较好"),
+        PointData(day: "周六", pct: 70, tag: "今天", tagColor: Color(red: 0.42, green: 0.62, blue: 0.90), relation: "周期黄体期", observation: "适合留余量"),
+    ]
+
+    private var values: [CGFloat] { points.map { CGFloat($0.pct) / 100.0 } }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            GeometryReader { proxy in
+                let w = proxy.size.width
+                let h = proxy.size.height
+                let padL: CGFloat = 36, padR: CGFloat = 8, padT: CGFloat = 28, padB: CGFloat = 24
+                let chartW = w - padL - padR, chartH = h - padT - padB
+
+                ZStack(alignment: .topLeading) {
+                    // Y-axis
+                    ForEach([("100%", 0.0), ("50%", 0.5), ("0%", 1.0)], id: \.0) { label, frac in
+                        Text(label).font(.system(size: 9, weight: .medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                            .position(x: 16, y: padT + chartH * frac)
+                    }
+
+                    // Grid + curve
+                    Canvas { ctx, _ in
+                        for frac in [0.0, 0.5, 1.0] {
+                            let y = padT + chartH * frac
+                            var p = Path(); p.move(to: CGPoint(x: padL, y: y)); p.addLine(to: CGPoint(x: w - padR, y: y))
+                            ctx.stroke(p, with: .color(Color.gray.opacity(0.12)), style: StrokeStyle(lineWidth: 0.8, dash: [3, 5]))
+                        }
+                        var curve = Path()
+                        for (i, val) in values.enumerated() {
+                            let x = padL + chartW * CGFloat(i) / CGFloat(values.count - 1)
+                            let y = padT + chartH * (1 - val)
+                            if i == 0 { curve.move(to: CGPoint(x: x, y: y)) } else { curve.addLine(to: CGPoint(x: x, y: y)) }
+                        }
+                        ctx.stroke(curve, with: .color(VitoraTheme.ColorToken.actionPrimaryDeep), style: StrokeStyle(lineWidth: 2.5, lineCap: .round, lineJoin: .round))
+                    }
+
+                    // Dots + tap targets
+                    ForEach(0..<points.count, id: \.self) { i in
+                        let pt = points[i]
+                        let x = padL + chartW * CGFloat(i) / CGFloat(values.count - 1)
+                        let y = padT + chartH * (1 - values[i])
+                        let hasTag = !pt.tag.isEmpty
+
+                        // Dot
+                        Circle().fill(hasTag ? pt.tagColor : VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.6))
+                            .frame(width: hasTag ? 10 : 6, height: hasTag ? 10 : 6)
+                            .position(x: x, y: y)
+
+                        // Tag above dot
+                        if hasTag {
+                            Text(pt.tag).font(.system(size: 10, weight: .bold)).foregroundStyle(pt.tagColor)
+                                .position(x: x, y: y - 16)
+                        }
+
+                        // Tap area
+                        Color.clear.frame(width: 44, height: 44).contentShape(Rectangle())
+                            .position(x: x, y: y)
+                            .onTapGesture {
+                                withAnimation(.easeOut(duration: 0.18)) {
+                                    selectedPoint = selectedPoint == i ? nil : i
+                                }
+                            }
+
+                        // X-axis label
+                        Text(pt.day).font(.system(size: 9, weight: .medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                            .position(x: x, y: h - 6)
+                    }
+
+                    // Bubble popup
+                    if let sel = selectedPoint, sel < points.count {
+                        let pt = points[sel]
+                        let x = padL + chartW * CGFloat(sel) / CGFloat(values.count - 1)
+                        let y = padT + chartH * (1 - values[sel])
+                        let bubbleX = min(max(x, 90), w - 90)
+
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack {
+                                Text(pt.day).font(.system(size: 15, weight: .bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
+                                Text("\(pt.pct)%").font(.system(size: 15, weight: .bold)).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                            }
+                            Text("可能关联：\(pt.relation)")
+                                .font(.system(size: 12, weight: .medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            Text("Vitora 看到：\(pt.observation)")
+                                .font(.system(size: 12, weight: .medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            Text("问 Vitora >")
+                                .font(.system(size: 13, weight: .bold)).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                        }
+                        .padding(12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color.white)
+                                .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 4)
+                        )
+                        .position(x: bubbleX, y: max(8, y - 72))
+                        .transition(.opacity)
+                    }
+                }
+            }
+            .frame(height: 190)
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+        .accessibilityIdentifier("cycle.weekly.energy.curve")
+    }
+}
+
+// MARK: - Period Tab Content
+
+private struct CyclePeriodTabContent: View {
+    private let cardBg = VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82)
+    private let cardRadius: CGFloat = 22
+
+    var body: some View {
+        VStack(spacing: 14) {
+            // Combined phase + dominance card
+            phaseOverviewCard
+
+            // Nutrient supplement card
+            nutrientCard
+
+            // CTA
+            Button {} label: {
+                HStack {
+                    Text("告诉 Vitora 这个阶段不准")
+                        .font(.subheadline.weight(.bold))
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                .frame(maxWidth: .infinity).frame(height: 48)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .stroke(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.38), lineWidth: 1.5)
+                        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white.opacity(0.52)))
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    // MARK: Phase Overview (merged phase + dominance)
+
+    private var phaseOverviewCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("当前周期阶段与今天")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+            Text("Day 18 · 黄体期中段")
+                .font(.title2.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            phaseAxis
+
+            Divider().overlay(Color.white.opacity(0.5))
+
+            // Dominance inline
+            HStack(alignment: .top, spacing: 10) {
+                PixelVitoraView(state: .idle, size: 30, showsGlow: false)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(alignment: .firstTextBaseline, spacing: 6) {
+                        Text("黄体期占比")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        Text("57%")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(Color(red: 0.90, green: 0.68, blue: 0.22))
+                    }
+                    Text("能量波动更多出现在黄体期中后段，建议稳定补给。")
+                        .font(.caption)
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: cardRadius, style: .continuous).fill(cardBg)
+                .overlay(RoundedRectangle(cornerRadius: cardRadius, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+    }
+
+    private var phaseAxis: some View {
+        VStack(spacing: 6) {
+            HStack { Spacer(); Text("黄体中段").font(.caption2.weight(.bold)).foregroundStyle(Color(red: 0.90, green: 0.68, blue: 0.22)).padding(.trailing, 12) }
+            GeometryReader { proxy in
+                let w = proxy.size.width
+                ZStack(alignment: .leading) {
+                    HStack(spacing: 0) {
+                        Capsule().fill(Color(red: 0.88, green: 0.42, blue: 0.44)).frame(width: w * 0.18)
+                        Capsule().fill(Color(red: 0.55, green: 0.75, blue: 0.90)).frame(width: w * 0.29)
+                        Capsule().fill(Color(red: 0.60, green: 0.80, blue: 0.56)).frame(width: w * 0.14)
+                        Capsule().fill(Color(red: 0.95, green: 0.78, blue: 0.38)).frame(width: w * 0.39)
+                    }.frame(height: 6)
+                    Circle().fill(Color(red: 0.88, green: 0.42, blue: 0.44)).frame(width: 10, height: 10).position(x: w * 0.0, y: 3)
+                    Circle().fill(Color(red: 0.55, green: 0.75, blue: 0.90)).frame(width: 10, height: 10).position(x: w * 0.18, y: 3)
+                    Circle().fill(Color(red: 0.60, green: 0.80, blue: 0.56)).frame(width: 10, height: 10).position(x: w * 0.47, y: 3)
+                    Circle().fill(Color(red: 0.95, green: 0.78, blue: 0.38)).frame(width: 14, height: 14)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2)).position(x: w * 0.82, y: 3)
+                }
+            }.frame(height: 14)
+            HStack {
+                Text("月经").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                Spacer()
+                Text("卵泡").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                Spacer()
+                Text("排卵").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                Spacer()
+                Text("今天").font(.caption2.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
+            }
+        }
+    }
+
+    // MARK: Nutrient Supplement Card
+
+    private struct NutrientItem {
+        let symbol: String
+        let name: String
+        let effect: String
+        let color: Color
+    }
+
+    private let nutrients: [NutrientItem] = [
+        NutrientItem(symbol: "drop.fill", name: "铁", effect: "补充经期流失，改善疲惫感", color: Color(red: 0.85, green: 0.38, blue: 0.38)),
+        NutrientItem(symbol: "leaf.fill", name: "镁", effect: "缓解痛经和肌肉紧张", color: Color(red: 0.38, green: 0.72, blue: 0.52)),
+        NutrientItem(symbol: "circle.hexagongrid.fill", name: "钙", effect: "稳定情绪，减轻经前不适", color: Color(red: 0.52, green: 0.68, blue: 0.88)),
+        NutrientItem(symbol: "bolt.fill", name: "维生素 B6", effect: "调节激素平衡，减少水肿", color: Color(red: 0.92, green: 0.72, blue: 0.32)),
+    ]
+
+    private var nutrientCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                Text("经期营养补充建议")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+            }
+
+            Text("黄体期中后段，这些微量元素对身体恢复尤为重要：")
+                .font(.caption)
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+            ForEach(nutrients, id: \.name) { item in
+                HStack(spacing: 12) {
+                    Image(systemName: item.symbol)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(item.color)
+                        .frame(width: 36, height: 36)
+                        .background(item.color.opacity(0.14), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        Text(item.effect)
+                            .font(.caption)
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .lineLimit(2)
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: cardRadius, style: .continuous).fill(cardBg)
+                .overlay(RoundedRectangle(cornerRadius: cardRadius, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+    }
+}
+
+
+// MARK: - Phase Distribution Bar
+
+private struct CyclePhaseDistributionBar: View {
+    private let phases: [(label: String, pct: Double, color: Color)] = [
+        ("月经", 0.00, Color(red: 0.88, green: 0.42, blue: 0.44)),
+        ("卵泡", 0.29, Color(red: 0.55, green: 0.75, blue: 0.90)),
+        ("排卵", 0.14, Color(red: 0.72, green: 0.62, blue: 0.88)),
+        ("黄体", 0.57, Color(red: 0.95, green: 0.78, blue: 0.38)),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("阶段分布")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            // Bar
+            GeometryReader { proxy in
+                HStack(spacing: 0) {
+                    ForEach(phases, id: \.label) { phase in
+                        if phase.pct > 0 {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(phase.color)
+                                .frame(width: max(4, proxy.size.width * phase.pct))
+                        }
+                    }
+                }
+                .clipShape(Capsule())
+            }
+            .frame(height: 10)
+
+            // Legend
+            HStack(spacing: 14) {
+                ForEach(phases, id: \.label) { phase in
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(phase.color)
+                            .frame(width: 8, height: 8)
+                        Text("\(phase.label) \(Int(phase.pct * 100))%")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
+                .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+        .accessibilityIdentifier("cycle.phase.distribution")
+    }
+}
+
+// MARK: - Month Comparison View
+
+private struct CycleMonthComparisonView: View {
+    private let cardBg = VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82)
+    private let cardRadius: CGFloat = 22
+
+    private struct CompareRow {
+        let label: String
+        let icon: String
+        let lastMonth: String
+        let thisMonth: String
+        let trend: Trend
+
+        enum Trend { case up, down, same }
+    }
+
+    private let rows: [CompareRow] = [
+        CompareRow(label: "平均能量", icon: "bolt.fill", lastMonth: "58%", thisMonth: "62%", trend: .up),
+        CompareRow(label: "低谷天数", icon: "arrow.down.right", lastMonth: "8 天", thisMonth: "5 天", trend: .up),
+        CompareRow(label: "深睡平均", icon: "moon.fill", lastMonth: "1.2h", thisMonth: "1.5h", trend: .up),
+        CompareRow(label: "HRV 均值", icon: "waveform.path.ecg", lastMonth: "42 ms", thisMonth: "48 ms", trend: .up),
+        CompareRow(label: "痛经天数", icon: "cross.fill", lastMonth: "3 天", thisMonth: "2 天", trend: .up),
+        CompareRow(label: "周期长度", icon: "calendar", lastMonth: "30 天", thisMonth: "28 天", trend: .same),
+    ]
+
+    var body: some View {
+        VStack(spacing: 14) {
+            summaryCard
+            comparisonTable
+            vitoraInsight
+        }
+    }
+
+    private var summaryCard: some View {
+        HStack(spacing: 12) {
+            PixelVitoraView(state: .idle, size: 30, showsGlow: false)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("本月整体优于上月")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                Text("平均能量 ↑4%，低谷天数减少 3 天，深睡改善明显。")
+                    .font(.caption)
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: cardRadius, style: .continuous).fill(cardBg)
+                .overlay(RoundedRectangle(cornerRadius: cardRadius, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+    }
+
+    private var comparisonTable: some View {
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Text("")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("上月")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    .frame(width: 60)
+                Text("本月")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .frame(width: 60)
+                Text("")
+                    .frame(width: 28)
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
+
+            ForEach(rows, id: \.label) { row in
+                VStack(spacing: 0) {
+                    Divider().overlay(Color.white.opacity(0.5))
+                    HStack {
+                        HStack(spacing: 8) {
+                            Image(systemName: row.icon)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                                .frame(width: 24)
+                            Text(row.label)
+                                .font(.subheadline.weight(.medium))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                        Text(row.lastMonth)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                            .frame(width: 60)
+
+                        Text(row.thisMonth)
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            .frame(width: 60)
+
+                        Image(systemName: trendIcon(row.trend))
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(trendColor(row.trend))
+                            .frame(width: 28)
+                    }
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                }
+            }
+        }
+        .background(
+            RoundedRectangle(cornerRadius: cardRadius, style: .continuous).fill(cardBg)
+                .overlay(RoundedRectangle(cornerRadius: cardRadius, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+    }
+
+    private var vitoraInsight: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Vitora 看到的变化")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            VStack(alignment: .leading, spacing: 6) {
+                insightBullet("深睡时长增加约 15 分钟，恢复弹性改善")
+                insightBullet("低谷天从上月 8 天降到 5 天，节奏更稳")
+                insightBullet("痛经天数减少，可能与补铁和轻运动有关")
+                insightBullet("周期长度回到 28 天，接近你的平均水平")
+            }
+        }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: cardRadius, style: .continuous).fill(cardBg)
+                .overlay(RoundedRectangle(cornerRadius: cardRadius, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
+        )
+    }
+
+    private func insightBullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Circle()
+                .fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.6))
+                .frame(width: 5, height: 5)
+                .offset(y: 6)
+            Text(text)
+                .font(.caption)
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func trendIcon(_ trend: CompareRow.Trend) -> String {
+        switch trend {
+        case .up: return "arrow.up.right"
+        case .down: return "arrow.down.right"
+        case .same: return "equal"
+        }
+    }
+
+    private func trendColor(_ trend: CompareRow.Trend) -> Color {
+        switch trend {
+        case .up: return Color(red: 0.28, green: 0.76, blue: 0.52)
+        case .down: return Color(red: 0.92, green: 0.48, blue: 0.42)
+        case .same: return VitoraTheme.ColorToken.tertiaryText
         }
     }
 }

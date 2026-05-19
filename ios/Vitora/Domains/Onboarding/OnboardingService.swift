@@ -2,38 +2,44 @@ import Foundation
 
 struct OnboardingDraft: Equatable {
     var displayLabel: String
+    var authMethod: AuthMethod
     var focusAreas: [FocusArea]
-    var cycleSummary: String
-    var cycleLengthSummary: String
-    var cycleRegularitySummary: String
-    var shouldEstimateCycle: Bool
-    var energyWindowPreference: EnergyWindowPreference
-    var guidanceStyle: VitoraGuidanceStyle
-    var reminderPreference: OnboardingReminderPreference
+    var sportPreferences: [SportPreference]
+    var periodRegularity: PeriodRegularity
+    var lastPeriodDate: Date?
+    var averageCycleLength: Int?
+    var flowAmount: FlowAmount?
+    var hasDysmenorrhea: Bool
+    var dysmenorrheaReminderEnabled: Bool
     var dataSourceAuthorization: DataSourceAuthorization
+    var notificationPermissionState: NotificationPermissionState
 
     init(
         displayLabel: String = "",
+        authMethod: AuthMethod = .local,
         focusAreas: [FocusArea] = [.energy],
-        cycleSummary: String = "",
-        cycleLengthSummary: String = "不确定",
-        cycleRegularitySummary: String = "不确定",
-        shouldEstimateCycle: Bool = true,
-        energyWindowPreference: EnergyWindowPreference = .unsure,
-        guidanceStyle: VitoraGuidanceStyle = .explainFirst,
-        reminderPreference: OnboardingReminderPreference = .eveningReview,
-        dataSourceAuthorization: DataSourceAuthorization = .notAsked()
+        sportPreferences: [SportPreference] = [],
+        periodRegularity: PeriodRegularity = .unsure,
+        lastPeriodDate: Date? = nil,
+        averageCycleLength: Int? = nil,
+        flowAmount: FlowAmount? = nil,
+        hasDysmenorrhea: Bool = false,
+        dysmenorrheaReminderEnabled: Bool = false,
+        dataSourceAuthorization: DataSourceAuthorization = .notAsked(),
+        notificationPermissionState: NotificationPermissionState = .notDetermined
     ) {
         self.displayLabel = displayLabel
+        self.authMethod = authMethod
         self.focusAreas = focusAreas
-        self.cycleSummary = cycleSummary
-        self.cycleLengthSummary = cycleLengthSummary
-        self.cycleRegularitySummary = cycleRegularitySummary
-        self.shouldEstimateCycle = shouldEstimateCycle
-        self.energyWindowPreference = energyWindowPreference
-        self.guidanceStyle = guidanceStyle
-        self.reminderPreference = reminderPreference
+        self.sportPreferences = sportPreferences
+        self.periodRegularity = periodRegularity
+        self.lastPeriodDate = lastPeriodDate
+        self.averageCycleLength = averageCycleLength
+        self.flowAmount = flowAmount
+        self.hasDysmenorrhea = hasDysmenorrhea
+        self.dysmenorrheaReminderEnabled = dysmenorrheaReminderEnabled
         self.dataSourceAuthorization = dataSourceAuthorization
+        self.notificationPermissionState = notificationPermissionState
     }
 
     var trimmedDisplayLabel: String {
@@ -45,10 +51,18 @@ struct OnboardingDraft: Equatable {
     }
 
     var normalizedCycleSummary: String? {
-        let start = cycleSummary.trimmingCharacters(in: .whitespacesAndNewlines)
-        let startText = start.isEmpty ? "上次月经开始日不确定" : "上次月经开始日：\(start)"
-        let estimateText = shouldEstimateCycle ? "先用低数据估算" : "用户希望按提供信息判断"
-        return "\(startText)；平均周期：\(cycleLengthSummary)；规律性：\(cycleRegularitySummary)；\(estimateText)"
+        let startText: String
+        if let date = lastPeriodDate {
+            let fmt = DateFormatter()
+            fmt.dateStyle = .medium
+            startText = "上次月经开始日：\(fmt.string(from: date))"
+        } else {
+            startText = "上次月经开始日不确定"
+        }
+        let lengthText = averageCycleLength.map { "约 \($0) 天" } ?? "不确定"
+        let flowText = flowAmount?.rawValue ?? "未填"
+        let painText = hasDysmenorrhea ? "有痛经" : "无痛经"
+        return "\(startText)；平均周期：\(lengthText)；规律性：\(periodRegularity.rawValue)；经量：\(flowText)；\(painText)"
     }
 }
 
@@ -74,21 +88,28 @@ struct OnboardingService: OnboardingServicing {
     func complete(draft: OnboardingDraft, completedAt: Date = .now) -> OnboardingCompletion {
         let profile = UserProfile(
             displayLabel: draft.trimmedDisplayLabel,
+            authMethod: draft.authMethod,
             createdAt: completedAt,
             updatedAt: completedAt
         )
         let context = OnboardingContext(
             focusAreas: draft.focusAreas.isEmpty ? [.energy] : draft.focusAreas,
-            cycleContext: nil,
+            sportPreferences: draft.sportPreferences,
+            cycleContext: draft.lastPeriodDate.map { CycleContext(anchorDate: $0) },
             cycleSummary: draft.normalizedCycleSummary,
-            energyWindowPreference: draft.energyWindowPreference,
-            guidanceStyle: draft.guidanceStyle,
-            reminderPreference: draft.reminderPreference,
+            periodRegularity: draft.periodRegularity,
+            lastPeriodDate: draft.lastPeriodDate,
+            flowAmount: draft.flowAmount,
+            hasDysmenorrhea: draft.hasDysmenorrhea,
+            dysmenorrheaReminderEnabled: draft.dysmenorrheaReminderEnabled,
+            energyWindowPreference: .unsure,
+            guidanceStyle: .explainFirst,
+            reminderPreference: .eveningReview,
             dataSourceAuthorization: draft.dataSourceAuthorization,
+            notificationPermissionState: draft.notificationPermissionState,
             completedAt: completedAt
         )
         let gateState = gateService.resolveGate(profile: profile, context: context)
-
         return OnboardingCompletion(profile: profile, context: context, gateState: gateState)
     }
 }

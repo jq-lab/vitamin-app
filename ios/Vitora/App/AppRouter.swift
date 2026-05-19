@@ -53,8 +53,8 @@ private struct MainTabShell: View {
                 context: environment.vitoraContext,
                 onClose: environment.dismissPresentation
             )
-            .presentationDetents([.fraction(0.72), .large])
-            .presentationDragIndicator(.visible)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.hidden)
         }
         .sheet(
             isPresented: Binding(

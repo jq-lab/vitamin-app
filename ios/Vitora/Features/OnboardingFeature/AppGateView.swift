@@ -52,12 +52,10 @@ struct AppGateView: View {
     @ViewBuilder
     private var pageContent: some View {
         switch viewModel.step {
-        case .identity:
-            OnboardingIdentityView(viewModel: viewModel)
-        case .context:
-            OnboardingContextView(viewModel: viewModel)
-        case .ready:
-            OnboardingReadyView(viewModel: viewModel) { completion in
+        case .aboutYou:
+            OnboardingAboutYouView(viewModel: viewModel)
+        case .yourBody:
+            OnboardingYourBodyView(viewModel: viewModel) { completion in
                 environment.finishOnboarding(completion)
             }
         }
@@ -109,31 +107,22 @@ struct AppGateView: View {
 
     private var stepLabel: String {
         switch viewModel.step {
-        case .identity: return "STEP 1"
-        case .context: return "STEP 2"
-        case .ready: return "STEP 3"
+        case .aboutYou: return "STEP 1"
+        case .yourBody: return "STEP 2"
         }
     }
 
     private var progressText: String {
         switch viewModel.step {
-        case .identity:
-            "1 / 3"
-        case .context:
-            "2 / 3"
-        case .ready:
-            "3 / 3"
+        case .aboutYou: "1 / 2"
+        case .yourBody: "2 / 2"
         }
     }
 
     private var progressValue: Double {
         switch viewModel.step {
-        case .identity:
-            0.33
-        case .context:
-            0.66
-        case .ready:
-            1.0
+        case .aboutYou: 0.5
+        case .yourBody: 1.0
         }
     }
 }

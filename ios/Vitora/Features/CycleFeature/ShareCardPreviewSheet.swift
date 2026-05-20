@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ShareCardPreviewSheet: View {
     let onClose: () -> Void
+    var showsEveningCard = false
 
     var body: some View {
         ZStack {
@@ -17,11 +18,9 @@ struct ShareCardPreviewSheet: View {
 
                         HStack(spacing: 6) {
                             Text("✦").font(.caption)
-                            Text("🌸").font(.caption)
                             Text("Vitora 分享卡片预览")
                                 .font(.title3.weight(.bold))
                                 .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                            Text("🌸").font(.caption)
                             Text("✦").font(.caption)
                         }
 
@@ -34,7 +33,9 @@ struct ShareCardPreviewSheet: View {
                     // Two cards side by side
                     HStack(alignment: .top, spacing: 12) {
                         morningCard
-                        eveningCard
+                        if showsEveningCard {
+                            eveningCard
+                        }
                     }
                     .padding(.horizontal, 4)
 
@@ -62,13 +63,13 @@ struct ShareCardPreviewSheet: View {
                     .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
                 Spacer()
                 HStack(spacing: 3) {
-                    Text("☀️").font(.caption2)
-                    Text("早安花卡").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    ReviewPixelGlyphView(kind: .sun, tint: Color(red: 246 / 255, green: 175 / 255, blue: 72 / 255), size: 18)
+                    Text("早安卡").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                 }
             }
 
             VStack(spacing: 4) {
-                Text("早安 ☀️")
+                Text("早安")
                     .font(.headline.weight(.bold))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
                 Text("愿你今天从容有余")
@@ -76,32 +77,40 @@ struct ShareCardPreviewSheet: View {
                     .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
             }
 
-            // Pixel garden image
-            Image("PixelGarden")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+            ZStack {
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color(red: 0.82, green: 0.94, blue: 0.68),
+                                Color(red: 0.60, green: 0.80, blue: 0.44),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+
+                ReviewPixelFlowerView(stage: .bloom, palette: .pink, size: 88)
+                    .padding(.top, 10)
+            }
+            .frame(height: 120)
+            .clipShape(RoundedRectangle(cornerRadius: 14))
 
             VStack(spacing: 4) {
-                Text("留白花 · 半开")
+                Text("今日能量 · 68%")
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
 
-                HStack(spacing: 2) {
-                    Text("✦").font(.caption2).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    Text("花语").font(.caption2.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    Text("✦").font(.caption2).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                }
-
-                Text("给自己留一点呼吸的空间，\n也是在照顾明天。")
+                Text("Vitora 正在帮你翻译身体信号")
                     .font(.caption2)
                     .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                     .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.76)
             }
 
             HStack(spacing: 12) {
-                Label("今日 72%", systemImage: "heart.fill")
+                Label("今日 68%", systemImage: "heart.fill")
                     .font(.caption2.weight(.medium))
                     .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
                 Label("黄体期 D19", systemImage: "clock")
@@ -132,13 +141,13 @@ struct ShareCardPreviewSheet: View {
                     .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
                 Spacer()
                 HStack(spacing: 3) {
-                    Text("🌙").font(.caption2)
+                    ReviewPixelGlyphView(kind: .moon, tint: Color(red: 124 / 255, green: 115 / 255, blue: 236 / 255), size: 18)
                     Text("晚安复盘卡").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                 }
             }
 
             VStack(spacing: 4) {
-                Text("今晚复盘 🌙")
+                Text("今晚复盘")
                     .font(.headline.weight(.bold))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
                 Text("回看今天前后的变化")
@@ -154,8 +163,7 @@ struct ShareCardPreviewSheet: View {
                         .background(Color.gray.opacity(0.10), in: Capsule())
                     Text("68").font(.title2.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
                     Text("分").font(.caption2).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    Text("半开").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    Text("🌸").font(.system(size: 28))
+                    ReviewPixelFlowerView(stage: .halfOpen, palette: .pink, size: 34)
                 }
 
                 Image(systemName: "arrow.right")
@@ -172,27 +180,14 @@ struct ShareCardPreviewSheet: View {
                         .padding(.horizontal, 8).padding(.vertical, 4)
                         .background(VitoraTheme.ColorToken.actionPrimaryDeep, in: Capsule())
                     Text("更舒展").font(.caption2.weight(.medium)).foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    Text("🌺").font(.system(size: 28))
+                    ReviewPixelFlowerView(stage: .bloom, palette: .pink, size: 34)
                 }
             }
 
-            Text("今天你保留了下午的恢复时间，\nVitora 又更懂你一点。")
+            Text("Vitora 记录了今天的反馈，\n又更懂你一点。")
                 .font(.caption2)
                 .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
                 .multilineTextAlignment(.center)
-
-            HStack(spacing: 4) {
-                Text("🪴").font(.caption)
-                Text("今晚种下一颗种子")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                Text("✦").font(.caption2).foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-            }
-            .padding(.horizontal, 12).padding(.vertical, 8)
-            .background(
-                Capsule().fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.08))
-                    .overlay(Capsule().stroke(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.22), lineWidth: 0.8))
-            )
 
             Text("Vitora✦")
                 .font(.caption2.weight(.bold))
@@ -217,12 +212,11 @@ struct ShareCardPreviewSheet: View {
                                    startPoint: .topLeading, endPoint: .bottomTrailing)
                 )
                 .frame(width: 48, height: 48)
-                .overlay(Text("🌿").font(.title3))
+                .overlay(Text("✦").font(.title3))
 
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 4) {
-                    Text("分享你的能量花园").font(.subheadline.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    Text("🌱").font(.caption)
+                    Text("分享你的能量日记").font(.subheadline.weight(.bold)).foregroundStyle(VitoraTheme.ColorToken.strongText)
                 }
                 Text("长按保存图片，分享给你的朋友\n一起温柔记录每一天的自己")
                     .font(.caption2)

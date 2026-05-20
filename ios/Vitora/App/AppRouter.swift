@@ -69,9 +69,7 @@ private struct MainTabShell: View {
             EveningReviewSheet(
                 review: environment.eveningReview,
                 learningSignal: environment.reviewLearningSignal,
-                sleepSeed: environment.sleepSeedCard,
                 onSubmit: environment.submitEveningReview,
-                onSelectSeed: environment.selectSleepSeed,
                 onTellVitora: {
                     environment.openVitoraContext(
                         sourceTitle: "晚间复盘",
@@ -120,7 +118,6 @@ private struct GlobalVitoraDock: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var shimmer = false
     @State private var promptIndex = 0
-    @State private var inputFocusTrigger = 0
 
     private let rotatingPrompts = [
         "我可以补充一件事...",
@@ -130,29 +127,29 @@ private struct GlobalVitoraDock: View {
     private let promptTimer = Timer.publish(every: 120, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        VStack(spacing: selectedTab == .vitora ? 7 : 0) {
-            dockTopRow
+        VStack(spacing: selectedTab == .vitora ? 8 : 0) {
+            if selectedTab == .vitora {
+                VitoraInputShortcutBar {
+                    VitoraInputDock(
+                        text: $viewModel.inputText,
+                        placeholder: rotatingPrompts[promptIndex],
+                        style: .assistantFloating,
+                        isVoiceRecording: viewModel.isVoiceRecording,
+                        voiceSignal: viewModel.voiceSignal,
+                        isProcessing: viewModel.isProcessing,
+                        exposesAccessibility: true,
+                        onVoice: viewModel.toggleVoice,
+                        onSend: submit
+                    )
+                }
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
 
-            VitoraInputDock(
-                text: $viewModel.inputText,
-                placeholder: rotatingPrompts[promptIndex],
-                isVoiceRecording: viewModel.isVoiceRecording,
-                voiceSignal: viewModel.voiceSignal,
-                focusTrigger: selectedTab == .vitora ? inputFocusTrigger : 0,
-                exposesAccessibility: selectedTab == .vitora,
-                onVoice: viewModel.toggleVoice,
-                onSend: submit
-            )
-            .frame(height: selectedTab == .vitora ? VitoraTheme.Size.touchTargetMin + 16 : 0)
-            .opacity(selectedTab == .vitora ? 1 : 0)
-            .allowsHitTesting(selectedTab == .vitora)
-            .accessibilityHidden(selectedTab != .vitora)
-            .clipped()
-            .transition(.opacity.combined(with: .move(edge: .bottom)))
+            dockTopRow
         }
         .padding(.horizontal, 8)
-        .padding(.top, 7)
-        .padding(.bottom, selectedTab == .vitora ? 7 : 6)
+        .padding(.top, selectedTab == .vitora ? 8 : 7)
+        .padding(.bottom, 6)
         .background(alignment: .bottom) {
             dockAmbientGlow
         }
@@ -204,7 +201,6 @@ private struct GlobalVitoraDock: View {
 
             Button {
                 onSelectTab(.vitora)
-                inputFocusTrigger += 1
             } label: {
                 HStack(spacing: 6) {
                     VitoraFaceTabButton(isSelected: selectedTab == .vitora)
@@ -440,7 +436,7 @@ private struct GlobalVitoraDock: View {
                         endPoint: .trailing
                     )
                 )
-                .frame(width: 238, height: selectedTab == .vitora ? 108 : 52)
+                .frame(width: 248, height: selectedTab == .vitora ? 126 : 52)
                 .blur(radius: selectedTab == .vitora ? 20 : 15)
                 .offset(y: 10)
 
@@ -458,6 +454,17 @@ private struct GlobalVitoraDock: View {
             return
         }
         onSubmitted()
+    }
+}
+
+private struct VitoraInputShortcutBar<Content: View>: View {
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        content()
+            .frame(maxWidth: 370)
+            .accessibilityElement(children: .contain)
+            .accessibilityIdentifier("vitora.input.shortcutBar")
     }
 }
 

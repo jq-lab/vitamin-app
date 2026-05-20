@@ -9,8 +9,6 @@ final class AppEnvironment: ObservableObject {
     @Published private(set) var vitoraContext = VitoraContextPayload(sourceTitle: "Today", sourceSummary: "68% · 14:00 可能低谷")
     @Published private(set) var eveningReview = EveningReview(day: .now, status: .unavailable)
     @Published private(set) var reviewLearningSignal: VitoraLearningSignal?
-    @Published private(set) var sleepSeedCard: SleepSeedCard? = .morningHalfOpenSample
-    @Published private(set) var cycleSeedEvidence: [SleepSeedCard] = SleepSeedCard.cycleEvidenceSamples
     @Published private(set) var selectedCycleDay = 18
     @Published private(set) var selectedAuraVariant: DynamicAuraVariant = .luteal
 
@@ -90,6 +88,18 @@ final class AppEnvironment: ObservableObject {
         eveningReview.status == .available
     }
 
+    var canShowEveningReviewAnalysis: Bool {
+        eveningReview.status == .available || eveningReview.status == .submitted
+    }
+
+    func openEveningReviewInVitora() {
+        guard canShowEveningReviewAnalysis else {
+            return
+        }
+        navigationState.dismissPresentation()
+        navigationState.selectedTab = .vitora
+    }
+
     func openEveningReview() {
         guard eveningReview.status == .available || eveningReview.status == .submitted else {
             return
@@ -107,41 +117,6 @@ final class AppEnvironment: ObservableObject {
         )
         eveningReview = submitted
         reviewLearningSignal = learningSignalService.makeSignal(review: submitted, intention: nil)
-    }
-
-    func selectSleepSeed(_ kind: SleepSeedKind) {
-        sleepSeedCard = SleepSeedCard(
-            day: eveningReview.day,
-            kind: kind,
-            growthState: .seed,
-            energyPercent: 68,
-            reason: "今晚会结合休息、HRV 和明早感受来观察",
-            todayAction: kind.todayAction,
-            feedbackSummary: "等待明早观察",
-            learnedSignal: "这颗种子会帮助 Vitora 验证明天哪类建议更适合你。"
-        )
-    }
-
-    func nurtureSleepSeedFromTodaySuggestion() {
-        let bloomed = (sleepSeedCard ?? .morningHalfOpenSample)
-            .updatingGrowthState(.bloom)
-        let updatedSeed = SleepSeedCard(
-            id: bloomed.id,
-            day: bloomed.day,
-            kind: bloomed.kind,
-            growthState: bloomed.growthState,
-            energyPercent: bloomed.energyPercent,
-            reason: "你愿意试今天的低负担建议，种子已继续打开",
-            todayAction: bloomed.todayAction,
-            feedbackSummary: bloomed.feedbackSummary,
-            learnedSignal: "晚间复盘会确认这条建议是否真的帮到你。"
-        )
-        sleepSeedCard = updatedSeed
-
-        if !cycleSeedEvidence.contains(where: { $0.id == bloomed.id }) {
-            cycleSeedEvidence.insert(updatedSeed, at: 0)
-            cycleSeedEvidence = Array(cycleSeedEvidence.prefix(8))
-        }
     }
 
     func dismissPresentation() {
@@ -166,8 +141,6 @@ final class AppEnvironment: ObservableObject {
         route = .onboarding
         eveningReview = EveningReview(day: .now, status: .unavailable)
         reviewLearningSignal = nil
-        sleepSeedCard = .morningHalfOpenSample
-        cycleSeedEvidence = SleepSeedCard.cycleEvidenceSamples
     }
 
     private func seedEveningReviewForUITests() {

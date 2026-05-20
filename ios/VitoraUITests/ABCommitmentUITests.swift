@@ -2,7 +2,7 @@ import XCTest
 
 final class ABCommitmentUITests: XCTestCase {
     @MainActor
-    func testSelectingABCreatesDurableIntentionAndReminderPreference() {
+    func testReminderSheetKeepsTodayIntentionAndSelectableTimes() {
         let app = XCUIApplication()
         app.launchArguments += [
             "-AppleLanguages", "(zh-Hans)",
@@ -12,26 +12,22 @@ final class ABCommitmentUITests: XCTestCase {
         ]
         app.launch()
 
-        app.buttons["today.suggestion.try"].tap()
+        app.buttons["today.suggestion.remind"].tap()
 
-        XCTAssertTrue(app.staticTexts["两个可选方向"].waitForExistence(timeout: 3))
-        app.buttons["today.ab.choice.a"].tap()
+        XCTAssertTrue(app.staticTexts["设置提醒"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["午间补能"].exists)
+        XCTAssertTrue(app.staticTexts["智能提醒"].exists)
+        XCTAssertTrue(app.buttons["today.reminder.select.0"].exists)
+        XCTAssertTrue(app.buttons["today.reminder.select.1"].exists)
+        XCTAssertTrue(app.buttons["today.reminder.save"].exists)
 
-        XCTAssertTrue(app.staticTexts["今天的小尝试"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["提前加餐 + 短走动"].exists)
-        XCTAssertTrue(app.staticTexts["晚间会用这个选择做一次轻复盘"].exists)
-        XCTAssertTrue(app.switches["today.reminder.toggle"].exists)
-
-        app.switches["today.reminder.toggle"].tap()
-        XCTAssertTrue(app.staticTexts["已准备轻提醒"].waitForExistence(timeout: 3))
-
-        app.buttons["today.analysis.close"].tap()
-        XCTAssertTrue(app.staticTexts["今天的小尝试"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["提前加餐 + 短走动"].exists)
+        app.buttons["today.reminder.select.1"].tap()
+        app.buttons["today.reminder.save"].tap()
+        XCTAssertTrue(app.staticTexts["智能监测"].waitForExistence(timeout: 3))
     }
 
     @MainActor
-    func testNotSuitableFeedbackDoesNotCreatePressureCopy() {
+    func testReminderFlowDoesNotCreatePressureCopy() {
         let app = XCUIApplication()
         app.launchArguments += [
             "-AppleLanguages", "(zh-Hans)",
@@ -41,11 +37,11 @@ final class ABCommitmentUITests: XCTestCase {
         ]
         app.launch()
 
-        app.buttons["today.suggestion.try"].tap()
-        XCTAssertTrue(app.staticTexts["两个可选方向"].waitForExistence(timeout: 3))
-        app.buttons["today.ab.notSuitable"].tap()
+        app.buttons["today.suggestion.remind"].tap()
+        XCTAssertTrue(app.staticTexts["设置提醒"].waitForExistence(timeout: 3))
+        app.buttons["稍后再说"].tap()
 
-        XCTAssertTrue(app.staticTexts["今天先不选也可以"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["智能监测"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.staticTexts["未完成"].exists)
         XCTAssertFalse(app.staticTexts["连续"].exists)
     }

@@ -80,7 +80,10 @@ struct CycleView: View {
             case .hormoneCalendar:
                 HormoneCalendarView(onClose: { self.sheet = nil })
             case .sharePreview:
-                ShareCardPreviewSheet(onClose: { self.sheet = nil })
+                ShareCardPreviewSheet(
+                    onClose: { self.sheet = nil },
+                    showsEveningCard: environment.canShowEveningReviewAnalysis
+                )
             }
         }
         .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil || isSharePresented)
@@ -297,14 +300,6 @@ private struct CycleReviewInsightCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                Image("PixelGarden")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(height: 150)
-                    .frame(maxWidth: .infinity)
-                    .clipped()
-                    .clipShape(UnevenRoundedRectangle(topLeadingRadius: 26, bottomLeadingRadius: 0, bottomTrailingRadius: 0, topTrailingRadius: 26, style: .continuous))
-
                 VStack(alignment: .leading, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("这 30 天，Vitora 看见的三件事")

@@ -20,6 +20,8 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["global.record.quick"].exists)
         XCTAssertTrue(app.otherElements["primary.tabbar"].exists)
         XCTAssertTrue(app.otherElements["global.vitora.dock"].exists)
+        XCTAssertTrue(app.otherElements["vitora.input.shortcutBar"].exists)
+        XCTAssertTrue(app.otherElements["vitora.input.dock"].exists)
         XCTAssertFalse(app.buttons["tab.vitora.embedded"].exists)
         XCTAssertFalse(app.buttons["vitora.input.cycle"].exists)
         XCTAssertFalse(app.buttons["vitora.input.plus"].exists)
@@ -44,8 +46,6 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertTrue(app.buttons["vitora.chat.topic.周期"].exists)
         XCTAssertTrue(app.buttons["vitora.chat.topic.睡眠"].exists)
         XCTAssertTrue(app.buttons["vitora.chat.topic.营养"].exists)
-        XCTAssertFalse(app.buttons["vitora.sleepSeed.explain"].exists)
-        XCTAssertFalse(app.staticTexts["为什么这颗种子半开"].exists)
         XCTAssertFalse(app.buttons["vitora.chat.topic.情绪"].exists)
         XCTAssertFalse(app.buttons["vitora.chat.topic.能量"].exists)
         XCTAssertFalse(app.otherElements["vitora.cycle.context.report"].exists)
@@ -87,7 +87,7 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
     }
 
     @MainActor
-    func testVitoraTabAutoFocusesGlobalInput() {
+    func testVitoraTabSwitchShowsInputWithoutAutoFocusUntilInputTap() {
         let app = launchPivotApp()
 
         XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
@@ -96,6 +96,8 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
 
         let input = app.textFields["vitora.input.text"]
         XCTAssertTrue(input.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.otherElements["vitora.input.shortcutBar"].exists)
+        XCTAssertEqual(app.keyboards.count, 0)
         XCTAssertFalse(app.buttons["vitora.input.plus"].exists)
         input.tap()
         input.typeText("focus test")
@@ -193,12 +195,14 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
 
         app.buttons["tab.vitora"].tap()
         XCTAssertTrue(app.textFields["vitora.input.text"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.otherElements["vitora.input.shortcutBar"].exists)
         XCTAssertFalse(app.buttons["vitora.input.plus"].exists)
 
         app.textFields["vitora.input.text"].tap()
         app.textFields["vitora.input.text"].typeText("今天想补充睡眠")
         app.buttons["vitora.input.send"].tap()
 
+        XCTAssertTrue(app.otherElements["vitora.input.processing"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts["Vitora 知道"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["今天想补充睡眠"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["更新后的判断"].waitForExistence(timeout: 3))

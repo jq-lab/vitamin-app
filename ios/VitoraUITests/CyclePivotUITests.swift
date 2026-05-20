@@ -30,10 +30,9 @@ final class CyclePivotUITests: XCTestCase {
         XCTAssertTrue(app.buttons["cycle.insight.tab.adjustment"].exists)
         app.buttons["cycle.insight.tab.support"].tap()
         XCTAssertTrue(app.staticTexts["轻量运动"].waitForExistence(timeout: 2))
-        XCTAssertFalse(app.otherElements["cycle.seedEvidence.card"].exists)
-        XCTAssertFalse(app.staticTexts["本周期花架证据"].exists)
-        XCTAssertFalse(app.staticTexts["建议 → 反馈"].exists)
-        XCTAssertFalse(app.staticTexts["轻走后反馈更好"].exists)
+        if !app.buttons["cycle.insight.open"].exists {
+            app.swipeDown()
+        }
         app.buttons["cycle.insight.open"].tap()
         XCTAssertTrue(app.otherElements["cycle.insight.detail.sheet"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["今天怎么联动"].exists)

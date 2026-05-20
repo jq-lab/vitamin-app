@@ -36,18 +36,8 @@ struct VitoraAssistantSurfaceView: View {
 
                         VitoraFocusPageLinks(
                             showsReview: environment.isEveningReviewAvailable,
-                            hasSleepSeed: environment.sleepSeedCard != nil,
                             onOpenCalendar: { showsCycleCalendar = true },
-                            onOpenReview: environment.openEveningReview,
-                            onOpenSeed: {
-                                if let seed = environment.sleepSeedCard {
-                                    environment.openVitoraContext(
-                                        sourceTitle: "睡眠种子",
-                                        sourceSummary: "\(seed.kind.title) · \(seed.growthState.displayText)",
-                                        prompt: "帮我解释这颗种子为什么是这个状态，以及今天怎么调整。"
-                                    )
-                                }
-                            }
+                            onOpenReview: environment.openEveningReviewInVitora
                         )
                         .transition(.opacity.combined(with: .move(edge: .top)))
                     } else {
@@ -109,9 +99,18 @@ struct VitoraAssistantSurfaceView: View {
                         CapabilityFeedbackCard(feedback: feedback)
                     }
 
-                    if activeTopicCard != "周期", environment.isEveningReviewAvailable {
-                        EveningReviewEntryCard(
-                            onOpen: environment.openEveningReview
+                    if activeTopicCard != "周期", environment.canShowEveningReviewAnalysis {
+                        EveningReviewAnalysisCard(
+                            review: environment.eveningReview,
+                            learningSignal: environment.reviewLearningSignal,
+                            onFeedback: environment.submitEveningReview,
+                            onTellVitora: {
+                                environment.openVitoraContext(
+                                    sourceTitle: "晚间复盘",
+                                    sourceSummary: environment.eveningReview.afterSummary.isEmpty ? environment.eveningReview.beforeSummary : environment.eveningReview.afterSummary,
+                                    prompt: "你可以补充今天这个建议后来有没有改变你的状态。"
+                                )
+                            }
                         )
                     }
 
@@ -367,10 +366,8 @@ private struct ChatBubbleTail: Shape {
 
 private struct VitoraFocusPageLinks: View {
     let showsReview: Bool
-    let hasSleepSeed: Bool
     let onOpenCalendar: () -> Void
     let onOpenReview: () -> Void
-    let onOpenSeed: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
@@ -391,17 +388,6 @@ private struct VitoraFocusPageLinks: View {
                     symbol: "moon.stars.fill",
                     tint: Color(red: 128 / 255, green: 120 / 255, blue: 236 / 255),
                     action: onOpenReview
-                )
-            }
-
-            if hasSleepSeed {
-                pageLink(
-                    identifier: "vitora.focus.page.seed",
-                    title: "睡眠种子",
-                    subtitle: "为什么半开",
-                    symbol: "leaf.fill",
-                    tint: Color(red: 98 / 255, green: 184 / 255, blue: 112 / 255),
-                    action: onOpenSeed
                 )
             }
         }
@@ -721,36 +707,260 @@ private struct CapabilityFeedbackCard: View {
     }
 }
 
-private struct EveningReviewEntryCard: View {
-    let onOpen: () -> Void
+private struct EveningReviewAnalysisCard: View {
+    let review: EveningReview
+    let learningSignal: VitoraLearningSignal?
+    let onFeedback: (EveningReviewFeedback, String?) -> Void
+    let onTellVitora: () -> Void
 
     var body: some View {
-        Button(action: onOpen) {
-            HStack(alignment: .center, spacing: 14) {
-                PixelVitoraView(state: .confirming, size: 44, showsGlow: true)
-                    .frame(width: 54, height: 54)
+        VStack(alignment: .leading, spacing: 14) {
+            header
+            analysisBlock
+            feedbackBlock
 
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("今晚复盘")
-                        .font(.headline.weight(.semibold))
+            if hasFeedback {
+                incubationBlock
+            }
+
+            Button(action: onTellVitora) {
+                HStack(spacing: 9) {
+                    ReviewPixelGlyphView(kind: .chat, tint: VitoraTheme.ColorToken.actionPrimaryDeep, size: 26)
+                    Text("补充今天的真实感受")
+                        .font(.subheadline.weight(.bold))
                         .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                }
+                .padding(.horizontal, 14)
+                .frame(height: 48)
+                .background(VitoraTheme.ColorToken.paper.opacity(0.48), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).stroke(Color.white.opacity(0.58), lineWidth: 0.65))
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("vitora.review.tell.inline")
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.78))
+                .background(.ultraThinMaterial.opacity(0.18), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.12), radius: 18, x: 0, y: 8)
+        )
+        .accessibilityIdentifier("vitora.review.analysis.card")
+    }
 
-                    Text("回看今天的建议和晚间感受，让 Vitora 学会更贴近你。")
-                        .font(.footnote)
-                        .lineSpacing(2)
-                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+    private var header: some View {
+        HStack(alignment: .center, spacing: 12) {
+            ReviewPixelGlyphView(
+                kind: .moon,
+                tint: Color(red: 124 / 255, green: 115 / 255, blue: 236 / 255),
+                size: 38
+            )
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text("晚间复盘")
+                    .font(.title3.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                Text("Vitora 根据今日能量、提醒偏好和已保存选择整理")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(2)
+            }
+
+            Spacer(minLength: 8)
+        }
+    }
+
+    private var analysisBlock: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("早上预测 vs 晚上感受")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            HStack(alignment: .top, spacing: 10) {
+                VStack(spacing: 16) {
+                    timelineIcon(.sun, tint: Color(red: 247 / 255, green: 180 / 255, blue: 62 / 255))
+                    timelineIcon(.idea, tint: Color(red: 148 / 255, green: 117 / 255, blue: 238 / 255))
+                    timelineIcon(.chart, tint: VitoraTheme.ColorToken.actionPrimaryDeep)
+                    timelineIcon(.moon, tint: Color(red: 124 / 255, green: 115 / 255, blue: 236 / 255))
                 }
 
-                Spacer()
+                VStack(alignment: .leading, spacing: 11) {
+                    analysisRow(
+                        title: "早上 Vitora 判断",
+                        value: "68% · 下午容易掉电",
+                        trailing: EmptyView()
+                    )
 
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    Divider().opacity(0.32)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("今天建议")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        HStack(spacing: 8) {
+                            suggestionPill(kind: .fork, text: "补一份蛋白", tint: Color(red: 148 / 255, green: 117 / 255, blue: 238 / 255))
+                            suggestionPill(kind: .walk, text: "10 分钟轻走", tint: VitoraTheme.ColorToken.actionPrimaryDeep)
+                        }
+                    }
+
+                    Divider().opacity(0.32)
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text("你今天用过的设定")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        compactFact(kind: .chart, text: "查看了今日数据")
+                        compactFact(kind: .bell, text: "保存了提醒偏好")
+                        compactFact(kind: .chat, text: hasFeedback ? "已反馈：\(submittedFeedback?.displayText ?? "有帮助")" : "反馈待确认")
+                    }
+
+                    Divider().opacity(0.32)
+
+                    Text(learningSignal?.summary ?? "Vitora 会用这次反馈判断，轻走和留余量是不是更像你。")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .lineSpacing(3)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(14)
-            .background(GlassSurface(cornerRadius: 22, opacity: 0.60, shadowStrength: 0.64, variant: .cleanResting))
+        }
+        .padding(14)
+        .background(GlassSurface(cornerRadius: 22, opacity: 0.58, shadowStrength: 0.30, variant: .cleanResting))
+    }
+
+    private var feedbackBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("晚上你的反馈")
+                .font(.headline.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            HStack(spacing: 9) {
+                feedbackButton(.helpful, kind: .check)
+                feedbackButton(.neutral, kind: .clock)
+                feedbackButton(.notSuitable, kind: .chat)
+            }
+        }
+    }
+
+    private var incubationBlock: some View {
+        VStack(alignment: .leading, spacing: 13) {
+            HStack(spacing: 10) {
+                ReviewPixelGlyphView(kind: .water, tint: VitoraTheme.ColorToken.auraCyan, size: 28)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("复盘已记录")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("Vitora 会根据反馈优化后续建议")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+            }
+
+            Text(learningSignal?.summary ?? "Vitora 会用这次反馈判断哪类建议更像你。")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .lineSpacing(3)
+        }
+        .padding(14)
+        .background(GlassSurface(cornerRadius: 22, opacity: 0.60, shadowStrength: 0.30, variant: .cleanElevated))
+    }
+
+    private var hasFeedback: Bool {
+        review.status == .submitted || submittedFeedback != nil
+    }
+
+    private var submittedFeedback: EveningReviewFeedback? {
+        [.helpful, .neutral, .notSuitable].first { review.afterSummary.contains($0.displayText) }
+    }
+
+    private func timelineIcon(_ kind: ReviewPixelGlyphKind, tint: Color) -> some View {
+        VStack(spacing: 0) {
+            ReviewPixelGlyphView(kind: kind, tint: tint, size: 32)
+            if kind != .moon {
+                Rectangle()
+                    .fill(Color.gray.opacity(0.18))
+                    .frame(width: 2, height: 18)
+            }
+        }
+    }
+
+    private func analysisRow<Trailing: View>(title: String, value: String, trailing: Trailing) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                Text(value)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            }
+            Spacer()
+            trailing
+        }
+    }
+
+    private func suggestionPill(kind: ReviewPixelGlyphKind, text: String, tint: Color) -> some View {
+        HStack(spacing: 6) {
+            ReviewPixelGlyphView(kind: kind, tint: tint, size: 24)
+            Text(text)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+        }
+        .padding(.leading, 7)
+        .padding(.trailing, 10)
+        .frame(height: 36)
+        .background(VitoraTheme.ColorToken.paper.opacity(0.52), in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.62), lineWidth: 0.6))
+    }
+
+    private func compactFact(kind: ReviewPixelGlyphKind, text: String) -> some View {
+        HStack(spacing: 7) {
+            ReviewPixelGlyphView(kind: kind, tint: VitoraTheme.ColorToken.actionPrimaryDeep, size: 20)
+            Text(text)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+        }
+    }
+
+    private func feedbackButton(_ feedback: EveningReviewFeedback, kind: ReviewPixelGlyphKind) -> some View {
+        let isSelected = submittedFeedback == feedback
+
+        return Button {
+            onFeedback(feedback, nil)
+        } label: {
+            VStack(spacing: 5) {
+                ReviewPixelGlyphView(
+                    kind: kind,
+                    tint: isSelected ? VitoraTheme.ColorToken.actionPrimaryDeep : VitoraTheme.ColorToken.secondaryText,
+                    size: 28
+                )
+                Text(feedback.displayText)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(isSelected ? VitoraTheme.ColorToken.actionPrimaryDeep : VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 58)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(isSelected ? VitoraTheme.ColorToken.actionPrimarySoft.opacity(0.72) : VitoraTheme.ColorToken.paper.opacity(0.48))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .stroke(isSelected ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.44) : Color.white.opacity(0.58), lineWidth: 0.8)
+            )
         }
         .buttonStyle(.plain)
-        .accessibilityIdentifier("vitora.review.open")
+        .accessibilityIdentifier("vitora.review.feedback.inline.\(feedback.rawValue)")
     }
+
 }

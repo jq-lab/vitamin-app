@@ -7,9 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		SHAR001 /* ShareCardPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAR002 /* ShareCardPreviewSheet.swift */; };
-		HCAL001 /* HormoneCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HCAL002 /* HormoneCalendarView.swift */; };
-		SEED001 /* SeedPlantingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SEED002 /* SeedPlantingSheet.swift */; };
 		9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A94F0D36DA4A0187511CC119 /* ExpoModulesProvider.swift */; };
 		A10000000000000000000001 /* VitoraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* VitoraApp.swift */; };
 		A10000000000000000000002 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* AppEnvironment.swift */; };
@@ -125,6 +122,7 @@
 		H30000000000000000000006 /* AskableSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000006 /* AskableSurfaceUITests.swift */; };
 		H30000000000000000000007 /* VisualLanguageSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000007 /* VisualLanguageSmokeTests.swift */; };
 		H30000000000000000000008 /* LegacyLunaTextScanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000008 /* LegacyLunaTextScanTests.swift */; };
+		HCAL001 /* HormoneCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HCAL002 /* HormoneCalendarView.swift */; };
 		I10000000000000000000001 /* EveningReviewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000001 /* EveningReviewService.swift */; };
 		I10000000000000000000002 /* VitoraLearningSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000002 /* VitoraLearningSignalService.swift */; };
 		I10000000000000000000003 /* EveningReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000003 /* EveningReviewSheet.swift */; };
@@ -153,6 +151,7 @@
 		L30000000000000000000002 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L40000000000000000000002 /* AccessibilityUITests.swift */; };
 		M10000000000000000000001 /* DynamicAuraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000001 /* DynamicAuraBackground.swift */; };
 		M10000000000000000000002 /* DynamicAura in Resources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000002 /* DynamicAura */; };
+		SHAR001 /* ShareCardPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAR002 /* ShareCardPreviewSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -173,9 +172,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		SHAR002 /* ShareCardPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewSheet.swift; sourceTree = "<group>"; };
-		HCAL002 /* HormoneCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormoneCalendarView.swift; sourceTree = "<group>"; };
-		SEED002 /* SeedPlantingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedPlantingSheet.swift; sourceTree = "<group>"; };
 		2D8BD0E6DB1EF0BFAA9AC70A /* Pods-Vitora.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.debug.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.debug.xcconfig"; sourceTree = "<group>"; };
 		58A4EB357FBA685658458C76 /* Pods-Vitora.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Vitora.release.xcconfig"; path = "Target Support Files/Pods-Vitora/Pods-Vitora.release.xcconfig"; sourceTree = "<group>"; };
 		A20000000000000000000001 /* VitoraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraApp.swift; sourceTree = "<group>"; };
@@ -296,6 +292,7 @@
 		H40000000000000000000006 /* AskableSurfaceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskableSurfaceUITests.swift; sourceTree = "<group>"; };
 		H40000000000000000000007 /* VisualLanguageSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualLanguageSmokeTests.swift; sourceTree = "<group>"; };
 		H40000000000000000000008 /* LegacyLunaTextScanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLunaTextScanTests.swift; sourceTree = "<group>"; };
+		HCAL002 /* HormoneCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormoneCalendarView.swift; sourceTree = "<group>"; };
 		I20000000000000000000001 /* EveningReviewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewService.swift; sourceTree = "<group>"; };
 		I20000000000000000000002 /* VitoraLearningSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraLearningSignalService.swift; sourceTree = "<group>"; };
 		I20000000000000000000003 /* EveningReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewSheet.swift; sourceTree = "<group>"; };
@@ -324,6 +321,7 @@
 		L40000000000000000000002 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
 		M20000000000000000000001 /* DynamicAuraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicAuraBackground.swift; sourceTree = "<group>"; };
 		M20000000000000000000002 /* DynamicAura */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DynamicAura; sourceTree = "<group>"; };
+		SHAR002 /* ShareCardPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -684,7 +682,6 @@
 				E20000000000000000000007 /* TodayAnalysisSheet.swift */,
 				E20000000000000000000008 /* FullEnergyRitualView.swift */,
 				E20000000000000000000009 /* TodayView.swift */,
-				SEED002 /* SeedPlantingSheet.swift */,
 				H20000000000000000000004 /* TodayStatusCard.swift */,
 				H20000000000000000000019 /* CalibrationChips.swift */,
 				H20000000000000000000005 /* BodyFactorTiles.swift */,
@@ -1047,7 +1044,6 @@
 				E10000000000000000000007 /* TodayAnalysisSheet.swift in Sources */,
 				E10000000000000000000008 /* FullEnergyRitualView.swift in Sources */,
 				E10000000000000000000009 /* TodayView.swift in Sources */,
-				SEED001 /* SeedPlantingSheet.swift in Sources */,
 				H10000000000000000000004 /* TodayStatusCard.swift in Sources */,
 				H10000000000000000000019 /* CalibrationChips.swift in Sources */,
 				H10000000000000000000005 /* BodyFactorTiles.swift in Sources */,

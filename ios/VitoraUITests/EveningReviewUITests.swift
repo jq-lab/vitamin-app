@@ -5,18 +5,20 @@ final class EveningReviewUITests: XCTestCase {
     func testEveningReviewShowsBeforeAfterFeedbackAndLearningSignal() {
         let app = launchReviewApp()
 
-        app.swipeUp()
-        app.buttons["today.evening.review.card"].tap()
+        app.buttons["tab.vitora"].tap()
+        XCTAssertTrue(app.otherElements["vitora.assistant.surface"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.otherElements["vitora.review.sheet"].exists)
+        XCTAssertTrue(app.buttons["vitora.review.capsule"].waitForExistence(timeout: 3))
+        app.buttons["vitora.review.capsule"].tap()
 
         XCTAssertTrue(app.staticTexts["今晚复盘"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.descendants(matching: .any)["vitora.review.analysis.card"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["今日理解开放度"].exists)
-        XCTAssertTrue(app.staticTexts["早上预测 vs 晚上感受"].exists)
+        XCTAssertTrue(app.otherElements["vitora.review.sheet"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["今天 Vitora 给过这个建议："].exists)
         XCTAssertTrue(app.staticTexts["早上"].exists)
-        XCTAssertTrue(app.staticTexts["晚上你的反馈"].exists)
+        XCTAssertTrue(app.staticTexts["晚间感受"].exists)
         XCTAssertFalse(app.staticTexts["完成了吗"].exists)
 
-        app.buttons["vitora.review.feedback.inline.helpful"].tap()
+        app.buttons["vitora.review.feedback.helpful"].tap()
     }
 
     @MainActor

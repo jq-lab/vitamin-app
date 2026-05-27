@@ -8,24 +8,29 @@ final class OnboardingDomainTests: XCTestCase {
         XCTAssertEqual(service.resolveGate(profile: nil, dataSource: .notAsked()), .needsOnboarding)
     }
 
+    @MainActor
+    func testSpecialConditionNoneSpecialClearsOthers() {
+        let viewModel = OnboardingViewModel()
+
+        viewModel.toggleSpecialCondition(.tryingToConceive)
+        viewModel.toggleSpecialCondition(.pcos)
+        XCTAssertEqual(viewModel.selectedSpecialConditions, [.tryingToConceive, .pcos])
+
+        viewModel.toggleSpecialCondition(.noneSpecial)
+        XCTAssertEqual(viewModel.selectedSpecialConditions, [.noneSpecial])
+    }
+
     func testCompletionWithSkippedHealthKitAllowsLowDataMainTabs() {
         let service = OnboardingService()
         let completion = service.complete(
             draft: OnboardingDraft(
                 displayLabel: "  小维  ",
-                focusAreas: [.energy],
-                energyWindowPreference: .afternoon,
-                guidanceStyle: .gentleSuggestion,
-                reminderPreference: .eveningReview,
                 dataSourceAuthorization: DataSourceAuthorization(state: .skipped)
             ),
             completedAt: Date(timeIntervalSince1970: 1_800_000_000)
         )
 
         XCTAssertEqual(completion.profile.displayLabel, "小维")
-        XCTAssertEqual(completion.context.energyWindowPreference, .afternoon)
-        XCTAssertEqual(completion.context.guidanceStyle, .gentleSuggestion)
-        XCTAssertEqual(completion.context.reminderPreference, .eveningReview)
         XCTAssertEqual(completion.context.dataSourceAuthorization.state, .skipped)
         XCTAssertEqual(completion.gateState, .lowDataReady)
         XCTAssertTrue(completion.gateState.allowsMainTabs)
@@ -37,7 +42,7 @@ final class OnboardingDomainTests: XCTestCase {
         let completion = service.complete(
             draft: OnboardingDraft(
                 displayLabel: "Luna",
-                focusAreas: [.energy, .sleep],
+                improvementGoals: [.energyManagement, .sleepQuality],
                 dataSourceAuthorization: DataSourceAuthorization(state: .authorized)
             ),
             completedAt: Date(timeIntervalSince1970: 1_800_000_000)
@@ -46,6 +51,21 @@ final class OnboardingDomainTests: XCTestCase {
         XCTAssertEqual(completion.context.focusAreas, [.energy, .sleep])
         XCTAssertEqual(completion.gateState, .readyForToday)
         XCTAssertFalse(completion.context.supportsLowDataMode)
+    }
+
+    func testDerivedFocusAreasFromImprovementGoals() {
+        let draft = OnboardingDraft(
+            displayLabel: "Test",
+            improvementGoals: [.sleepQuality, .moodManagement, .cycleRegularity]
+        )
+
+        XCTAssertEqual(draft.derivedFocusAreas, [.sleep, .mood, .cycle])
+    }
+
+    func testDerivedFocusAreasDefaultsToEnergyWhenEmpty() {
+        let draft = OnboardingDraft(displayLabel: "Test")
+
+        XCTAssertEqual(draft.derivedFocusAreas, [.energy])
     }
 
     func testHealthKitOptionalChoiceCanSkipWithoutBlockingCompletion() {
@@ -58,7 +78,7 @@ final class OnboardingDomainTests: XCTestCase {
         XCTAssertTrue(skipped.keepsAppUsable)
     }
 
-    func testOnboardingContextDecodesLegacyPayloadWithCustomizationDefaults() throws {
+    func testOnboardingContextDecodesLegacyPayloadWithNewFieldDefaults() throws {
         let payload = """
         {
           "id": "00000000-0000-0000-0000-000000000001",
@@ -76,8 +96,11 @@ final class OnboardingDomainTests: XCTestCase {
         let context = try JSONDecoder().decode(OnboardingContext.self, from: payload)
 
         XCTAssertEqual(context.energyWindowPreference, .unsure)
-        XCTAssertEqual(context.guidanceStyle, .explainFirst)
-        XCTAssertEqual(context.reminderPreference, .eveningReview)
+        XCTAssertEqual(context.dysmenorrheaSeverity, .none)
+        XCTAssertEqual(context.periodImpactAreas, [])
+        XCTAssertEqual(context.improvementGoals, [])
+        XCTAssertEqual(context.specialConditions, [])
+        XCTAssertNil(context.customExercise)
         XCTAssertEqual(context.dataSourceAuthorization.state, .skipped)
     }
 }

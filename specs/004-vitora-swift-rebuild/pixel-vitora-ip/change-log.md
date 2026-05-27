@@ -2,6 +2,29 @@
 
 > 每次 Pixel Vitora 相关改动都必须追加记录。没有记录的 IP 改动视为 handoff 不完整。
 
+## 2026-05-24 · PixelGlassEggContainer Home Renderer
+
+| 字段 | 内容 |
+| --- | --- |
+| 目的 | 按用户提供的蓝晶蛋参考图，把 Today 首页主蛋从简单蓝晶 `PixelEggView` 提升为低像素霜态玻璃数字蛋容器，要求透明冰蓝蛋壳、voxel 阶梯边缘、蓝色像素星星和约 60% 可见晶体填充。 |
+| 改动 | 在 `PixelEggView.swift` 新增 `PixelGlassEggContainer`：使用 `Canvas + TimelineView` 自绘蛋形 mask、像素晶格、阶梯 rim、内部发光晶体、星星贴片、呼吸/漂浮/高光扫过和点击回弹扩散；Today 首页主蛋改用新组件，小尺寸头像继续保留旧 `PixelEggView`，避免缩小后细节噪声过重。 |
+| 主要文件 | `ios/Vitora/Core/DesignSystem/PixelEggView.swift`、`ios/Vitora/Features/TodayFeature/EggCompoundView.swift` |
+| 规格来源 | 用户 2026-05-24 PixelGlassEggContainer 计划、`F-VISUAL-004`、`C-TODAY-003`、`IAC-T-002`。 |
+| 构建结果 | `xcodebuild -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 ENABLE_USER_SCRIPT_SANDBOXING=NO build` 通过。 |
+| 模拟器结果 | 已安装并启动到 iPhone 17 Pro Simulator，截图保存到 `ios/QA/Screenshots/PixelGlassEggContainer/today-pixel-glass-egg-home-v2.png`。 |
+| 未解决问题 | 本轮只替换 Today 首页主蛋；右侧半圆弧轨道、快捷记录页和小尺寸消息头像不在本轮范围。 |
+
+## 2026-05-22 · Today Blue Crystal Pixel Egg Variant
+
+| 字段 | 内容 |
+| --- | --- |
+| 目的 | 按 D-065，把 Today 首页主视觉从旧能量碗/琥珀蛋推进到蓝晶混合 Pixel Egg，并承接图4的蓝白晶体、水感和像素眼方向。 |
+| 改动 | `PixelEggView` 增加 `blueCrystal` 材质：半透明蓝白外壳、像素晶格、水感内部颗粒、白/蓝像素眼和冷色柔光；只作为 Today 首页蛋形主视觉变体，仍保留 Pixel Vitora 身份。 |
+| 主要文件 | `ios/Vitora/Core/DesignSystem/PixelEggView.swift` |
+| 规格来源 | D-065、`F-VISUAL-004`、`C-TODAY-003`。 |
+| 构建结果 | `xcodebuild -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 ENABLE_USER_SCRIPT_SANDBOXING=NO build` 通过。 |
+| 未解决问题 | 若后续继续提高还原度，应只扩展统一 `PixelEggView` 的材质参数，不得在 Today 页面局部重画 smooth orb、人像、宠物或普通 icon。 |
+
 ## 2026-05-16 · Frosted Material Variants
 
 | 字段 | 内容 |

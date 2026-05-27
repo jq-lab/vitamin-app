@@ -189,14 +189,19 @@ struct PremiumAuraBackground: View {
                     reduceTransparency: reduceTransparency
                 )
 
+                PremiumAuraGlassDepthVeil(
+                    scene: scene,
+                    intensity: intensity,
+                    reduceTransparency: reduceTransparency
+                )
+
                 LinearGradient(
                     stops: [
-                        .init(color: scene.secondaryMist.opacity(reduceTransparency ? 0.20 : 0.10 * intensity), location: 0.0),
+                        .init(color: scene.secondaryMist.opacity(reduceTransparency ? 0.24 : scene.topClarityWarmOpacity * intensity), location: 0.0),
                         .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(reduceTransparency ? 0.56 : 0.38), location: 0.28),
-                        .init(color: VitoraTheme.ColorToken.paperWarmLift.opacity(reduceTransparency ? 0.52 : 0.34), location: 0.58),
-                        .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(reduceTransparency ? 0.34 : 0.24), location: 0.78),
-                        .init(color: scene.primaryMist.opacity(reduceTransparency ? 0.14 : 0.075 * intensity), location: 0.96),
-                        .init(color: Color(red: 226 / 255, green: 230 / 255, blue: 228 / 255).opacity(reduceTransparency ? 0.18 : 0.08), location: 1.0),
+                        .init(color: VitoraTheme.ColorToken.paperWarmLift.opacity(reduceTransparency ? 0.52 : scene.centerCondensedOpacity), location: 0.58),
+                        .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(reduceTransparency ? 0.38 : scene.bottomPearlOpacity), location: 0.80),
+                        .init(color: scene.primaryMist.opacity(reduceTransparency ? 0.18 : scene.bottomMistOpacity * intensity), location: 1.0),
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
@@ -207,12 +212,13 @@ struct PremiumAuraBackground: View {
 
                 Rectangle()
                     .fill(.ultraThinMaterial)
-                    .opacity(reduceTransparency ? 0.22 : 0.045)
+                    .opacity(reduceTransparency ? 0.22 : scene.materialFogOpacity)
                     .mask(
                         LinearGradient(
                             stops: [
                                 .init(color: .clear, location: 0.0),
-                                .init(color: .black.opacity(0.18), location: 0.62),
+                                .init(color: .black.opacity(0.16), location: 0.50),
+                                .init(color: .black.opacity(0.52), location: 0.72),
                                 .init(color: .black, location: 1.0),
                             ],
                             startPoint: .top,
@@ -232,6 +238,28 @@ struct PremiumAuraBackground: View {
     }
 }
 
+private extension PremiumAuraScene {
+    var topClarityWarmOpacity: Double {
+        self == .today ? 0.16 : 0.10
+    }
+
+    var centerCondensedOpacity: Double {
+        self == .today ? 0.40 : 0.34
+    }
+
+    var bottomPearlOpacity: Double {
+        self == .today ? 0.34 : 0.24
+    }
+
+    var bottomMistOpacity: Double {
+        self == .today ? 0.18 : 0.075
+    }
+
+    var materialFogOpacity: Double {
+        self == .today ? 0.075 : 0.045
+    }
+}
+
 private struct PearlAmbientWash: View {
     let scene: PremiumAuraScene
     let intensity: Double
@@ -241,10 +269,10 @@ private struct PearlAmbientWash: View {
         ZStack {
             LinearGradient(
                 stops: [
-                    .init(color: scene.secondaryMist.opacity(0.17 * intensity), location: 0.0),
+                    .init(color: scene.secondaryMist.opacity((scene == .today ? 0.23 : 0.17) * intensity), location: 0.0),
                     .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(0.48 * intensity), location: 0.30),
                     .init(color: VitoraTheme.ColorToken.paperWarmLift.opacity(0.42 * intensity), location: 0.62),
-                    .init(color: scene.primaryMist.opacity(cyanOpacity * 0.55), location: 1.0),
+                    .init(color: scene.primaryMist.opacity(cyanOpacity * (scene == .today ? 0.82 : 0.55)), location: 1.0),
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -252,26 +280,26 @@ private struct PearlAmbientWash: View {
 
             RadialGradient(
                 colors: [
-                    Color(red: 255 / 255, green: 214 / 255, blue: 198 / 255).opacity(warmOpacity * 1.12),
-                    Color(red: 255 / 255, green: 229 / 255, blue: 186 / 255).opacity(warmOpacity * 0.52),
-                    Color(red: 255 / 255, green: 236 / 255, blue: 239 / 255).opacity(warmOpacity * 0.42),
+                    Color(red: 255 / 255, green: 194 / 255, blue: 181 / 255).opacity(warmOpacity * 1.18),
+                    Color(red: 255 / 255, green: 219 / 255, blue: 167 / 255).opacity(warmOpacity * 0.64),
+                    Color(red: 255 / 255, green: 225 / 255, blue: 232 / 255).opacity(warmOpacity * 0.52),
                     .clear,
                 ],
                 center: UnitPoint(x: 0.20, y: 0.03),
                 startRadius: 1,
-                endRadius: 380
+                endRadius: scene == .today ? 450 : 380
             )
 
             RadialGradient(
                 colors: [
-                    Color(red: 165 / 255, green: 227 / 255, blue: 225 / 255).opacity(cyanOpacity * 0.86),
-                    Color(red: 213 / 255, green: 240 / 255, blue: 232 / 255).opacity(cyanOpacity * 0.52),
-                    Color(red: 222 / 255, green: 229 / 255, blue: 227 / 255).opacity(cyanOpacity * 0.26),
+                    Color(red: 137 / 255, green: 226 / 255, blue: 218 / 255).opacity(cyanOpacity * 1.02),
+                    Color(red: 196 / 255, green: 241 / 255, blue: 225 / 255).opacity(cyanOpacity * 0.72),
+                    Color(red: 232 / 255, green: 247 / 255, blue: 239 / 255).opacity(cyanOpacity * 0.34),
                     .clear,
                 ],
-                center: UnitPoint(x: 0.88, y: 0.98),
+                center: UnitPoint(x: scene == .today ? 0.92 : 0.88, y: 0.98),
                 startRadius: 1,
-                endRadius: 340
+                endRadius: scene == .today ? 440 : 340
             )
 
             RadialGradient(
@@ -333,7 +361,7 @@ private struct PearlAmbientWash: View {
         case .cycle:
             base = 0.13
         case .today:
-            base = 0.13
+            base = 0.23
         case .support:
             base = 0.09
         }
@@ -348,7 +376,7 @@ private struct PearlAmbientWash: View {
         case .onboarding:
             base = 0.15
         case .today, .cycle:
-            base = 0.14
+            base = scene == .today ? 0.24 : 0.14
         default:
             base = 0.10
         }
@@ -366,6 +394,87 @@ private struct PremiumAuraAccessibilityMarker: View {
             .accessibilityLabel("Vitora 浅霜背景")
             .accessibilityIdentifier(identifier)
             .allowsHitTesting(false)
+    }
+}
+
+private struct PremiumAuraGlassDepthVeil: View {
+    let scene: PremiumAuraScene
+    let intensity: Double
+    let reduceTransparency: Bool
+
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                stops: [
+                    .init(color: .clear, location: 0.0),
+                    .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(centerOpacity * 0.30), location: 0.34),
+                    .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(centerOpacity), location: 0.55),
+                    .init(color: scene.primaryMist.opacity(bottomMist), location: 0.82),
+                    .init(color: VitoraTheme.ColorToken.surfacePearlMain.opacity(bottomPearl), location: 1.0),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            Canvas { context, size in
+                guard !reduceTransparency else { return }
+                drawCondensedGlassRibbon(
+                    in: &context,
+                    size: size,
+                    y: size.height * 0.56,
+                    color: VitoraTheme.ColorToken.surfacePearlMain,
+                    opacity: scene == .today ? 0.13 * intensity : 0.07 * intensity,
+                    blur: 38
+                )
+                drawCondensedGlassRibbon(
+                    in: &context,
+                    size: size,
+                    y: size.height * 0.86,
+                    color: scene.primaryMist,
+                    opacity: scene == .today ? 0.12 * intensity : 0.055 * intensity,
+                    blur: 52
+                )
+            }
+            .blendMode(.screen)
+        }
+        .allowsHitTesting(false)
+    }
+
+    private var centerOpacity: Double {
+        reduceTransparency ? 0.16 : (scene == .today ? 0.12 * intensity : 0.06 * intensity)
+    }
+
+    private var bottomMist: Double {
+        reduceTransparency ? 0.12 : (scene == .today ? 0.13 * intensity : 0.055 * intensity)
+    }
+
+    private var bottomPearl: Double {
+        reduceTransparency ? 0.36 : (scene == .today ? 0.30 : 0.18)
+    }
+
+    private func drawCondensedGlassRibbon(
+        in context: inout GraphicsContext,
+        size: CGSize,
+        y: CGFloat,
+        color: Color,
+        opacity: Double,
+        blur: CGFloat
+    ) {
+        var path = Path()
+        path.move(to: CGPoint(x: -size.width * 0.12, y: y))
+        path.addCurve(
+            to: CGPoint(x: size.width * 1.10, y: y + 18),
+            control1: CGPoint(x: size.width * 0.26, y: y - 32),
+            control2: CGPoint(x: size.width * 0.70, y: y + 44)
+        )
+
+        var ribbon = context
+        ribbon.addFilter(.blur(radius: blur))
+        ribbon.stroke(path, with: .color(color.opacity(opacity)), style: StrokeStyle(lineWidth: size.height * 0.16, lineCap: .round))
+
+        var highlight = context
+        highlight.addFilter(.blur(radius: max(10, blur * 0.24)))
+        highlight.stroke(path, with: .color(Color.white.opacity(opacity * 0.54)), style: StrokeStyle(lineWidth: size.height * 0.028, lineCap: .round))
     }
 }
 

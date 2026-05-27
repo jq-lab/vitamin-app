@@ -7,15 +7,16 @@ final class VisualLanguageSmokeTests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.descendants(matching: .any)["premium.aura.background.today"].exists)
-        XCTAssertTrue(app.staticTexts["Vitora 今日建议"].exists)
+        XCTAssertTrue(app.staticTexts["智能监测"].exists)
 
         app.buttons["tab.vitora"].tap()
         XCTAssertTrue(app.textFields.element(boundBy: 0).waitForExistence(timeout: 3))
+        XCTAssertTrue(app.otherElements["vitora.input.shortcutBar"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["premium.aura.background.vitora"].exists)
         XCTAssertTrue(app.staticTexts["Vitora 知道"].exists)
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.staticTexts["周期回顾"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.descendants(matching: .any)["premium.aura.background.cycle"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["cycle.review.insights"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["cycle.growth.album"].exists)
@@ -33,17 +34,24 @@ final class VisualLanguageSmokeTests: XCTestCase {
             throw XCTSkip("Set VITORA_PREMIUM_AURA_SCREENSHOT_DIR or create \(markerPath) to capture premium aura screenshots.")
         }
 
-        let app = launchPivotApp(extraArguments: ["-vitoraUITestReviewAvailable"])
+        let app = launchPivotApp(extraArguments: ["-vitoraUITestReviewAvailable", "-vitoraUITestFocusSmartMonitor"])
 
         XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
+        if !app.staticTexts["智能监测"].isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(app.staticTexts["智能监测"].waitForExistence(timeout: 3))
         waitForAnimationsToSettle()
-        try saveScreenshot(named: "01-premium-aura-today", in: screenshotDirectory)
+        try saveScreenshot(named: "01-premium-aura-today-smart-monitor", in: screenshotDirectory)
 
+        if !app.buttons["today.evidence.open"].isHittable {
+            app.swipeDown()
+        }
         app.buttons["today.evidence.open"].tap()
-        XCTAssertTrue(app.otherElements["today.bodyFactors.detail.sheet"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.otherElements["today.analysis.sheet"].waitForExistence(timeout: 3))
         waitForAnimationsToSettle()
         try saveScreenshot(named: "02-premium-aura-today-analysis", in: screenshotDirectory)
-        app.buttons["today.detail.close"].tap()
+        app.buttons["today.analysis.close"].tap()
 
         XCTAssertTrue(app.buttons["today.top.context"].waitForExistence(timeout: 3))
         app.buttons["today.top.context"].tap()
@@ -73,7 +81,7 @@ final class VisualLanguageSmokeTests: XCTestCase {
         }
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.staticTexts["周期回顾"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 5))
         waitForAnimationsToSettle()
         try saveScreenshot(named: "07-premium-aura-cycle", in: screenshotDirectory)
     }

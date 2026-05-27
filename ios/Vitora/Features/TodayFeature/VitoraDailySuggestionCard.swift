@@ -1,5 +1,395 @@
 import SwiftUI
 
+struct TodayInsightPanel: View {
+    let topic: TodayInsightTopic
+    var cycleDay: Int = 18
+    var cyclePhase: String = "黄体期"
+    let onOpenAnalysis: () -> Void
+    let onRecord: (TodayInsightTopic) -> Void
+    let onAskVitora: () -> Void
+    @State private var showsReasons = ProcessInfo.processInfo.arguments.contains("-vitoraUITestEnergyReasons")
+    @State private var showReminder = false
+
+    private var reminderPlan: TodaySuggestionPlan {
+        TodaySuggestionPlan.all[0]
+    }
+
+    private var subtitle: String {
+        switch topic {
+        case .energy: return "\(cyclePhase)D\(cycleDay) · 偏低"
+        case .sleep: return "昨夜恢复 · 今日节奏参考"
+        case .period: return "\(cyclePhase) Day \(cycleDay)"
+        case .nutrition: return "补水与已在使用补给"
+        }
+    }
+
+    private var trailingSummary: String {
+        switch topic {
+        case .energy: return "恢复 65 · 燃料 75"
+        case .sleep: return "7.2h · 中断 2 次"
+        case .period: return "预计 8 天后"
+        case .nutrition: return "水 5/8 · 镁未记"
+        }
+    }
+
+    var body: some View {
+        AskableSurface(
+            accessibilityID: "today.insight.panel",
+            onOpenDetail: toggleEnergyReasonsOrOpenAnalysis,
+            onAskVitora: onAskVitora,
+            onCorrectVitora: onAskVitora
+        ) {
+            VStack(alignment: .leading, spacing: 15) {
+                header
+
+                switch topic {
+                case .energy:
+                    energyContent
+                case .sleep:
+                    sleepContent
+                case .period:
+                    periodContent
+                case .nutrition:
+                    nutritionContent
+                }
+            }
+            .padding(.horizontal, 18)
+            .padding(.vertical, 18)
+            .background(TodaySuggestionShell())
+        }
+        .sheet(isPresented: $showReminder) {
+            ReminderSetupSheet(plan: reminderPlan, onClose: { showReminder = false })
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.hidden)
+        }
+        .onChange(of: topic) { _ in
+            showsReasons = false
+        }
+        .accessibilityIdentifier("today.insight.panel.\(topic.rawValue)")
+    }
+
+    private var header: some View {
+        HStack(alignment: .top, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Button(action: toggleEnergyReasonsOrOpenAnalysis) {
+                    HStack(spacing: 6) {
+                        Text(topic.title)
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundStyle(Color.black)
+                        if topic == .energy {
+                            Image(systemName: showsReasons ? "chevron.up" : "chevron.down")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(topic.accent)
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("today.insight.title")
+
+                Text(subtitle)
+                    .font(.system(size: 16, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            }
+
+            Spacer(minLength: 8)
+
+            VStack(alignment: .trailing, spacing: 7) {
+                Text(trailingSummary)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.78)
+
+                if topic == .energy {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            showsReasons.toggle()
+                        }
+                    } label: {
+                        Text(showsReasons ? "收起" : "为什么")
+                            .font(.system(size: 12, weight: .bold))
+                            .foregroundStyle(topic.accent)
+                            .padding(.horizontal, 10)
+                            .frame(height: 28)
+                            .background(topic.softAccent.opacity(0.42), in: Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("today.insight.why")
+                }
+            }
+        }
+    }
+
+    private var energyContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack(spacing: 18) {
+                TodayInsightRing(value: 65, title: "恢复", footnote: "睡眠 6h12m", tint: Color(red: 245 / 255, green: 160 / 255, blue: 35 / 255))
+                TodayInsightRing(value: 75, title: "燃料", footnote: "水 5/8 杯", tint: Color(red: 49 / 255, green: 139 / 255, blue: 224 / 255))
+                TodayInsightRing(value: 40, title: "活动", footnote: "步数 3.2k", tint: Color(red: 86 / 255, green: 155 / 255, blue: 43 / 255))
+            }
+            .frame(maxWidth: .infinity)
+
+            HStack(spacing: 9) {
+                TodayInsightChip(text: "水", isSelected: true)
+                TodayInsightChip(text: "镁", isSelected: false)
+                TodayInsightChip(text: "铁", isSelected: false)
+                TodayInsightChip(text: "B6", isSelected: false)
+            }
+
+            VitoraYellowHint(text: "VITORA: 下午容易掉电，HRV↓8%。先补镁还是先小睡？")
+
+            if showsReasons {
+                VStack(alignment: .leading, spacing: 10) {
+                    TodayInsightReasonRow(symbol: "moon.zzz.fill", text: "昨夜恢复只到 65，午后更容易出现低谷。")
+                    TodayInsightReasonRow(symbol: "waveform.path.ecg", text: "HRV 比平时低 8%，今天更适合降低刺激。")
+                    TodayInsightReasonRow(symbol: "drop.fill", text: "补水 5/8 杯，燃料够用但还没满。")
+
+                    Text("建议：先补水和已在使用的镁；如果 14:00 后仍明显掉电，安排 15 分钟安静恢复。")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineSpacing(3)
+                }
+                .padding(14)
+                .background(Color(red: 255 / 255, green: 252 / 255, blue: 244 / 255), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.black.opacity(0.06), lineWidth: 0.6))
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            footer(scoreText: "今日 68/100")
+        }
+    }
+
+    private var sleepContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                TodayInsightMetricBox(title: "时长", value: "7.2h", detail: "比目标少 38m", tint: topic.accent)
+                TodayInsightMetricBox(title: "深睡", value: "1.4h", detail: "恢复略浅", tint: Color(red: 79 / 255, green: 181 / 255, blue: 201 / 255))
+                TodayInsightMetricBox(title: "中断", value: "2次", detail: "凌晨偏多", tint: Color(red: 135 / 255, green: 130 / 255, blue: 221 / 255))
+            }
+
+            VitoraYellowHint(text: "VITORA: 睡眠不算差，但恢复感没有满。今天先把午后安排做轻一点。")
+
+            TodayInsightReasonRow(symbol: "heart.text.square.fill", text: "依据会结合睡眠、HRV 和黄体期 D18，不把单一指标当结论。")
+
+            footer(scoreText: "睡眠 7.2h")
+        }
+    }
+
+    private var periodContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                TodayInsightMetricBox(title: "阶段", value: "D18", detail: cyclePhase, tint: topic.accent)
+                TodayInsightMetricBox(title: "窗口", value: "8天", detail: "距下次经期", tint: Color(red: 214 / 255, green: 142 / 255, blue: 80 / 255))
+                TodayInsightMetricBox(title: "节律", value: "留余量", detail: "午后放慢", tint: Color(red: 100 / 255, green: 151 / 255, blue: 205 / 255))
+            }
+
+            VitoraYellowHint(text: "VITORA: 黄体期中段更容易对睡眠和补给敏感，今天不用硬把节奏拉满。")
+
+            VStack(alignment: .leading, spacing: 8) {
+                TodayInsightReasonRow(symbol: "calendar", text: "当前 D18 只解释周期位置，不做医学诊断。")
+                TodayInsightReasonRow(symbol: "slider.horizontal.3", text: "如果今天体感和预测不一致，可以告诉 Vitora 校准。")
+            }
+
+            footer(scoreText: "\(cyclePhase) D\(cycleDay)")
+        }
+    }
+
+    private var nutritionContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 10) {
+                TodayInsightMetricBox(title: "水", value: "5/8", detail: "还差 3 杯", tint: topic.accent)
+                TodayInsightMetricBox(title: "镁", value: "未记", detail: "可补充记录", tint: Color(red: 129 / 255, green: 121 / 255, blue: 212 / 255))
+                TodayInsightMetricBox(title: "B6", value: "未记", detail: "仅记录", tint: Color(red: 214 / 255, green: 142 / 255, blue: 80 / 255))
+            }
+
+            HStack(spacing: 9) {
+                TodayInsightChip(text: "水 5/8", isSelected: true)
+                TodayInsightChip(text: "镁", isSelected: false)
+                TodayInsightChip(text: "B6", isSelected: false)
+            }
+
+            VitoraYellowHint(text: "VITORA: 这里只记录你已经在使用的补给和补水，不推荐购买，也不替代专业建议。")
+
+            footer(scoreText: "水 5/8")
+        }
+    }
+
+    private func footer(scoreText: String) -> some View {
+        HStack {
+            Button {
+                onRecord(topic)
+            } label: {
+                HStack(spacing: 9) {
+                    Image(systemName: "plus")
+                        .font(.system(size: 17, weight: .medium))
+                    Text("记一笔")
+                        .font(.system(size: 18, weight: .bold))
+                }
+                .foregroundStyle(.white)
+                .padding(.horizontal, 22)
+                .frame(height: 56)
+                .background(VitoraTheme.ColorToken.strongText, in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("today.insight.record")
+
+            if topic == .energy && showsReasons {
+                Button {
+                    showReminder = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 14, weight: .bold))
+                        Text("提醒")
+                            .font(.system(size: 15, weight: .bold))
+                    }
+                    .foregroundStyle(topic.accent)
+                    .padding(.horizontal, 14)
+                    .frame(height: 44)
+                    .background(topic.softAccent.opacity(0.38), in: Capsule())
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("today.insight.reminder")
+            }
+
+            Spacer()
+
+            Text(scoreText)
+                .font(.system(size: 17, weight: .bold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .minimumScaleFactor(0.75)
+                .lineLimit(1)
+        }
+    }
+
+    private func toggleEnergyReasonsOrOpenAnalysis() {
+        if topic == .energy {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                showsReasons.toggle()
+            }
+        } else {
+            onOpenAnalysis()
+        }
+    }
+}
+
+private struct TodayInsightRing: View {
+    let value: Int
+    let title: String
+    let footnote: String
+    let tint: Color
+
+    var body: some View {
+        VStack(spacing: 8) {
+            ZStack {
+                Circle()
+                    .stroke(tint.opacity(0.18), lineWidth: 9)
+                Circle()
+                    .trim(from: 0, to: CGFloat(value) / 100)
+                    .stroke(tint, style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                Text("\(value)%")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(tint)
+                    .monospacedDigit()
+            }
+            .frame(width: 82, height: 82)
+
+            VStack(spacing: 1) {
+                Text(title)
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundStyle(Color.black)
+                Text(footnote)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+            }
+            .frame(width: 92)
+        }
+    }
+}
+
+private struct TodayInsightChip: View {
+    let text: String
+    let isSelected: Bool
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: isSelected ? "checkmark" : "circle")
+                .font(.system(size: 12, weight: .bold))
+            Text(text)
+                .font(.system(size: 14, weight: .bold))
+        }
+        .foregroundStyle(isSelected ? Color(red: 26 / 255, green: 106 / 255, blue: 92 / 255) : VitoraTheme.ColorToken.secondaryText)
+        .padding(.horizontal, 12)
+        .frame(height: 38)
+        .background(isSelected ? Color(red: 216 / 255, green: 247 / 255, blue: 237 / 255) : Color(red: 241 / 255, green: 239 / 255, blue: 234 / 255), in: Capsule())
+    }
+}
+
+private struct VitoraYellowHint: View {
+    let text: String
+
+    var body: some View {
+        Text(text)
+            .font(.system(size: 17, weight: .bold))
+            .foregroundStyle(Color(red: 154 / 255, green: 91 / 255, blue: 15 / 255))
+            .lineSpacing(4)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 15)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(red: 255 / 255, green: 241 / 255, blue: 210 / 255), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+    }
+}
+
+private struct TodayInsightReasonRow: View {
+    let symbol: String
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: symbol)
+                .font(.system(size: 13, weight: .bold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .frame(width: 18, height: 18)
+            Text(text)
+                .font(.system(size: 13.5, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private struct TodayInsightMetricBox: View {
+    let title: String
+    let value: String
+    let detail: String
+    let tint: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(title)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+            Text(value)
+                .font(.system(size: 21, weight: .bold))
+                .foregroundStyle(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+            Text(detail)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(red: 250 / 255, green: 249 / 255, blue: 246 / 255), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.black.opacity(0.06), lineWidth: 0.6))
+    }
+}
+
 struct VitoraDailySuggestionCard: View {
     var mode: TodayMetricMode = .energy
     var cycleDay: Int = 18
@@ -28,11 +418,11 @@ struct VitoraDailySuggestionCard: View {
 
                     VStack(alignment: .leading, spacing: 1) {
                         Text("智能监测")
-                            .font(.system(size: 21, weight: .heavy))
-                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            .font(.system(size: 21, weight: .medium))
+                            .foregroundStyle(Color(red: 44/255, green: 44/255, blue: 42/255))
                         Text("身体翻译器正在整理管家方案")
-                            .font(.system(size: 11.5, weight: .semibold))
-                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .font(.system(size: 11.5, weight: .regular))
+                            .foregroundStyle(Color(red: 95/255, green: 94/255, blue: 90/255))
                     }
 
                     Spacer(minLength: 0)
@@ -69,56 +459,16 @@ struct VitoraDailySuggestionCard: View {
     }
 }
 
+// Spec §6: bg #FFFFFF, border 0.5px tertiary, shadow subtle
 private struct TodaySuggestionShell: View {
     var body: some View {
-        RoundedRectangle(cornerRadius: 28, style: .continuous)
-            .fill(.ultraThinMaterial)
-            .overlay {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82),
-                                Color(red: 255 / 255, green: 248 / 255, blue: 241 / 255).opacity(0.64),
-                                Color(red: 238 / 255, green: 248 / 255, blue: 246 / 255).opacity(0.52),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            }
-            .overlay(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.72),
-                                Color.white.opacity(0.10),
-                                .clear,
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .center
-                        )
-                    )
-                    .blendMode(.screen)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.92),
-                                Color(red: 208 / 255, green: 222 / 255, blue: 218 / 255).opacity(0.42),
-                                Color.white.opacity(0.68),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-            }
-            .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.18), radius: 18, x: 0, y: 12)
-            .shadow(color: Color(red: 121 / 255, green: 202 / 255, blue: 200 / 255).opacity(0.08), radius: 20, x: -8, y: 12)
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(Color.white)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 6)
     }
 }
 
@@ -214,146 +564,451 @@ private struct PixelMorningSunMark: View {
     }
 }
 
+private enum SmartMonitorPane: Equatable {
+    case push
+    case cycleLog
+}
+
 private struct SmartMonitorPokerPanel: View {
     let plan: TodaySuggestionPlan
     let cycleDay: Int
     let cyclePhase: String
     let onSwap: () -> Void
     let onReminder: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var activePane: SmartMonitorPane = CommandLine.arguments.contains("-vitoraUITestSmartMonitorLog") ? .cycleLog : .push
 
     private var cycleAdvice: CycleSuggestionAdvice {
         CycleSuggestionAdvice.make(phase: cyclePhase, day: cycleDay, plan: plan)
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("身体翻译器")
-                    .font(.system(size: 30, weight: .black, design: .rounded))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.78)
-
-                Text("正在把今天翻译成管家方案")
-                    .font(.system(size: 13.2, weight: .heavy))
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.76)
-
-                Text(plan.rationale)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.72)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .frame(height: 105, alignment: .center)
-            .padding(.horizontal, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.78),
-                                VitoraTheme.ColorToken.surfacePearlInset.opacity(0.40),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay(RoundedRectangle(cornerRadius: 28, style: .continuous).stroke(Color.white.opacity(0.78), lineWidth: 0.8))
-            )
-
-            HStack(alignment: .top, spacing: 10) {
-                VStack(alignment: .leading, spacing: 8) {
-                    sectionTitle("今日推送")
-
-                    HStack(alignment: .center, spacing: 7) {
-                        if let first = plan.items.first {
-                            SuggestionPokerCard(item: first)
-                        }
-
-                        Text("+")
-                            .font(.system(size: 20, weight: .black, design: .rounded))
-                            .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.70))
-                            .frame(width: 14)
-                            .accessibilityHidden(true)
-
-                        if plan.items.indices.contains(1) {
-                            SuggestionPokerCard(item: plan.items[1])
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                VStack(alignment: .leading, spacing: 8) {
-                    sectionTitle("周期建议")
-                    CycleAdvicePokerCard(advice: cycleAdvice)
-                }
-                .frame(width: 116, alignment: .leading)
-            }
-
-            HStack(spacing: 10) {
-                Button(action: onSwap) {
-                    HStack(spacing: 5) {
-                        Image(systemName: "arrow.triangle.2.circlepath")
-                            .font(.system(size: 12, weight: .bold))
-                        Text("换一换")
-                            .font(.system(size: 13.5, weight: .heavy))
-                    }
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 38)
-                    .background(Color.white.opacity(0.70), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.white.opacity(0.78), lineWidth: 0.75))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("today.suggestion.swap")
-
-                Button(action: onReminder) {
-                    HStack(spacing: 7) {
-                        Image(systemName: "bell.fill")
-                            .font(.system(size: 12, weight: .heavy))
-                        Text("一键提醒")
-                            .font(.system(size: 14.5, weight: .heavy))
-                    }
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 38)
-                    .background(Color(red: 255 / 255, green: 203 / 255, blue: 82 / 255), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).stroke(Color.white.opacity(0.82), lineWidth: 0.75))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier("today.suggestion.remind")
-            }
-        }
-        .padding(13)
-        .background(
-            RoundedRectangle(cornerRadius: 30, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.84),
-                            VitoraTheme.ColorToken.surfacePearlMain.opacity(0.68),
-                            Color(red: 233 / 255, green: 243 / 255, blue: 245 / 255).opacity(0.52),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+        ZStack(alignment: .topTrailing) {
+            VStack(alignment: .leading, spacing: 14) {
+                SmartMonitorRecommendationIntro(
+                    cycleDay: cycleDay,
+                    cyclePhase: cyclePhase,
+                    plan: plan
                 )
-                .background(.ultraThinMaterial.opacity(0.28), in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-                .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Color.white.opacity(0.86), lineWidth: 0.9))
-                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.12), radius: 14, x: 0, y: 9)
-        )
+
+                SmartMonitorEmbeddedSwitchPanel(
+                    activePane: $activePane,
+                    plan: plan,
+                    cycleAdvice: cycleAdvice,
+                    onSelectPane: selectPane
+                )
+
+                // Spec §6: dual CTA — 换一换 transparent+border, 一键提醒 amber
+                HStack(spacing: 10) {
+                    Button(action: leftAction) {
+                        HStack(spacing: 5) {
+                            Image(systemName: activePane == .push ? "arrow.triangle.2.circlepath" : "arrow.left")
+                                .font(.system(size: 12, weight: .medium))
+                            Text(activePane == .push ? "换一换" : "回到推送")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundStyle(Color(red: 44/255, green: 44/255, blue: 42/255))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(Color.clear)
+                        .overlay(Capsule().stroke(Color.black.opacity(0.10), lineWidth: 0.5))
+                        .clipShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("today.suggestion.swap")
+
+                    Button(action: onReminder) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "bell.fill")
+                                .font(.system(size: 12, weight: .medium))
+                            Text("一键提醒")
+                                .font(.system(size: 13, weight: .medium))
+                        }
+                        .foregroundStyle(Color(red: 44/255, green: 44/255, blue: 42/255))
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(Color(red: 250/255, green: 199/255, blue: 117/255), in: Capsule()) // #FAC775
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityIdentifier("today.suggestion.remind")
+                }
+            }
+
+            SmartMonitorCornerSignal(phase: cyclePhase, day: cycleDay)
+                .padding(.top, 10)
+                .padding(.trailing, 18)
+                .accessibilityHidden(true)
+        }
+        .padding(14)
+        .background(SmartMonitorInnerPanelBackground())
+        .contentShape(BrokenCornerCardShape())
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("today.suggestion.combination.card")
     }
 
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 12.5, weight: .heavy))
-            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-            .lineLimit(1)
+    private func selectPane(_ pane: SmartMonitorPane) {
+        if reduceMotion {
+            activePane = pane
+        } else {
+            withAnimation(.easeInOut(duration: 0.22)) {
+                activePane = pane
+            }
+        }
+    }
+
+    private func leftAction() {
+        if activePane == .push {
+            onSwap()
+        } else {
+            selectPane(.push)
+        }
+    }
+}
+
+private struct SmartMonitorRecommendationIntro: View {
+    let cycleDay: Int
+    let cyclePhase: String
+    let plan: TodaySuggestionPlan
+
+    private var primaryCopy: String {
+        "今天是\(cyclePhase)第\(cycleDay)天，你可能午后更容易掉电。"
+    }
+
+    private var secondaryCopy: String {
+        "监测到昨晚睡眠略晚，先补给再安排安静恢复。"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("个性化推荐")
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                .lineLimit(1)
+
+            Text(primaryCopy)
+                .font(.system(size: 16.2, weight: .heavy, design: .rounded))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .lineLimit(2)
+                .minimumScaleFactor(0.84)
+                .lineSpacing(1)
+
+            Text(secondaryCopy)
+                .font(.system(size: 12.2, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+                .accessibilityHint(plan.rationale)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+        .padding(.trailing, 112)
+        .padding(.top, 2)
+    }
+}
+
+private struct SmartMonitorCornerSignal: View {
+    let phase: String
+    let day: Int
+
+    var body: some View {
+        VStack(spacing: 2) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 12, weight: .black))
+                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+
+            Text("D\(day)")
+                .font(.system(size: 10.5, weight: .black, design: .rounded).monospacedDigit())
+                .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.82))
+                .lineLimit(1)
+        }
+        .frame(width: 48, height: 42)
+        .background(Color.white.opacity(0.62), in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 17, style: .continuous).stroke(Color.white.opacity(0.72), lineWidth: 0.65))
+    }
+}
+
+private struct SmartMonitorEmbeddedSwitchPanel: View {
+    @Binding var activePane: SmartMonitorPane
+    let plan: TodaySuggestionPlan
+    let cycleAdvice: CycleSuggestionAdvice
+    let onSelectPane: (SmartMonitorPane) -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                SmartMonitorPaneTab(
+                    title: "今日推送",
+                    systemImage: "sparkles",
+                    isSelected: activePane == .push
+                ) {
+                    onSelectPane(.push)
+                }
+
+                SmartMonitorPaneTab(
+                    title: "LOG",
+                    systemImage: "doc.text.magnifyingglass",
+                    isSelected: activePane == .cycleLog
+                ) {
+                    onSelectPane(.cycleLog)
+                }
+                .frame(width: 84)
+            }
+            .padding(.horizontal, 0)
+            .padding(.bottom, 10)
+            .zIndex(2)
+
+            ZStack {
+                SmartMonitorPushPane(plan: plan)
+                    .opacity(activePane == .push ? 1 : 0)
+                    .offset(x: activePane == .push ? 0 : -12)
+                    .accessibilityHidden(activePane != .push)
+
+                SmartMonitorCycleLogPane(plan: plan, advice: cycleAdvice)
+                    .opacity(activePane == .cycleLog ? 1 : 0)
+                    .offset(x: activePane == .cycleLog ? 0 : 12)
+                    .accessibilityHidden(activePane != .cycleLog)
+            }
+            .frame(height: 142)
+            .padding(.horizontal, 10)
+            .clipped()
+            .zIndex(1)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("today.suggestion.switch.panel")
+    }
+}
+
+private struct SmartMonitorPaneTab: View {
+    let title: String
+    let systemImage: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 11, weight: .heavy))
+                Text(title)
+                    .font(.system(size: 12.5, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.76)
+            }
+            .foregroundStyle(isSelected ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.secondaryText)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .contentShape(Rectangle())
+            .overlay(alignment: .bottom) {
+                Capsule()
+                    .fill(isSelected ? VitoraTheme.ColorToken.actionPrimaryDeep : Color.clear)
+                    .frame(width: 24, height: 3)
+            }
+        }
+        .buttonStyle(.plain)
+        .contentShape(Rectangle())
+        .accessibilityIdentifier(title == "LOG" ? "today.suggestion.log" : "today.suggestion.push")
+    }
+}
+
+private struct SmartMonitorPushPane: View {
+    let plan: TodaySuggestionPlan
+
+    private var primaryItem: TodaySuggestionPlan.Item? {
+        plan.items.first
+    }
+
+    private var supportItem: TodaySuggestionPlan.Item? {
+        plan.items.dropFirst().first
+    }
+
+    private var actionLine: String {
+        guard let primaryItem else { return plan.rationale }
+        if let supportItem {
+            return "\(primaryItem.shortTimeText) \(primaryItem.reminderAction)，\(supportItem.shortTimeText) \(supportItem.reminderAction)"
+        }
+        return "\(primaryItem.shortTimeText) \(primaryItem.reminderAction)"
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 11) {
+            if let primaryItem {
+                SuggestionMetricIcon(kind: primaryItem.kind, tint: primaryItem.tint, size: 34)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("今日 \(plan.themeTitle)")
+                    .font(.system(size: 22, weight: .black, design: .rounded))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+
+                Text(actionLine)
+                    .font(.system(size: 12.5, weight: .heavy).monospacedDigit())
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.68)
+
+                HStack(spacing: 7) {
+                    ForEach(plan.sources.prefix(3), id: \.title) { source in
+                        CycleLogChip(icon: source.kind.symbol, text: source.title)
+                    }
+                }
+
+                Text(plan.rationale)
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("today.suggestion.push.pane")
+    }
+}
+
+private struct SmartMonitorCycleLogPane: View {
+    let plan: TodaySuggestionPlan
+    let advice: CycleSuggestionAdvice
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                SuggestionMetricIcon(kind: .cycle, tint: SuggestionSignalKind.cycle.tint, size: 34)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(advice.phaseText)
+                        .font(.system(size: 12.5, weight: .heavy).monospacedDigit())
+                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+
+                    Text(advice.title)
+                        .font(.system(size: 23, weight: .black, design: .rounded))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+
+                    Text(advice.action)
+                        .font(.system(size: 12.5, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.78)
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            HStack(spacing: 7) {
+                CycleLogChip(icon: "moon.fill", text: "睡眠略低")
+                CycleLogChip(icon: "waveform.path.ecg", text: "HRV 下降")
+                CycleLogChip(icon: "clock", text: "14:00 低谷")
+            }
+
+            Text("Vitora 把周期位置、睡眠和恢复信号合在一起，只建议先留余量。")
+                .font(.system(size: 11.5, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(advice.phaseText)，\(advice.title)，\(advice.action)。睡眠略低，HRV 下降，14点低谷。")
+        .accessibilityIdentifier("today.suggestion.cycleLog.pane")
+    }
+}
+
+private struct CycleLogChip: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.system(size: 9.5, weight: .bold))
+            Text(text)
+                .font(.system(size: 10.5, weight: .heavy))
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+        }
+        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+        .padding(.horizontal, 7)
+        .frame(height: 25)
+        .background(Color.white.opacity(0.58), in: Capsule())
+        .overlay(Capsule().stroke(Color.white.opacity(0.64), lineWidth: 0.6))
+    }
+}
+
+private struct SmartMonitorInnerPanelBackground: View {
+    var body: some View {
+        BrokenCornerCardShape()
+            .fill(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(0.90),
+                        VitoraTheme.ColorToken.surfacePearlMain.opacity(0.78),
+                        Color(red: 242 / 255, green: 248 / 255, blue: 247 / 255).opacity(0.52),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            .overlay(
+                BrokenCornerCardShape()
+                    .stroke(Color.white.opacity(0.88), lineWidth: 0.9)
+            )
+            .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 12, x: 0, y: 7)
+    }
+}
+
+private struct BrokenCornerCardShape: Shape {
+    var cornerRadius: CGFloat = 30
+    var notchWidth: CGFloat = 134
+    var notchDrop: CGFloat = 42
+
+    func path(in rect: CGRect) -> Path {
+        let radius = min(cornerRadius, min(rect.width, rect.height) * 0.20)
+        let drop = min(notchDrop, rect.height * 0.22)
+        let width = min(notchWidth, rect.width * 0.38)
+        let notchStartX = rect.maxX - width
+        let notchKneeX = rect.maxX - width * 0.56
+        let notchShelfX = rect.maxX - radius
+
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX + radius, y: rect.minY))
+        path.addLine(to: CGPoint(x: notchStartX, y: rect.minY))
+        path.addQuadCurve(
+            to: CGPoint(x: notchStartX + 16, y: rect.minY + 7),
+            control: CGPoint(x: notchStartX + 10, y: rect.minY)
+        )
+        path.addLine(to: CGPoint(x: notchKneeX, y: rect.minY + drop))
+        path.addQuadCurve(
+            to: CGPoint(x: notchKneeX + 24, y: rect.minY + drop),
+            control: CGPoint(x: notchKneeX + 10, y: rect.minY + drop + 7)
+        )
+        path.addLine(to: CGPoint(x: notchShelfX, y: rect.minY + drop))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX, y: rect.minY + drop + radius),
+            control: CGPoint(x: rect.maxX, y: rect.minY + drop)
+        )
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY - radius))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX - radius, y: rect.maxY),
+            control: CGPoint(x: rect.maxX, y: rect.maxY)
+        )
+        path.addLine(to: CGPoint(x: rect.minX + radius, y: rect.maxY))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.minX, y: rect.maxY - radius),
+            control: CGPoint(x: rect.minX, y: rect.maxY)
+        )
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY + radius))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.minX + radius, y: rect.minY),
+            control: CGPoint(x: rect.minX, y: rect.minY)
+        )
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -1217,7 +1872,7 @@ struct ReminderSetupSheet: View {
                         Image(systemName: "info.circle")
                             .font(.caption)
                             .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-                        Text("时间可以随时调整，不会变成打卡任务。")
+                        Text("提醒可以随时调整，不影响今天的判断。")
                             .font(.caption)
                             .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
                     }
@@ -1376,6 +2031,7 @@ struct ReminderSetupSheet: View {
 
 struct InsightDetailSheet: View {
     let title: String
+    var accent: Color = VitoraTheme.ColorToken.actionPrimaryDeep
     let onAskVitora: () -> Void
     let onClose: () -> Void
 
@@ -1388,7 +2044,7 @@ struct InsightDetailSheet: View {
                         HStack(spacing: 6) {
                             Image(systemName: "sparkles")
                                 .font(.body.weight(.semibold))
-                                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                                .foregroundStyle(accent)
                             Text(title)
                                 .font(.title3.weight(.bold))
                                 .foregroundStyle(VitoraTheme.ColorToken.strongText)
@@ -1457,7 +2113,7 @@ struct InsightDetailSheet: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 50)
-                    .background(VitoraTheme.ColorToken.actionPrimaryDeep, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .background(accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
 
@@ -1482,7 +2138,7 @@ struct InsightDetailSheet: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 22, height: 22)
-                    .background(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.72), in: Circle())
+                    .background(accent.opacity(0.72), in: Circle())
                 Text(title)
                     .font(.headline.weight(.bold))
                     .foregroundStyle(VitoraTheme.ColorToken.strongText)
@@ -1495,9 +2151,9 @@ struct InsightDetailSheet: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                .foregroundStyle(accent)
                 .frame(width: 30, height: 30)
-                .background(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .background(accent.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             Text(text)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(VitoraTheme.ColorToken.strongText)

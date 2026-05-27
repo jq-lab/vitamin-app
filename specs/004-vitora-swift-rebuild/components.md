@@ -43,7 +43,7 @@
 | ID | 名称 | 层级 | 优先级 | 主要规格 |
 | --- | --- | --- | --- | --- |
 | C-APP-001 | AppGate | Screen | P0 | REQ-001, IA-000 |
-| C-APP-002 | OnboardingStack | Screen | P0 | REQ-001, REQ-002 |
+| C-APP-002 | OnboardingStack | Screen | P0 | REQ-001, REQ-002; 注册进入页 + 聊天式补充页，完成后直接进入 Today |
 | C-APP-003 | PrimaryTabBar | Composite | P0 | IA-010, IA-020, IA-030 |
 | C-APP-004 | VitoraFaceTabButton | Composite | P0 | REQ-010, WF-V-001 |
 | C-APP-005 | ScreenScaffold | Composite | P0 | all WF |
@@ -63,7 +63,7 @@
 | C-TODAY-004 | RhythmCurve | Composite | P0 | REQ-004 |
 | C-TODAY-005 | CalibrationChips | Composite | P0 | REQ-008 |
 | C-TODAY-006 | BodyFactorTiles | Feature | P0 | REQ-006 |
-| C-TODAY-007 | VitoraDailySuggestionCard | Feature | P0 | REQ-007 |
+| C-TODAY-007 | TodayInsightPanel | Feature | P0 | REQ-007 |
 | C-TODAY-008 | EnergyBowlRealtimePrediction | Feature | P0 | REQ-005 |
 | C-TODAY-009 | TodayCalendarSheet | Feature | P0 | REQ-013 |
 | C-TODAY-010 | TodayStateDetailSheet | Feature | P0 | REQ-004 |
@@ -103,6 +103,7 @@
 | C-CYCLE-007 | VitoraNarrativeRow | Composite | P0 | REQ-012 |
 | C-CYCLE-008 | CurrentPhaseDetailSheet | Feature | P0 | IA-031 |
 | C-CYCLE-009 | EnergyDynamicsDetailSheet | Feature | P0 | IA-032 |
+| C-CYCLE-010 | FlowerMapView | Feature | P0 | D-076 |
 
 ### 2.5 Support / Trust
 
@@ -128,8 +129,8 @@
 | Linked Specs | REQ-004, REQ-010, REQ-012, WF-T-001, WF-V-001, WF-C-001 |
 | Tokens | `vt.layout.tab.*`, `vt.glass.g2.panel`, `vt.glow.cta` |
 | 状态 | todaySelected、vitoraSelected、cycleSelected、globalInputDock、quickRecord、sheetPresented |
-| Interactions | tap 切换；点击 `AI管家` 展开并聚焦输入；右侧圆形 `+` 打开快捷补充 sheet 且不切 Tab；sheet 打开时保持或弱化。 |
-| Acceptance | 只有 3 个 tab；Tab 组居中；右侧圆形 `+` 触控不小于 44pt；Today / Cycle 不显示输入条；Tab 和记录均不进入输入胶囊。 |
+| Interactions | tap 切换；点击 `AI管家` 只切换到 Assistant Surface 并展示输入快捷栏，点击输入栏本身才聚焦键盘；D-087 后中心凹槽悬浮圆形 `+` 打开快捷补充 sheet 且不切 Tab，长按进入语音记录；sheet 打开时隐藏。 |
+| Acceptance | 只有 3 个 tab；底部为一体式白色圆角凹槽 Dock，左右承载 `今日 / 周期`，中心悬浮圆形 `+` 触控不小于 44pt；D-088 后 Dock 下移贴近底部并带一层轻霜态嵌入底座，中心 `+` 为蓝绿色半透明霜态玻璃；D-090 后 Dock 本体与左右 Tab 胶囊进一步收窄，中心 `+` 更轻、更透明，短按手动记录、长按语音记录不变；Today / Cycle 不显示输入条；Tab 和记录均不进入输入胶囊，不保留右侧独立圆形 `+`。 |
 | Do Not | 不用心形普通图标代替 Vitora face；不新增第四 tab。 |
 
 ### C-APP-007 · AskableSurface
@@ -147,6 +148,32 @@
 
 ## 4. Today Components
 
+### C-TODAY-001 · DateCycleContextStrip
+
+| 字段 | 规格 |
+| --- | --- |
+| Purpose | 在 Today 左上角用最小占位提供日期、周期阶段和能量入口。 |
+| Appears In | IA-010 |
+| Linked Specs | REQ-004, REQ-013, WF-T-001, WF-T-003 |
+| Tokens | `vt.glass.g1.clearCard`, `vt.color.energy.yellow`, `vt.type.caption` |
+| 状态 | todaySelected、lowData |
+| Interactions | 点击整卡打开 Today 周期日历浮层。 |
+| Acceptance | 宽约 190-205pt、高约 66-72pt；只显示星期、日期、`黄体 D18`、横向能量条和数值 `68`；不显示睡眠、步数、日历 icon 或冗长 `/100` 占位。 |
+| Do Not | 不把顶部入口做成大日历组件或信息 dashboard。 |
+
+### C-TODAY-009 · TodayCalendarSheet
+
+| 字段 | 规格 |
+| --- | --- |
+| Purpose | 从 Today 快速理解当天周期背景，并回看当月阶段。 |
+| Appears In | IA-012 |
+| Linked Specs | REQ-013, WF-T-003 |
+| Tokens | `vt.bg.aura.sheet`, `vt.glass.g2.panel`, `vt.shadow.glass.low`, `vt.color.phase.*` |
+| 状态 | open、monthChanging、daySelected、moreMenu |
+| Interactions | 返回 Today、切换月份、选择日期、打开更多、点击记忆箱。 |
+| Acceptance | 左侧约 3/4 宽纸质浮层，右侧露出虚化 Today 背景；顶部无“周期日历”标题和说明副标题；月历使用英文周标题和阶段色虚线圆点；5 号黑色实心选中、4 号蓝描边、16-20 粉、21-28 绿、29-31 橙；下方为浅粉撕边便签和 2x2 木制记忆箱。 |
+| Do Not | 不放到 Cycle 首页；不保留行动链、过去几天、大白卡统计块、普通彩色 memory box 或底部双按钮噪音。 |
+
 ### C-TODAY-003 · TodayStatusCard
 
 | 字段 | 规格 |
@@ -155,11 +182,13 @@
 | Appears In | IA-010 |
 | Linked Specs | REQ-004, UF-002, WF-T-001 |
 | Tokens | `vt.bg.aura.today`, `vt.glass.g1.clearCard`, `vt.color.action.cyan`, `vt.type.energyNumber` |
-| Content Slots | 宽口 Energy Bowl 图形、单层高对比放大数字、数字下方状态词与同排 `查看数据`、碗下三阶段反向周期圆弧。 |
-| 状态 | richData、lowData、uncertain、calibrated、firstOpen |
-| Interactions | 点击能量碗进入状态详情；点击 `查看数据` 进入今日分析/身体要素合并模块；long-press askable menu。 |
-| Acceptance | 能量碗图形与数字/查看数据/状态文案必须分层不重叠；`今日能量偏低` 位于 `68%` 下方，`查看数据` 位于状态词右侧同一行；数字不能使用双层虚影或点阵偏移；水滴从屏幕顶部进入碗口，水位按能量显示浅水/半碗/接近满碗，Reduce Motion 下静态水位可读；首页数据小标签只进入今日分析，不在能量碗或建议卡出现；周期线轴必须下移到碗外下方，和碗底保持约一个中文字高度，形成中间下沉的三阶段圆弧，文字全部在下端；首页不出现实时预测图、三模式切换或校准 chips；不出现独立记录区。 |
-| Do Not | 不做顶部下拉 Energy Ball；不做复杂 dashboard。 |
+| Content Slots | 低代码日期标题、创意趋势卡、共享聊天记录卡。 |
+| 状态 | collapsed、expanded、topicEnergy、topicSleep、topicPeriod、topicNutrition、lowData |
+| Interactions | 点击低代码日期标题打开左侧周期日历抽屉；创意趋势卡只表达状态和温馨留言；long-press askable menu。 |
+| Acceptance | 顶部黑色三格 `TopModeSelector` 不出现；主视觉为 SwiftUI/Canvas `FlowerEnergyBloomView`，包含橙色半碗能量弧、中心花茎花朵、左右虚线轨道、前天/昨天/今天节点；不得使用外部图片；保留 `egg.compound.mascot` id；`PixelFrostedGlassEgg` 保留为设计系统备用但不作为首页主视觉；D-075 后花组件和右侧维度切换压缩在首屏上方约 1/3，红色虚线不遮挡聊天/反馈条；D-078 后当前默认 `68%` 只进入能量碗，今天节点未满 `80%` 时显示种子苗和阈值提示，不显示成熟向日葵或 `100% 同品种双朵共生` 气泡；达到 `80%` 后才切换为向日葵，达到 100% 且同品种时才显示共生气泡；时间线为直线，移除整体呼吸缩放，仅保留慢速轻摆和点击一次性反馈；D-079 后花组件下方不显示独立 `68/100 查看分析`；D-080 后主视觉采用接近整屏宽的 hero band，右侧维度胶囊必须独立悬浮且不覆盖水桶、`68%`、今天节点、阈值提示或红色虚线；D-081 后继续降低挤压感：水桶宽度收敛、历史节点更疏散、阈值提示上移、右侧胶囊缩小并上移，所有信息不能堆叠在水桶中心；D-083 后折叠/聊天态不再显示 `今日 / 睡眠 / 经期 / 营养` chips；D-086 后折叠/聊天态为直接浮在现有 Aura 背景上的全屏前景聊天卡，不显示外层磨砂玻璃底板，旧顶部小日历和微缩花盆在完全折叠时淡出，卡片头部展示日期与 `Today` 像素标题，聊天框顶部用轻量原生像素小图表达当前时间、深圳区域和周期背景，消息区不显示左侧虚线时间轴或时间胶囊，Vitora 消息使用柔白 Pixel 头像 + 气泡，用户消息右对齐；记录完成后上移反馈条显示记录摘要和温馨提示，反馈条右侧不显示灰色圆形附加记录/提醒按钮；不出现实时预测图、校准 chips、收割/花粉/图鉴/种子兑换、连续打卡、外层磨砂玻璃底板、常驻输入框或独立记录区。 |
+| Do Not | 不做顶部下拉 Energy Ball；不做复杂 dashboard；不把花画成厚重拟物或外部图片；不在花组件下方重复展示主数字和 CTA。 |
+
+D-086/D-089/D-091 补充：前景白色聊天卡左右贴近可用宽度，底部延伸到 Dock 后方；日期和像素 `Today` 头部更靠左上；右上汉堡菜单为 `today.collapsed.calendarMenu`，点击打开左侧周期日历抽屉。D-089 后展开态暂停花朵玩法主视觉，使用 `today.creativeTrend.card` 小型创意趋势卡，不展示水桶、种子苗、花朵成长或右侧维度胶囊。D-091 后展开态也使用同一个聊天记录卡，不再显示旧三环 `TodayInsightPanel` 首页卡。
 
 ### C-TODAY-008 · EnergyBowlAndAnalysisPrediction
 
@@ -170,22 +199,22 @@
 | Linked Specs | REQ-005, UF-003, UF-007, WF-T-002, WF-R-001 |
 | Tokens | `vt.glass.g1.clearCard`, `vt.color.action.cyan`, `vt.type.energyNumber`, `vt.motion.tap` |
 | 状态 | richData、lowData、uncertain、reviewComparison |
-| Interactions | 点击能量碗；点击 `查看数据`；在今日分析查看当前时间气泡。 |
-| Acceptance | 不冒充刷新；不使用顶部下拉 Energy Ball；首页固定综合能量，不显示睡眠/周期模式切换、实时预测图、数据小标签或校准 chips；首页周期只显示前一阶段/当前阶段/下一阶段三点圆弧，当前 D18 为 `排卵期 / 黄体期 D18 / 月经期`；实时预测移入今日分析，包含数据小标签、高/中/低纵轴、小时点位、当前时间气泡和综合能量解释；`查看数据` 打开综合实时预测 + 横向身体要素 + 综合判断。 |
+| Interactions | 点击能量碗；点击 `查看数据`；在今日分析查看球形分数报告、监测项解释、综合实时预测和今日推荐。 |
+| Acceptance | 不冒充刷新；不使用顶部下拉 Energy Ball；首页固定综合能量，不显示睡眠/周期模式切换、实时预测图、数据小标签或校准 chips；首页周期只显示前一阶段/当前阶段/下一阶段三点圆弧，当前 D18 为 `排卵期 / 黄体期 D18 / 月经期`，当前阶段段落加粗着色；今日分析顶部显示 `黄体期 Day 18`，球形纹路报告中间显示 68 分，下面列出睡眠、HRV、周期等关键监测项、解释综合实时预测，并直接给出今日推荐；能量碗和 `查看数据` 打开同一张今日分析。 |
 | Do Not | 不把 Energy Ball 做成下拉头部；不长动画阻塞用户；不展示未接入数据源的血糖判断。 |
 
-### C-TODAY-007 · VitoraDailySuggestionCard
+### C-TODAY-007 · TodayInsightPanel
 
 | 字段 | 规格 |
 | --- | --- |
-| Purpose | 用大字号身体翻译解释今天状态，承接睡眠种子状态，并给出可轮换的两条组合建议。 |
+| Purpose | 用主题化信息框承接首页下方具体内容，替换旧 `智能监测` 首页位置。 |
 | Appears In | IA-010, IA-015 |
 | Linked Specs | REQ-007, UF-004, WF-T-006 |
 | Tokens | `vt.glass.g2.panel`, `vt.color.action.blue`, `vt.shadow.glass.low` |
-| 状态 | fresh、accepted、changed、notSuitable、reminderSet、reviewPending、seed、halfOpen、bloom、dormant |
-| Interactions | `我试试` 进入现有今日分析/提醒路径并可推动睡眠种子继续打开；icon `换一换` 在 `吃+休息 / 运动+吃 / 休息+运动` 三组间循环；卡片/长按仍可解释或校准。 |
-| Acceptance | 标题后必须有大字号身体翻译和依据文案；睡眠种子只作为建议反馈证据显示 `状态 / 原因 / 今天怎么帮它`；每组显示两条行动建议，行尾为 `checkmark.circle.fill`；首屏不出现 `为什么` 按钮；形成当日意图并连接晚间复盘；不制造任务失败。 |
-| Do Not | 不叫“小尝试”弱化 AI 个性化；不只 toast。 |
+| 状态 | energySummary、energyExpanded、sleepDetail、periodDetail、nutritionRecord、reminderSet |
+| Interactions | 随主题弧选择切换内容；点击 `今日能量` 标题或 `为什么` 展开原因列表、轻建议和 `✓ 提醒`；`✓ 提醒` 复用现有提醒 Sheet；`+ 记一笔` 打开 Vitora contextual sheet，不切换主 Tab；睡眠、经期、营养主题展示各自详情。 |
+| Acceptance | `今日能量` 默认结构为三枚环形指标、营养/补充 chips、Vitora 黄色提示、黑色 `+ 记一笔` 和 `今日 68/100`；睡眠主题展示睡眠时长、恢复、HRV 等依据；经期主题展示黄体期 D18 阶段解释和建议；营养主题展示补水/补给记录，并明确只记录已在使用内容，不做购买引导；卡内可展示 HRV/心率作为依据，但不得变成首页弧上主题；形成当日意图并连接晚间复盘；不制造任务失败。 |
+| Do Not | 不保留首页扑克牌式 `智能监测` 作为主信息框；不做任务清单、打卡、完成率或销售化营养入口。 |
 
 ### C-TODAY-013 · MorningGrowthFeedbackCard
 
@@ -237,7 +266,7 @@
 | Linked Specs | REQ-010, REQ-011, UF-005, UF-006 |
 | Tokens | `vt.glass.g3.sheet`, `vt.layout.inputDock.height`, `vt.layout.tab.lowLift` |
 | 状态 | empty、typing、sendEnabled、voiceReady、recording、transcribed、aiUnavailable |
-| Interactions | type、send、voice record、keyboard avoidance；外部 `AI管家` Tab 可触发聚焦。 |
+| Interactions | type、send、voice record、keyboard avoidance；点击输入栏本身触发聚焦。 |
 | Acceptance | 顺序固定为语音/键盘、输入或内联语音条、发送；右侧发送固定且空态/可发送态清楚；只在 AI 管家页展开；点击 Today/Cycle/记录不自动聚焦；AI 不可用时输入保留并可手动保存。 |
 | Do Not | 不做只有 placeholder 的空聊天；不隐藏发送路径；不在输入区混入 `+`、周期小花、记录键或 Tab 切换按钮。 |
 
@@ -248,11 +277,11 @@
 | Purpose | 从 Today / Cycle 对象轻量唤醒 Vitora，不打断原任务。 |
 | Appears In | IA-021 |
 | Linked Specs | REQ-008, UF-005, WF-V-005 |
-| Tokens | `vt.glass.g3.sheet`, `vt.bg.overlay.dim`, `vt.motion.sheet.spring` |
-| 状态 | presented、sourceContext、typing、voice、understanding、confirming、saved、dismissed |
-| Interactions | close、swipe up full、quick chip、type、voice、confirm；可由右侧圆形 `+` 以 `快捷记录` 来源打开。 |
-| Acceptance | 顶部为稳定结构：左侧关闭、居中标题、下方来源摘要；底部固定本地输入条；打开时全局 Dock 隐藏；关闭回来源；保存后更新来源对象；快捷记录不切换到 Vitora Tab、不改写全局输入草稿。 |
-| Do Not | 不直接切到 Vitora tab；不未经确认保存。 |
+| Tokens | `vt.glass.g3.sheet`, `vt.motion.sheet.spring` |
+| 状态 | presented、sourceContext、manualHealth、aiHealth、aiVoice、aiText、periodStateSelected、outlineExpanded、optionSelected、mediaSelected、noteEditing、parsePreview、voicePermissionFallback、saved、dismissed |
+| Interactions | close、下拉关闭、点空白关闭、切换 `手动记账 / AI记录`、切换 `语音 / 打字`、切换 `是经期 / 否经期`、展开健康大纲、展开更多支线、选择/取消词条、选择图片/拍照/语音入口、填写留言条、AI 语音记录、转打字、AI 本地解析、再记、完成；可由 Dock 中心凹槽圆形 `+` 点按打开手动记录，也可由长按 `+` 或无障碍 `语音记录 / 打字记录` 直接打开对应 AI 输入态。 |
+| Acceptance | 只保留前景白色圆角底部卡片；AppRouter 在 sheet 打开时提供全屏透明 hit-test backdrop 拦截后方点击，点空白只关闭不透传；顶部保留拖拽条并新增 44pt 关闭按钮 `vitora.context.close`；双模式为 `手动记账 / AI记录`，Dock `+` 点按默认 `手动记账` active，长按默认 `AI记录 > 语音` active；手动模式显示 `是经期 / 否经期`，默认展示 5-8 个健康大纲，每个大纲默认露出 5 个高频词条，点击大纲或 `更多` 展开全部支线，词条用 Apple SF Symbols 且点击即可选中/取消；`是经期` 包含经期情况、身体状态、心情、服药、营养补充剂、健康小忌，`否经期` 包含白带、身体状态、心情、皮肤、爱爱、营养补充剂、健康小忌；下方包含日期/周期上下文字段、图片/拍照/语音入口和 `vitora.record.note.input` 留言条；不显示 `支出 / 收入 / 转账`、财务分类、金额输入卡、备注金额区、数字键盘或删除键；完成按钮不会卡在不可点击状态；AI 模式内有 `语音 / 打字` 二级切换，语音态展示 mic、录音状态、转写展示、`重新说 / 转打字 / 解析`，权限拒绝或不可用时降级到打字；打字态展示一句话输入、发送、快捷示例、`AI 已拆出字段` 预览卡和同一留言条；打开时全局 Dock 隐藏；关闭回来源；快捷记录不切换到 Vitora Tab、不改写全局输入草稿；完成后只写入运行态 `RecentRecordFeedback` 并关闭，不进入时间线。 |
+| Do Not | 不直接切到 Vitora tab；不未经确认保存；不接真实模型；不新增财务或健康 schema；不展示 Luna 文案、购买引导、医学诊断或完成后时间线。 |
 
 ### C-VITORA-013 · GardenEveningReviewEntryCard
 
@@ -299,14 +328,28 @@
 
 | 字段 | 规格 |
 | --- | --- |
-| Purpose | 总结“这 30 天，Vitora 看见的三件事”。 |
+| Purpose | 在统一地图报告框下半区承接详情内容，解释本周、趋势对比和近期状态。 |
 | Appears In | IA-030 |
 | Linked Specs | REQ-012, UF-008, WF-C-001 |
-| Tokens | `vt.glass.g2.panel`, `vt.color.action.blue`, `vt.color.phase.*` |
-| 状态 | week、monthTrend、cycle |
-| Interactions | 卡片式切换 `本周 / 趋势（月） / 周期`；卡片可长按问 Vitora。 |
-| Acceptance | 默认本周展示低谷窗口、恢复较好时段、影响因素和待校准天数；选中页签为白色霜状玻璃 + 青色短线；不制造任务完成或失败感。 |
-| Do Not | 不显示完成率、连续天数、红点或打卡。 |
+| Tokens | `vt.glass.g2.panel`, `vt.color.phase.*`, `vt.motion.tabCrossfade` |
+| 状态 | week、trendComparison、recent、reduceMotion |
+| Interactions | 由 Header 胶囊 `本周 / 趋势对比 / 近期` 驱动内容切换；切换时 220-280ms cross-fade + 内容轻微 fade-up；卡片内详情继承当前 tab accent。 |
+| Acceptance | 地图下方只显示一个嵌入式详情内容区，不再出现第二套文件夹 tab，也不再单独投大阴影；默认本周展示标题、状态摘要、7 日柱状图、三段说明、四格监测摘要和当前周期进度；趋势（对比）展示月度综合对比、4 行蓝色进度条、归因解释和本月总结；近期展示能量折线图、监测到了什么、近期结论 / 下一步和黄色描边按钮；Header 三个胶囊触控不小于 44pt；不制造任务完成或失败感。 |
+| Do Not | 不重排整个 Cycle 首页；不显示完成率、连续天数、红点、打卡、购买引导或医学诊断。 |
+
+### C-CYCLE-010 · FlowerMapView
+
+| 字段 | 规格 |
+| --- | --- |
+| Purpose | 在 Cycle 顶部用轻量花之地图承接长期节律和恢复资源积累，同时把 D-073 报告卡保留在下方作为主要解释层。 |
+| Appears In | IA-030, WF-C-001 |
+| Linked Specs | D-076 |
+| Tokens | `vt.bg.aura.cycle`, `vt.glass.g1.clearCard`, `vt.motion.tap` |
+| Content Slots | 深圳 / 广州点状路线、透明圆形种花引导、二维字符串轮廓地图、不规则菱形 tile、花朵收集入口、花朵详情浮层、玩法说明浮层。 |
+| 状态 | readyToPlant、plantedToday、tileEmptySoil、tileSprout、tileBloom、tileToday、tileLocked、detailPresented、helpPresented、citySelected |
+| Interactions | 点击 `种下今天的花` 或成熟状态下点击空地，把今日花种到下一个空格；点击已种花朵展示日期、能量和状态详情；点击问号展示玩法说明；点击城市路线节点切换查看未来城市阶段。 |
+| Acceptance | 原生 SwiftUI 实现，不使用 RN/Expo、图片素材、地图 SVG 或复杂动画库；地图和下方详情必须位于同一个大圆角描边外框内；种花动效为 0.72→1.0 scale + 淡黄 pulse；种下后透明圆形引导显示 `今日已种下`。 |
+| Do Not | 不做打卡、完成率、连续天数、红点、任务失败；不把花之地图变成第四主 Tab、完整花园系统或成长册；不删除 D-073 报告卡。 |
 
 ### C-CYCLE-004 · EnergyDynamicsCard
 
@@ -325,13 +368,13 @@
 
 | 字段 | 规格 |
 | --- | --- |
-| Purpose | 低成本展示本周期哪些建议真的对用户有用。 |
+| Purpose | 用真实花种低成本展示本周期哪些建议真的对用户有用。 |
 | Appears In | IA-030 |
 | Linked Specs | REQ-012, UF-008, WF-C-001 |
 | Tokens | `vt.glass.g2.panel`, `vt.color.action.blue`, `vt.shadow.glass.low` |
-| 状态 | bloom、halfOpen、dormant |
+| 状态 | wilted、score60、score80、score100 |
 | Interactions | 点击花卡可问 Vitora 或查看对应建议反馈；P0 可先静态展示最近 7-10 张。 |
-| Acceptance | 标题为 `本周期花架证据`；只展示“建议 → 反馈”的学习结果；不显示成长册进度、完成率、连续天数、金币、商店或花田地图。 |
+| Acceptance | 标题为 `本周期花架证据`；只展示“建议 → 反馈”的学习结果；花卡读取统一 `SleepSeedCard` 的真实花种、阶段和分数；不显示成长册进度、完成率、连续天数、金币、商店或花田地图。 |
 | Do Not | 不作为 Cycle 主视觉；不显示 `30 天成长册`、8/30、种子选择或每日网格。 |
 
 ## 7. Support Components

@@ -42,3 +42,40 @@ final class LunaRecordServiceTests: XCTestCase {
         XCTAssertNil(canceled.confirmedUnderstandingID)
     }
 }
+
+final class VitoraQuickRecordParserTests: XCTestCase {
+    func testHeadacheAndB6SentenceParsesTwoItems() {
+        let preview = VitoraQuickRecordParser().parse(rawInput: "今天有点头痛吃了 B6")
+
+        XCTAssertEqual(preview.items.count, 2)
+        XCTAssertNil(preview.vitoraFeedback)
+
+        let headache = preview.items.first { $0.subtype == "headache" }
+        XCTAssertEqual(headache?.category, .symptom)
+        XCTAssertEqual(headache?.severity, "轻")
+        XCTAssertEqual(headache?.needsConfirmation, false)
+
+        let b6 = preview.items.first { $0.subtype == "B6" }
+        XCTAssertEqual(b6?.category, .nutrition)
+        XCTAssertEqual(b6?.doseMG, 10)
+        XCTAssertEqual(b6?.needsConfirmation, false)
+    }
+
+    func testBareHeadacheDefaultsToMediumAndNeedsConfirmation() {
+        let preview = VitoraQuickRecordParser().parse(rawInput: "头痛")
+
+        XCTAssertEqual(preview.items.count, 1)
+        XCTAssertEqual(preview.items.first?.subtype, "headache")
+        XCTAssertEqual(preview.items.first?.severity, "中")
+        XCTAssertEqual(preview.items.first?.needsConfirmation, true)
+    }
+
+    func testMagnesiumAndB6ParseAsTwoNutritionItems() {
+        let preview = VitoraQuickRecordParser().parse(rawInput: "镁 200mg + B6 10mg")
+
+        XCTAssertEqual(preview.items.count, 2)
+        XCTAssertEqual(preview.items.map(\.category), [.nutrition, .nutrition])
+        XCTAssertEqual(preview.items.first { $0.subtype == "magnesium" }?.doseMG, 200)
+        XCTAssertEqual(preview.items.first { $0.subtype == "B6" }?.doseMG, 10)
+    }
+}

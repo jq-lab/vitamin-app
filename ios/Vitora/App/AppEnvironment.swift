@@ -11,12 +11,14 @@ final class AppEnvironment: ObservableObject {
     @Published private(set) var reviewLearningSignal: VitoraLearningSignal?
     @Published private(set) var selectedCycleDay = 18
     @Published private(set) var selectedAuraVariant: DynamicAuraVariant = .luteal
+    @Published private(set) var recentRecordFeedback: RecentRecordFeedback?
 
     let appName = String(localized: "vitora.app.title")
     let isAIUnavailableForUITests: Bool
     let hasRichTodayDataForUITests: Bool
     private let eveningReviewService = EveningReviewService(now: { Date() })
     private let learningSignalService = VitoraLearningSignalService(now: { Date() })
+    private var pendingQuickRecordLaunchMode: QuickRecordLaunchMode?
 
     init(arguments: [String] = ProcessInfo.processInfo.arguments) {
         isAIUnavailableForUITests = arguments.contains("-vitoraUITestAIUnavailable")
@@ -27,6 +29,13 @@ final class AppEnvironment: ObservableObject {
             navigationState.completeOnboarding(lowData: lowData)
             applyUITestInitialTab(from: arguments)
             route = .today
+            if arguments.contains("-vitoraUITestOpenQuickRecordVoice") {
+                pendingQuickRecordLaunchMode = .voice
+            } else if arguments.contains("-vitoraUITestOpenQuickRecordText") {
+                pendingQuickRecordLaunchMode = .text
+            } else if arguments.contains("-vitoraUITestOpenQuickRecord") {
+                pendingQuickRecordLaunchMode = .manual
+            }
         }
 
         if arguments.contains("-vitoraUITestReviewAvailable") {
@@ -67,21 +76,60 @@ final class AppEnvironment: ObservableObject {
         lunaRecordRequestID = UUID()
     }
 
-    func openQuickRecord() {
+    func openQuickRecord(_ launchMode: QuickRecordLaunchMode = .manual) {
+        let initialRecordMode: VitoraRecordMode
+        let initialAIInputMode: VitoraAIInputMode
+
+        switch launchMode {
+        case .manual:
+            initialRecordMode = .manual
+            initialAIInputMode = .text
+        case .voice:
+            initialRecordMode = .ai
+            initialAIInputMode = .voice
+        case .text:
+            initialRecordMode = .ai
+            initialAIInputMode = .text
+        }
+
         openVitoraContext(
             sourceTitle: "快捷记录",
             sourceSummary: "告诉 Vitora 一件事",
-            prompt: "告诉 Vitora 一件事..."
+            prompt: launchMode.prompt,
+            initialRecordMode: initialRecordMode,
+            initialAIInputMode: initialAIInputMode
         )
     }
 
-    func openVitoraContext(sourceTitle: String, sourceSummary: String, prompt: String) {
+    func consumePendingQuickRecordLaunchIfNeeded() {
+        guard let pendingQuickRecordLaunchMode else {
+            return
+        }
+
+        self.pendingQuickRecordLaunchMode = nil
+        openQuickRecord(pendingQuickRecordLaunchMode)
+    }
+
+    func openVitoraContext(
+        sourceTitle: String,
+        sourceSummary: String,
+        prompt: String,
+        initialRecordMode: VitoraRecordMode = .manual,
+        initialAIInputMode: VitoraAIInputMode = .text
+    ) {
         vitoraContext = VitoraContextPayload(
             sourceTitle: sourceTitle,
             sourceSummary: sourceSummary,
-            prompt: prompt
+            prompt: prompt,
+            initialRecordMode: initialRecordMode,
+            initialAIInputMode: initialAIInputMode
         )
         navigationState.present(.vitoraContextualSheet)
+    }
+
+    func submitQuickRecordFeedback(_ feedback: RecentRecordFeedback) {
+        recentRecordFeedback = feedback
+        navigationState.dismissPresentation()
     }
 
     var isEveningReviewAvailable: Bool {
@@ -97,7 +145,7 @@ final class AppEnvironment: ObservableObject {
             return
         }
         navigationState.dismissPresentation()
-        navigationState.selectedTab = .vitora
+        navigationState.selectedTab = .today
     }
 
     func openEveningReview() {
@@ -141,6 +189,7 @@ final class AppEnvironment: ObservableObject {
         route = .onboarding
         eveningReview = EveningReview(day: .now, status: .unavailable)
         reviewLearningSignal = nil
+        recentRecordFeedback = nil
     }
 
     private func seedEveningReviewForUITests() {
@@ -155,9 +204,7 @@ final class AppEnvironment: ObservableObject {
     }
 
     private func applyUITestInitialTab(from arguments: [String]) {
-        if arguments.contains("-vitoraUITestInitialTabVitora") {
-            navigationState.selectedTab = .vitora
-        } else if arguments.contains("-vitoraUITestInitialTabCycle") {
+        if arguments.contains("-vitoraUITestInitialTabCycle") {
             navigationState.selectedTab = .cycle
         }
     }
@@ -172,4 +219,30 @@ struct VitoraContextPayload: Equatable {
     var sourceTitle: String
     var sourceSummary: String
     var prompt: String = "告诉 Vitora 一件重要变化。"
+    var initialRecordMode: VitoraRecordMode = .manual
+    var initialAIInputMode: VitoraAIInputMode = .text
+}
+
+struct RecentRecordFeedback: Equatable {
+    var source: String
+    var summary: String
+    var message: String
+    var createdAt: Date
+}
+
+enum QuickRecordLaunchMode: Equatable {
+    case manual
+    case voice
+    case text
+
+    var prompt: String {
+        switch self {
+        case .manual:
+            return "告诉 Vitora 一件事..."
+        case .voice:
+            return "按住或点麦克风，说一句今天的身体感受。"
+        case .text:
+            return "用一句话记录今天的身体感受、情绪或经期变化。"
+        }
+    }
 }

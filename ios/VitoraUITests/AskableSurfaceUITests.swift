@@ -6,8 +6,8 @@ final class AskableSurfaceUITests: XCTestCase {
         let app = launchPivotApp()
 
         app.buttons["today.status.card"].tap()
-        XCTAssertTrue(app.otherElements["today.state.detail.sheet"].waitForExistence(timeout: 3))
-        app.buttons["关闭"].tap()
+        XCTAssertTrue(app.otherElements["today.analysis.sheet"].waitForExistence(timeout: 3))
+        app.buttons["today.analysis.close"].tap()
 
         let statusCard = app.buttons["today.status.card"]
         XCTAssertTrue(statusCard.waitForExistence(timeout: 3))
@@ -30,4 +30,3 @@ final class AskableSurfaceUITests: XCTestCase {
         return app
     }
 }
-

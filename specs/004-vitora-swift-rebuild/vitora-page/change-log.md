@@ -1,5 +1,39 @@
 # Vitora Tab Change Log
 
+## 2026-05-19 · 真实花种接入复盘种子证据
+
+目的：按 D-058，把睡眠种子从抽象方向图标升级为真实花种轻证据层，但不恢复花园化入口。
+
+改动：
+
+- AI 管家复盘分析卡、种子方向选择和花朵阶段对比读取统一 `SleepSeedCard` 的真实花种与阶段。
+- 用户仍只选择 `恢复 / 留余量 / 轻动`，不直接从 10 种花中选择。
+- 不新增花园 Tab、花园手册、成长册、完成率、连续天数或失败惩罚。
+
+## 2026-05-19 · 底部 Tab 与 AI 输入快捷栏分层
+
+目的：按用户最新交互计划，把主 Tab 切换和 AI 输入快捷键拆成两个清晰层级，减少 `AI管家`、麦克风、发送和全局 `+` 在底部区域的职责混淆。
+
+改动：
+
+- `GlobalVitoraDock`：AI 管家页显示上层输入快捷栏，下层继续保留三主 Tab 和右侧独立圆形 `+`；Today / Cycle 不显示输入栏。
+- `VitoraInputDock`：新增 assistant floating / sheet local 样式分支，AI 页使用带低像素 Vitora 标识的浮动输入栏，contextual sheet 保持本地输入栏。
+- `VitoraViewModel`：发送后增加短暂 `Vitora 正在整理...` 状态轨；语音录制态继续显示内联波形和键盘返回入口。
+- `AI管家` Tab 点击只切换页面，不再自动聚焦键盘；点击输入栏本身才进入输入。
+
+测试：
+
+- Build：通过，`xcodebuild -workspace Vitora.xcworkspace -scheme Vitora -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build`。
+- UI 测试尝试运行时被既有 `VitoraTests` Expo module 编译问题拦截，未进入 UI 用例执行。
+
+截图：
+
+- `/private/tmp/vitora-tab-input-today.png`
+- `/private/tmp/vitora-tab-input-ai.png`
+- `/private/tmp/vitora-tab-input-cycle.png`
+- `/private/tmp/vitora-tab-input-voice.png`
+- `/private/tmp/vitora-tab-input-processing.png`
+
 ## 2026-05-18 · 睡眠种子解释回归为建议反馈说明
 
 目的：按用户最新“睡眠种子玩法”计划，AI 管家不恢复花园化入口，而是解释种子为什么半开、今日建议如何帮助它，以及哪些反馈会让 Vitora 判断更准。

@@ -2,6 +2,307 @@
 
 > 后续任何 Cycle 页面相关改动都必须追加到本文件。
 
+## 2026-05-27 · 花田地图 v1.7 地图与详情统一外框
+
+**目的**
+
+按用户对图 1 / 图 2 的对比反馈，把当前“地图一块、详情卡一块”的分裂感收拢成参考图那种同一个框内的结构：外层先形成整体容器，再在容器下半区呈现具体详情。
+
+**具体改动**
+
+- `CycleView.swift`：新增 `CycleMapReportFrame`，用一个大圆角细描边容器同时包住 `FlowerMapView` 和 `CycleReviewInsightCard`。
+- `CycleView.swift`：`CycleReviewInsightCard` 增加嵌入态，放入统一外框时移除自身独立大圆角背景和阴影，只保留内容 padding。
+- `CyclePivotUITests.swift` / `AccessibilityUITests.swift`：增加 `cycle.mapReport.frame` 断言，确保统一外框在首屏存在。
+- `cycle-page-spec.md` / `qa-checklist.md` / `components.md` / `interaction-acceptance.md`：同步 v1.7 验收标准。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleUnifiedFrame-20260527/cycle-unified-frame-v2.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+## 2026-05-27 · 花田地图 v1.6 顶部报告切换与单详情框
+
+**目的**
+
+按用户最新参考图，把 Cycle 页信息结构改为“地图在上，地图下方框住一个具体内容做详细介绍”：删除地图下方的 `本周 / 趋势（对比） / 近期` 文件夹 tab，把 Header 中间胶囊从 `当前城市 / 路线 / 地球` 改为 `本周 / 趋势对比 / 近期`。
+
+**具体改动**
+
+- `CycleView.swift`：新增 `selectedCycleReportTab`，Header 中间胶囊改为报告维度切换。
+- `CycleView.swift`：`FlowerMapView` 不再接收顶部 segment；城市预览只由深圳 / 广州节点和点状路线触发。
+- `CycleView.swift`：`CycleReviewInsightCard` 删除地图下方文件夹 tab，只保留单张详情报告框，内容随 Header 胶囊切换。
+- `CycleView.swift`：清理已不可触发的 `地球预览` 分支，避免旧 `当前城市 / 路线 / 地球` 语义残留。
+- `CyclePivotUITests.swift`：周期页断言改为 Header 胶囊 `cycle.review.tab.week / trend / recent`，不再期待旧 `cycle.flowerMap.segment.*`。
+- `facts.md`、`decision-log.md`、`spec.md`、`wireframes.md`、`components.md`、`interaction-acceptance.md`、`cycle-page-spec.md`、`qa-checklist.md`：同步 D-084 / v1.6 规则。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleTopReportTabs-20260527/cycle-top-report-tabs-v2.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**未解决问题**
+
+- UI test 仍被既有 `VitoraTests` Expo module 缺失阻塞，未进入 Cycle UI 实际执行。
+- 花田真实数据仍为 mock 运行态；后续接入真实周期/反馈数据时需要替换 `plantedCount` 和城市进度来源。
+
+## 2026-05-27 · 花田地图 v1.5 路线去背景与本周复盘信息框架
+
+**目的**
+
+按用户最新截图反馈继续减轻 Cycle 顶部花田模块：去掉深圳 / 广州节点后的白色背景，去掉路线条中 `还差 12 格` 明文，去掉右下 `24朵` 的胶囊背景；同时将本周报告改成参考图的“上内容、下信息”结构，用高低柱状图表达本周能量复盘。
+
+**具体改动**
+
+- `CycleView.swift`：路线条移除整条白色胶囊背景和剩余格数 chip，保留深圳起点、12 个小点进度和广州终点；剩余格数只保留在可访问性标签和点击后的解锁说明里。
+- `CycleView.swift`：深圳 / 广州节点仅保留圆点 + 城市名，不再叠加白色背景或白描边。
+- `CycleView.swift`：地图右下花朵收集入口改成无背景的花朵图标 + `24朵`，点击仍打开花朵说明 sheet。
+- `CycleView.swift`：本周报告卡改成上半区日期范围、本周复盘、高低柱状图和计数；下半区为影响来源分布、三段说明、监测摘要和当前周期进度。
+- `CyclePivotUITests.swift`：同步断言不再期待可见 `还差 12 格`，并增加 `影响来源分布` 检查。
+- `cycle-page-spec.md` / `qa-checklist.md`：同步 v1.5 验收标准。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleCleanRouteReport-20260527/cycle-clean-route-report-v2.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**未解决问题**
+
+- UI test 仍被既有 `VitoraTests` Expo module 缺失阻塞，未进入 Cycle UI 实际执行。
+- 花田真实数据仍为 mock 运行态；后续接入真实周期/反馈数据时需要替换 `plantedCount` 和城市进度来源。
+
+## 2026-05-27 · 花田地图 v1.4 点状路线与花朵收集入口
+
+**目的**
+
+按用户最新截图反馈，把 Cycle 花田模块继续轻量化：种花引导从实心绿球改为透明虚线圆环，路线条改成深圳到广州的点状格子进度，`手册` 文案从路线条移除，地图右下改为花朵图标 + 已收集数量。
+
+**具体改动**
+
+- `CycleView.swift`：悬浮种花入口改为透明虚线圆环，未种显示幼苗，种下后显示低透明向日葵状态。
+- `CycleView.swift`：地图整体下移约 10pt，给路线条和花田之间更多呼吸空间。
+- `CycleView.swift`：路线条改为深圳起点、广州终点和中间点状进度格；保留 `还差 N 格` 交互。
+- `CycleView.swift`：移除路线条旁的 `手册` 文案按钮，地图右下新增花朵收集入口，显示 `24朵` 并复用花朵说明 sheet。
+- `cycle-page-spec.md` / `qa-checklist.md`：同步 v1.4 验收标准。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleRouteDots-20260527/cycle-route-dots-v1.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**未解决问题**
+
+- 花田真实数据仍为 mock 运行态；后续接入真实周期/反馈数据时需要替换 `plantedCount` 和城市进度来源。
+
+## 2026-05-26 · 花田地图 v1.3 顶部精简与悬浮种花引导
+
+**目的**
+
+按用户最新反馈，删除三段切换下方的 SummaryCard，让周期页顶部更轻：路线条直接上移，种花入口改为地图上的圆形悬浮引导，`手册` 与 `还差 N 格` 放在同一行。
+
+**具体改动**
+
+- `CycleView.swift`：移除 `FlowerMapView` 中的 SummaryCard 调用，不再显示 `当前城市 / 今日能量 / 地图进度 / 绿色种子大按钮`。
+- `CycleView.swift`：新增地图右上的悬浮圆形 `种下今天` 引导，保留 `cycle.flowerMap.plantToday`；种下后显示 `今日已种下`。
+- `CycleView.swift`：路线条重做为深圳节点、连接线、广州节点、`还差 N 格` 和同排 `手册`；种下今天后剩余格数从 `12` 变为 `11`。
+- `CyclePivotUITests.swift` / `AccessibilityUITests.swift`：移除 SummaryCard 断言，补充 `cycle.flowerMap.remaining`、悬浮种花和手册的回归断言。
+- `cycle-page-spec.md` / `qa-checklist.md`：同步 v1.3 验收标准。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleTopSimplify-20260526/cycle-top-simplified-installed.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**未解决问题**
+
+- 花田真实数据仍为 mock 运行态；后续接入真实周期/反馈数据时需要替换 `plantedCount` 和城市进度来源。
+- 坐标式模拟器点击不稳定；后续交互建议用 XCUITest 可访问性路径固化。
+
+## 2026-05-25 · 花田地图 v1.2 耕地三态与报告卡上移
+
+**目的**
+
+按用户提供的 `/Users/youxiang/Downloads/花园地图服饰2 (1).md`，把 Cycle 顶部花田从“默认绿色草坪”改成进度驱动三态：未种植为棕色耕地，种植中为耕地 + 幼苗/开花，种满后才成为完整绿色花田；同时移除花田下方 `已解锁 / 当前深圳 / 下一站广州` 三张状态卡，让文件夹报告卡上移。
+
+**具体改动**
+
+- `CycleView.swift`：`FlowerMapTileKind` 调整为 `void / emptySoil / sprout / bloom / today / locked`，城市 shape 只决定轮廓，`plantedCount` 决定视觉状态。
+- `CycleView.swift`：深圳 shape 重排为 36 格抽象轮廓，保留横向主体、边缘延展和小离岛。
+- `CycleView.swift`：空地顶面改为土棕耕地，增加田垄、土粒和小石子纹理；种植后先短暂显示幼苗，再变成今日花。
+- `CycleView.swift`：移除花田下方三张状态卡渲染，保留路线条里的 `下一站：广州 / 还差 12 格`。
+- `CyclePivotUITests.swift`：增加三态启动参数 `-vitoraUITestCycleFlowerMapPlantedCount 0|8|24|36` 和底部状态卡反向断言。
+- `cycle-page-spec.md` / `qa-checklist.md`：同步 v1.2 验收标准。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleRender-20260525/cycle-flower-map-v1.2-00.png
+ios/QA/Screenshots/CycleRender-20260525/cycle-flower-map-v1.2-08.png
+ios/QA/Screenshots/CycleRender-20260525/cycle-flower-map-v1.2-24.png
+ios/QA/Screenshots/CycleRender-20260525/cycle-flower-map-v1.2-36.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=E674099B-EB4A-444D-8B9F-639C9D719C2B -derivedDataPath /private/tmp/vitora-cycle-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=E674099B-EB4A-444D-8B9F-639C9D719C2B -derivedDataPath /private/tmp/vitora-cycle-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/VisualLanguageSmokeTests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**未解决问题**
+
+- 当前 Xcode scheme 的 UI test 仍被既有 `VitoraTests` Expo module 缺失阻塞；本次已通过 app build 和模拟器截图完成视觉验收。
+
+## 2026-05-25 · D-076 花之地图首屏落地规则补充
+
+**目的**
+
+按用户提供的目标图一，把 Cycle 首屏从旧报告卡优先改为“花之地图 + 文件夹报告卡”组合：顶部用等距深圳花之地图表达长期节律与恢复资源，下方继续保留 `本周 / 趋势（对比） / 近期` 报告卡。
+
+**具体改动**
+
+- `cycle-page-spec.md`：补齐三段切换、主信息卡、路线条、等距 tile 地图、右下 `手册` 按钮和三张状态卡规则。
+- `cycle-page-spec.md`：明确 `手册` 只作为花朵说明/已收集预览，不恢复花园手册、成长册、任务花园或打卡系统。
+- `qa-checklist.md`：增加 `cycle.flowerMap`、种花后 `25/36`、问号说明、手册说明和城市节点切换验收。
+
+**边界**
+
+- 不使用 RN / Expo、图片地图、SVG 地图或复杂动画库。
+- 不新增第四主 Tab。
+- 不新增打卡、完成率、连续天数、红点、任务清单、成长册、花园手册或种子选择。
+- 花之地图数据 v1 保持 mock 运行态：深圳 `24/36`，下一站广州，今日能量 `100/100`。
+
+## 2026-05-24 · D-073 Cycle 报告卡与三页展示图
+
+**目的**
+
+按用户最新报告卡方向，把 Cycle 首页从 D-067 的四个折页 tab 收口为三页报告语言：`本周 / 趋势（对比） / 近期`。iPhone 内使用叠层单卡 + 顶部文件夹标签，1536 展示图使用三张并排报告卡，避免移动端信息过密。
+
+**具体改动**
+
+- `CycleView`：`CycleReviewInsightCard` 改为 3 个文件夹 tab，默认 `本周` 在最前，inactive 标签低饱和露出，主卡与 active 标签融合。
+- `CycleView`：`本周` 展示 7 日柱状复盘、三段说明、四格监测摘要和当前周期进度；`趋势（对比）` 展示月度综合对比、4 行蓝色进度条、归因解释和本月总结；`近期` 展示能量折线、监测解释、下一步和黄色描边按钮。
+- `QA/Screenshots/VitoraReport/vitora-report-3up.html`：新增 HTML/CSS/SVG 展示图源文件，不引入图表库。
+- `QA/Screenshots/VitoraReport/vitora-report-3up-1536x1024.png`：输出三张并排报告卡，尺寸已校验为 `1536×1024`。
+- `CyclePivotUITests` / `AccessibilityUITests`：更新为 `cycle.review.tab.week`、`cycle.review.tab.trend`、`cycle.review.tab.recent`，并对旧 `experience / monitoring` 做反向断言。
+- `facts.md`、`wireframes.md`、`components.md`、`interaction-acceptance.md`、`tasks.md`、`cycle-page-spec.md`、`qa-checklist.md` 和 decision log 同步为 D-073。
+
+**边界**
+
+- Cycle 首页不恢复日历首页。
+- 不再展示旧 `经历 / 监测` 作为一级 tab。
+- 不恢复能量动态下方卡、节律洞察卡或 `本周期花架证据`。
+- 不新增打卡、完成率、连续天数、红点、复杂医疗 dashboard、订阅/VIP 或第四主 Tab。
+- 展示图不进入 app bundle，不影响 iOS 工程运行。
+
+**构建结果**
+
+```text
+xcodebuild -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests -only-testing:VitoraUITests/AccessibilityUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/VitoraReport/vitora-report-3up-1536x1024.png
+```
+
 ## 2026-05-18 · 增加花架证据层但不恢复花田地图
 
 **目的**

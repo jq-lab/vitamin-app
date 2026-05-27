@@ -62,9 +62,9 @@ P0 使用四类导航/呈现：
 | 屏幕 ID | 逻辑路由 | 屏幕 / 状态 | 呈现方式 | 父级 | 优先级 | 关联流程 | 关联事实 | 决策 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | IA-000 | `/` | App Gate | State gate | App root | P0 | UF-001, UF-002 | F-P0-ONBOARDING-001 | keep |
-| IA-001 | `/onboarding/start` | 最小身份 | Screen | Onboarding | P0 | UF-001 | F-P0-ONBOARDING-001 | keep |
-| IA-002 | `/onboarding/context` | 周期上下文、关注点、HealthKit 选择 | Screen | Onboarding | P0 | UF-001 | F-P0-DATA-001, F-P0-DATA-002 | keep |
-| IA-003 | `/onboarding/ready` | 本地准备和学习循环说明 | Screen | Onboarding | P0 | UF-001 | F-P0-NAV-001 | keep |
+| IA-001 | `/onboarding/start` | 注册进入页 | Screen | Onboarding | P0 | UF-001 | F-P0-ONBOARDING-001 | redesigned |
+| IA-002 | `/onboarding/context` | 聊天式补充信息与设备绑定 | Screen | Onboarding | P0 | UF-001 | F-P0-DATA-001, F-P0-DATA-002 | redesigned |
+| IA-003 | `/today` | Onboarding 完成后直接进入 Today | Route transition | App root | P0 | UF-001 | F-P0-NAV-001 | merged into direct entry |
 | IA-010 | `/today` | Today 首页 | Main tab | Primary nav | P0 | UF-002 | F-P0-TODAY-001 | redesign |
 | IA-011 | `/today/energy-bowl` | Energy Bowl / 实时预测 / 查看数据 | Inline status interaction | Today | P0 | UF-003 | F-P0-ORB-001 | redesign |
 | IA-012 | `/today/calendar` | 周期日历 | Detail sheet/screen | Today | P0 | UF-002, UF-009 | F-P0-TODAY-002 | moved from Cycle |

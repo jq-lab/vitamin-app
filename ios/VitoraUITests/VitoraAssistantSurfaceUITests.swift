@@ -51,6 +51,8 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertFalse(app.otherElements["vitora.cycle.context.report"].exists)
         app.buttons["vitora.chat.topic.周期"].tap()
         XCTAssertTrue(app.otherElements["vitora.context.card.周期"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["下午先留余量，避免硬扛式高强度安排"].exists)
+        XCTAssertTrue(app.buttons["设置周期建议提醒"].exists)
         XCTAssertTrue(app.staticTexts["黄体期 Day18"].exists)
         XCTAssertTrue(app.staticTexts["经期窗口 5月8日-5月12日"].exists)
         XCTAssertTrue(app.staticTexts["今晚适合轻量复盘"].exists)
@@ -76,14 +78,31 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["告诉 Vitora"].waitForExistence(timeout: 4))
         XCTAssertTrue(app.staticTexts["来源：快捷记录"].exists)
         XCTAssertFalse(app.otherElements["global.vitora.dock"].exists)
-        XCTAssertTrue(app.staticTexts["告诉 Vitora 一件事..."].exists)
-        XCTAssertTrue(app.staticTexts["快捷补充"].exists)
+        XCTAssertEqual(app.buttons["vitora.record.mode.manual"].value as? String, "已选择")
+        XCTAssertTrue(app.buttons["vitora.record.category.symptom"].exists)
+        XCTAssertTrue(app.buttons["vitora.record.option.symptom.abdominal_heaviness"].exists)
 
         app.buttons["vitora.context.close"].tap()
         XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.otherElements["global.vitora.dock"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.staticTexts["Vitora 知道"].exists)
         XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
+    }
+
+    @MainActor
+    func testReviewShortcutOpensVitoraBeforeEveningReviewCapsule() {
+        let app = launchReviewAvailablePivotApp()
+
+        XCTAssertTrue(app.staticTexts["现在状态"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["tab.vitora"].exists)
+        app.buttons["tab.vitora"].tap()
+
+        XCTAssertTrue(app.otherElements["vitora.assistant.surface"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.otherElements["vitora.review.sheet"].exists)
+        XCTAssertTrue(app.buttons["vitora.review.capsule"].waitForExistence(timeout: 3))
+
+        app.buttons["vitora.review.capsule"].tap()
+        XCTAssertTrue(app.otherElements["vitora.review.sheet"].waitForExistence(timeout: 5))
     }
 
     @MainActor
@@ -144,6 +163,8 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
 
         app.buttons["vitora.chat.topic.睡眠"].tap()
         XCTAssertTrue(app.otherElements["vitora.context.card.睡眠"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["14:40 安排一段安静恢复，优先补回恢复感"].exists)
+        XCTAssertTrue(app.buttons["设置睡眠建议提醒"].exists)
         XCTAssertTrue(app.staticTexts["睡眠 7.2h · 略低"].exists)
         XCTAssertTrue(app.staticTexts["深睡相对够"].exists)
         XCTAssertTrue(app.staticTexts["HRV ↓8%"].exists)
@@ -151,6 +172,8 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
 
         app.buttons["vitora.chat.topic.营养"].tap()
         XCTAssertTrue(app.otherElements["vitora.context.card.营养"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["13:20 前加一份蛋白，把补水和补给接上"].exists)
+        XCTAssertTrue(app.buttons["设置营养建议提醒"].exists)
         XCTAssertTrue(app.staticTexts["今日补给未记录"].exists)
         XCTAssertTrue(app.staticTexts["午后低谷前可加蛋白"].exists)
         XCTAssertTrue(app.staticTexts["补水和蛋白作为生活方式参考"].exists)
@@ -208,7 +231,7 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["更新后的判断"].waitForExistence(timeout: 3))
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.staticTexts["周期回顾"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
         XCTAssertFalse(app.textFields["vitora.input.text"].exists)
 
@@ -230,6 +253,20 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
             "-AppleLocale", "zh_CN",
             "-vitoraUITestCompletedOnboarding",
             "-vitoraUITestRichToday",
+        ]
+        app.launch()
+        return app
+    }
+
+    @MainActor
+    private func launchReviewAvailablePivotApp() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-AppleLanguages", "(zh-Hans)",
+            "-AppleLocale", "zh_CN",
+            "-vitoraUITestCompletedOnboarding",
+            "-vitoraUITestRichToday",
+            "-vitoraUITestReviewAvailable",
         ]
         app.launch()
         return app

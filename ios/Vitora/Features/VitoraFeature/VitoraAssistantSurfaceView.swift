@@ -35,9 +35,7 @@ struct VitoraAssistantSurfaceView: View {
                             .transition(.opacity.combined(with: .move(edge: .top)))
 
                         VitoraFocusPageLinks(
-                            showsReview: environment.isEveningReviewAvailable,
-                            onOpenCalendar: { showsCycleCalendar = true },
-                            onOpenReview: environment.openEveningReviewInVitora
+                            onOpenCalendar: { showsCycleCalendar = true }
                         )
                         .transition(.opacity.combined(with: .move(edge: .top)))
                     } else {
@@ -76,6 +74,13 @@ struct VitoraAssistantSurfaceView: View {
                     .padding(.top, hasEnteredChatFocus ? 4 : 2)
                     .zIndex(1)
 
+                    if environment.isEveningReviewAvailable {
+                        EveningReviewEntryCapsule {
+                            environment.openEveningReview()
+                        }
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(viewModel.messages) { message in
                             messageBubble(message)
@@ -86,6 +91,9 @@ struct VitoraAssistantSurfaceView: View {
                     if let activeTopicCard {
                         VitoraContextSummaryCard(
                             topic: activeTopicCard,
+                            onReminder: {
+                                viewModel.chooseQuestion("帮我把\(activeTopicCard)建议设成今天的轻提醒")
+                            },
                             onCancel: {
                                 withAnimation(.easeOut(duration: 0.18)) {
                                     self.activeTopicCard = nil
@@ -97,21 +105,6 @@ struct VitoraAssistantSurfaceView: View {
 
                     ForEach(viewModel.capabilityFeedbacks) { feedback in
                         CapabilityFeedbackCard(feedback: feedback)
-                    }
-
-                    if activeTopicCard != "周期", environment.canShowEveningReviewAnalysis {
-                        EveningReviewAnalysisCard(
-                            review: environment.eveningReview,
-                            learningSignal: environment.reviewLearningSignal,
-                            onFeedback: environment.submitEveningReview,
-                            onTellVitora: {
-                                environment.openVitoraContext(
-                                    sourceTitle: "晚间复盘",
-                                    sourceSummary: environment.eveningReview.afterSummary.isEmpty ? environment.eveningReview.beforeSummary : environment.eveningReview.afterSummary,
-                                    prompt: "你可以补充今天这个建议后来有没有改变你的状态。"
-                                )
-                            }
-                        )
                     }
 
                     ForEach(viewModel.richResponses.prefix(activeTopicCard == "周期" ? 0 : 1)) { response in
@@ -365,9 +358,7 @@ private struct ChatBubbleTail: Shape {
 }
 
 private struct VitoraFocusPageLinks: View {
-    let showsReview: Bool
     let onOpenCalendar: () -> Void
-    let onOpenReview: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
@@ -379,17 +370,6 @@ private struct VitoraFocusPageLinks: View {
                 tint: VitoraTheme.ColorToken.actionPrimaryDeep,
                 action: onOpenCalendar
             )
-
-            if showsReview {
-                pageLink(
-                    identifier: "vitora.focus.page.review",
-                    title: "晚间复盘",
-                    subtitle: "回看建议",
-                    symbol: "moon.stars.fill",
-                    tint: Color(red: 128 / 255, green: 120 / 255, blue: 236 / 255),
-                    action: onOpenReview
-                )
-            }
         }
         .accessibilityIdentifier("vitora.focus.pageLinks")
     }
@@ -440,6 +420,51 @@ private struct VitoraFocusPageLinks: View {
         .buttonStyle(.plain)
         .accessibilityLabel(title)
         .accessibilityIdentifier(identifier)
+    }
+}
+
+private struct EveningReviewEntryCapsule: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 12.5, weight: .bold))
+                    .foregroundStyle(Color(red: 128 / 255, green: 120 / 255, blue: 236 / 255))
+                    .frame(width: 25, height: 25)
+                    .background(VitoraTheme.ColorToken.paper.opacity(0.58), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.65))
+
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("今晚复盘")
+                        .font(.system(size: 13, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("回看今天的建议")
+                        .font(.system(size: 10.5, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+
+                Spacer(minLength: 4)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 10.5, weight: .bold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+            }
+            .padding(.leading, 8)
+            .padding(.trailing, 12)
+            .frame(height: 43)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(VitoraTheme.ColorToken.paper.opacity(0.48))
+                    .background(.ultraThinMaterial.opacity(0.20), in: Capsule(style: .continuous))
+            )
+            .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.62), lineWidth: 0.65))
+            .shadow(color: Color(red: 128 / 255, green: 120 / 255, blue: 236 / 255).opacity(0.10), radius: 8, x: 0, y: 4)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("今晚复盘")
+        .accessibilityIdentifier("vitora.review.capsule")
     }
 }
 
@@ -544,10 +569,11 @@ private struct ChatTopicSelector: View {
 
 private struct VitoraContextSummaryCard: View {
     let topic: String
+    let onReminder: () -> Void
     let onCancel: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 9) {
+        VStack(alignment: .leading, spacing: 11) {
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 15, weight: .semibold))
@@ -566,21 +592,48 @@ private struct VitoraContextSummaryCard: View {
                         .foregroundStyle(tint)
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)
+
+                    HStack(alignment: .firstTextBaseline, spacing: 5) {
+                        Text("建议")
+                            .font(.caption2.weight(.heavy))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        Text(suggestion)
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.76)
+                    }
+                    .padding(.top, 2)
                 }
 
                 Spacer(minLength: 8)
 
-                Button(action: onCancel) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                        .frame(width: 28, height: 28)
-                        .background(VitoraTheme.ColorToken.paper.opacity(0.42), in: Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.58), lineWidth: 0.65))
+                VStack(alignment: .trailing, spacing: 8) {
+                    Button(action: onCancel) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .frame(width: 28, height: 28)
+                            .background(VitoraTheme.ColorToken.paper.opacity(0.42), in: Circle())
+                            .overlay(Circle().stroke(Color.white.opacity(0.58), lineWidth: 0.65))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("取消\(topic)卡片")
+                    .accessibilityIdentifier("vitora.context.card.cancel")
+
+                    Button(action: onReminder) {
+                        Label("提醒", systemImage: "bell.fill")
+                            .font(.caption.weight(.heavy))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            .padding(.horizontal, 10)
+                            .frame(height: 30)
+                            .background(tint.opacity(0.20), in: Capsule())
+                            .overlay(Capsule().stroke(Color.white.opacity(0.62), lineWidth: 0.65))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("设置\(topic)建议提醒")
+                    .accessibilityIdentifier("vitora.context.card.reminder.\(topic)")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("取消\(topic)卡片")
-                .accessibilityIdentifier("vitora.context.card.cancel")
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -614,6 +667,19 @@ private struct VitoraContextSummaryCard: View {
             return "围绕补充、饮食和午后低谷"
         default:
             return "Vitora 会带入本次聊天"
+        }
+    }
+
+    private var suggestion: String {
+        switch topic {
+        case "周期":
+            return "下午先留余量，避免硬扛式高强度安排"
+        case "睡眠":
+            return "14:40 安排一段安静恢复，优先补回恢复感"
+        case "营养":
+            return "13:20 前加一份蛋白，把补水和补给接上"
+        default:
+            return "先记录一件真实感受，Vitora 再整理建议"
         }
     }
 

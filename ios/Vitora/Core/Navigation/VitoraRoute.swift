@@ -2,7 +2,6 @@ import Foundation
 
 enum PrimaryTab: String, CaseIterable, Codable, Equatable {
     case today
-    case vitora
     case cycle
 }
 

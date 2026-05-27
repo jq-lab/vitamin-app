@@ -1,11 +1,18 @@
 import SwiftUI
 import UIKit
 
+enum VitoraInputDockStyle: Equatable {
+    case sheetLocal
+    case assistantFloating
+}
+
 struct VitoraInputDock: View {
     @Binding var text: String
     var placeholder = "今日想问什么？"
+    var style: VitoraInputDockStyle = .sheetLocal
     var isVoiceRecording = false
     var voiceSignal: VoiceMoodSignal = .idle
+    var isProcessing = false
     var focusTrigger = 0
     var exposesAccessibility = true
     let onVoice: () -> Void
@@ -13,6 +20,26 @@ struct VitoraInputDock: View {
     @State private var localFocusTrigger = 0
 
     var body: some View {
+        Group {
+            if isProcessing {
+                VitoraProcessingStatusRail(style: style)
+            } else {
+                inputControls
+            }
+        }
+        .padding(style == .assistantFloating ? 7 : 8)
+        .background(inputBarBackground)
+        .clipShape(Capsule(style: .continuous))
+        .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(style == .assistantFloating ? 0.72 : 0.62), lineWidth: 0.75))
+        .shadow(color: style == .assistantFloating ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.12) : .clear, radius: 16, x: 0, y: 8)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(exposesAccessibility ? "vitora.input.dock" : "vitora.input.dock.hidden")
+        .accessibilityHidden(!exposesAccessibility)
+        .animation(.easeOut(duration: 0.22), value: isVoiceRecording)
+        .animation(.easeOut(duration: 0.20), value: isProcessing)
+    }
+
+    private var inputControls: some View {
         HStack(spacing: 8) {
             Button(action: {
                 let shouldFocusKeyboard = isVoiceRecording
@@ -40,6 +67,12 @@ struct VitoraInputDock: View {
                         .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
                         .accessibilityIdentifier(exposesAccessibility ? "vitora.input.voice.status" : "vitora.input.voice.status.hidden")
                 } else {
+                    if style == .assistantFloating {
+                        PixelInputIdentityBadge()
+                            .frame(width: 28, height: 28)
+                            .accessibilityHidden(true)
+                    }
+
                     FocusableVitoraTextField(
                         text: $text,
                         placeholder: placeholder,
@@ -52,25 +85,24 @@ struct VitoraInputDock: View {
                 }
             }
             .padding(.leading, isVoiceRecording ? 10 : 14)
-            .padding(.trailing, 14)
+            .padding(.trailing, style == .assistantFloating ? 12 : 14)
             .frame(minHeight: VitoraTheme.Size.touchTargetMin)
             .background(inputCapsuleBackground)
             .shadow(color: Color.white.opacity(0.46), radius: 8, x: -2, y: -2)
+            .contentShape(Capsule(style: .continuous))
+            .onTapGesture {
+                guard !isVoiceRecording else {
+                    return
+                }
+                localFocusTrigger += 1
+            }
 
             inlineSendButton
         }
-        .padding(8)
-        .background(inputBarBackground)
-        .clipShape(Capsule(style: .continuous))
-        .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.62), lineWidth: 0.75))
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(exposesAccessibility ? "vitora.input.dock" : "vitora.input.dock.hidden")
-        .accessibilityHidden(!exposesAccessibility)
-        .animation(.easeOut(duration: 0.22), value: isVoiceRecording)
     }
 
     private var hasSendContent: Bool {
-        !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isVoiceRecording
+        !isProcessing && (!text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isVoiceRecording)
     }
 
     private var inlineSendButton: some View {
@@ -85,7 +117,7 @@ struct VitoraInputDock: View {
         .buttonStyle(.plain)
         .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
         .contentShape(Circle())
-        .disabled(!hasSendContent)
+        .disabled(!hasSendContent || isProcessing)
         .accessibilityLabel("发送给 Vitora")
         .accessibilityHint("发送后先显示 Vitora 的理解确认")
         .accessibilityIdentifier(exposesAccessibility ? "vitora.input.send" : "vitora.input.send.hidden")
@@ -200,6 +232,139 @@ struct VitoraInputDock: View {
             }
             .clipShape(Circle())
             .overlay(Circle().stroke(VitoraTheme.ColorToken.paper.opacity(0.84), lineWidth: 0.8))
+    }
+}
+
+private struct PixelInputIdentityBadge: View {
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            VitoraTheme.ColorToken.surfacePearlMain.opacity(0.92),
+                            Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.54),
+                            Color(red: 255 / 255, green: 226 / 255, blue: 237 / 255).opacity(0.46),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(Color.white.opacity(0.84), lineWidth: 0.7)
+                )
+
+            VStack(spacing: 3) {
+                HStack(spacing: 4) {
+                    pixelEye
+                    pixelEye
+                }
+
+                HStack(spacing: 2) {
+                    Rectangle()
+                        .fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.34))
+                        .frame(width: 3, height: 3)
+                    Rectangle()
+                        .fill(VitoraTheme.ColorToken.auraCyan.opacity(0.42))
+                        .frame(width: 3, height: 3)
+                }
+            }
+        }
+        .shadow(color: VitoraTheme.ColorToken.auraCyan.opacity(0.16), radius: 6, x: 0, y: 2)
+    }
+
+    private var pixelEye: some View {
+        VStack(spacing: 1) {
+            ForEach(0..<3, id: \.self) { _ in
+                Rectangle()
+                    .fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.74))
+                    .frame(width: 3, height: 2)
+            }
+        }
+    }
+}
+
+private struct VitoraProcessingStatusRail: View {
+    var style: VitoraInputDockStyle
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let phase = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+
+            HStack(spacing: 10) {
+                PixelInputIdentityBadge()
+                    .frame(width: 32, height: 32)
+                    .overlay(alignment: .bottomTrailing) {
+                        Circle()
+                            .fill(VitoraTheme.ColorToken.auraCyan.opacity(0.84))
+                            .frame(width: 7, height: 7)
+                            .offset(x: 1, y: 1)
+                    }
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Vitora 正在整理...")
+                        .font(.footnote.weight(.bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+
+                    PixelProcessingBlocks(phase: phase)
+                        .frame(width: style == .assistantFloating ? 124 : 104, height: 8)
+                        .accessibilityHidden(true)
+                }
+
+                Spacer(minLength: 0)
+
+                Text("分析中")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
+                    .padding(.horizontal, 9)
+                    .padding(.vertical, 5)
+                    .background(VitoraTheme.ColorToken.paper.opacity(0.54), in: Capsule())
+            }
+            .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
+            .padding(.horizontal, 10)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.64))
+                    .background(.ultraThinMaterial.opacity(0.46), in: Capsule(style: .continuous))
+                    .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.82), lineWidth: 0.7))
+            )
+        }
+        .accessibilityLabel("Vitora 正在整理")
+        .accessibilityIdentifier("vitora.input.processing")
+    }
+}
+
+private struct PixelProcessingBlocks: View {
+    var phase: TimeInterval
+
+    private let blockCount = 12
+
+    var body: some View {
+        HStack(spacing: 3) {
+            ForEach(0..<blockCount, id: \.self) { index in
+                RoundedRectangle(cornerRadius: 1, style: .continuous)
+                    .fill(color(for: index))
+                    .frame(width: 7, height: height(for: index))
+            }
+        }
+        .frame(maxHeight: .infinity, alignment: .center)
+    }
+
+    private func height(for index: Int) -> CGFloat {
+        let wave = sin(phase * 3.2 + Double(index) * 0.62)
+        return 4 + CGFloat((wave + 1) * 0.5) * 4
+    }
+
+    private func color(for index: Int) -> Color {
+        let wave = sin(phase * 2.4 + Double(index) * 0.48)
+        let opacity = 0.34 + (wave + 1) * 0.22
+        return index.isMultiple(of: 3)
+            ? VitoraTheme.ColorToken.auraCyan.opacity(opacity)
+            : VitoraTheme.ColorToken.actionPrimaryDeep.opacity(opacity)
     }
 }
 

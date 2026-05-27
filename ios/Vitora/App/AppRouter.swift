@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct AppRouter: View {
     @ObservedObject var environment: AppEnvironment
@@ -16,7 +17,6 @@ struct AppRouter: View {
 private struct MainTabShell: View {
     @ObservedObject var environment: AppEnvironment
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    @StateObject private var vitoraViewModel = VitoraViewModel()
     @State private var isChildSheetPresented = false
 
     var body: some View {
@@ -25,36 +25,38 @@ private struct MainTabShell: View {
                 if shouldShowGlobalDock {
                     GlobalVitoraDock(
                         selectedTab: environment.navigationState.selectedTab,
-                        viewModel: vitoraViewModel,
                         onSelectTab: environment.selectTab,
-                        onQuickRecord: environment.openQuickRecord,
-                        onSubmitted: {
-                            if environment.navigationState.selectedTab != .vitora {
-                                environment.selectTab(.vitora)
-                            }
-                        }
+                        onQuickRecord: environment.openQuickRecord
                     )
                 }
             }
         .onPreferenceChange(AppSheetPresentationPreferenceKey.self) { isPresented in
             isChildSheetPresented = isPresented
         }
-        .sheet(
-            isPresented: Binding(
-                get: { environment.navigationState.presentation == .vitoraContextualSheet },
-                set: { isPresented in
-                    if !isPresented {
-                        environment.dismissPresentation()
-                    }
+        .overlay(alignment: .bottom) {
+            if environment.navigationState.presentation == .vitoraContextualSheet {
+                ZStack(alignment: .bottom) {
+                    Color.black.opacity(0.001)
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            environment.dismissPresentation()
+                        }
+                        .accessibilityIdentifier("vitora.context.backdrop")
+
+                    VitoraContextualSheet(
+                        context: environment.vitoraContext,
+                        onClose: environment.dismissPresentation,
+                        onSubmit: environment.submitQuickRecordFeedback
+                    )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
-            )
-        ) {
-            VitoraContextualSheet(
-                context: environment.vitoraContext,
-                onClose: environment.dismissPresentation
-            )
-            .presentationDetents([.medium, .large])
-            .presentationDragIndicator(.hidden)
+                .zIndex(20)
+            }
+        }
+        .animation(.easeOut(duration: 0.22), value: environment.navigationState.presentation == .vitoraContextualSheet)
+        .onAppear {
+            environment.consumePendingQuickRecordLaunchIfNeeded()
         }
         .sheet(
             isPresented: Binding(
@@ -89,8 +91,6 @@ private struct MainTabShell: View {
         switch environment.navigationState.selectedTab {
         case .today:
             TodayView(environment: environment)
-        case .vitora:
-            VitoraAssistantSurfaceView(environment: environment, viewModel: vitoraViewModel)
         case .cycle:
             CycleView(environment: environment)
         }
@@ -111,224 +111,246 @@ struct AppSheetPresentationPreferenceKey: PreferenceKey {
 
 private struct GlobalVitoraDock: View {
     let selectedTab: PrimaryTab
-    @ObservedObject var viewModel: VitoraViewModel
     let onSelectTab: (PrimaryTab) -> Void
-    let onQuickRecord: () -> Void
-    let onSubmitted: () -> Void
+    let onQuickRecord: (QuickRecordLaunchMode) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var shimmer = false
-    @State private var promptIndex = 0
+    @State private var showVoiceLaunchCue = false
+    @State private var suppressNextQuickTap = false
 
-    private let rotatingPrompts = [
-        "我可以补充一件事...",
-        "为什么今天容易低谷？",
-        "今天怎么安排更轻一点？",
-    ]
-    private let promptTimer = Timer.publish(every: 120, on: .main, in: .common).autoconnect()
+    private let dockWidth: CGFloat = 312
+    private let dockHeight: CGFloat = 64
+    private let dockTopInset: CGFloat = 18
+    private let plusDiameter: CGFloat = 56
 
     var body: some View {
-        VStack(spacing: selectedTab == .vitora ? 8 : 0) {
-            if selectedTab == .vitora {
-                VitoraInputShortcutBar {
-                    VitoraInputDock(
-                        text: $viewModel.inputText,
-                        placeholder: rotatingPrompts[promptIndex],
-                        style: .assistantFloating,
-                        isVoiceRecording: viewModel.isVoiceRecording,
-                        voiceSignal: viewModel.voiceSignal,
-                        isProcessing: viewModel.isProcessing,
-                        exposesAccessibility: true,
-                        onVoice: viewModel.toggleVoice,
-                        onSend: submit
-                    )
-                }
-                .transition(.opacity.combined(with: .move(edge: .top)))
-            }
+        ZStack(alignment: .top) {
+            bottomEmbeddingRail
+                .offset(y: dockTopInset + dockHeight - 18)
 
-            dockTopRow
+            dockBody
+                .offset(y: dockTopInset)
+
+            quickRecordButton
         }
-        .padding(.horizontal, 8)
-        .padding(.top, selectedTab == .vitora ? 8 : 7)
-        .padding(.bottom, 6)
-        .background(alignment: .bottom) {
-            dockAmbientGlow
-        }
-        .offset(y: reduceMotion ? 0 : (shimmer ? -1 : 0))
-        .padding(.horizontal, 14)
-        .padding(.bottom, 4)
+        .frame(width: dockWidth, height: dockHeight + dockTopInset + 5, alignment: .top)
+        .offset(y: 10)
+        .padding(.bottom, -10)
         .frame(maxWidth: .infinity)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("global.vitora.dock")
-        .onAppear {
-            guard !reduceMotion else {
-                return
-            }
-            withAnimation(.easeInOut(duration: 6.5).repeatForever(autoreverses: true)) {
-                shimmer = true
-            }
-        }
-        .onReceive(promptTimer) { _ in
-            guard viewModel.inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                  !viewModel.isVoiceRecording,
-                  selectedTab == .vitora
-            else {
-                return
-            }
-
-            withAnimation(.easeInOut(duration: 0.22)) {
-                promptIndex = (promptIndex + 1) % rotatingPrompts.count
-            }
-        }
     }
 
-    private var dockTopRow: some View {
-        ZStack {
-            tabSwitcher
-
-            HStack {
-                Spacer(minLength: 0)
-                quickRecordButton
-            }
-        }
-        .frame(maxWidth: .infinity, minHeight: VitoraTheme.Size.touchTargetMin)
-    }
-
-    private var tabSwitcher: some View {
-        HStack(spacing: 2) {
-            dockTabButton(tab: .today, title: "今日") {
-                HomeTabGlyph(isSelected: selectedTab == .today)
-            }
-
-            Button {
-                onSelectTab(.vitora)
-            } label: {
-                HStack(spacing: 6) {
-                    VitoraFaceTabButton(isSelected: selectedTab == .vitora)
-                        .frame(width: 28, height: 26)
-
-                    Text("AI管家")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.82)
-                }
-                .padding(.leading, 7)
-                .padding(.trailing, 9)
-                .frame(width: 88)
-                .frame(minHeight: 35)
-                .background(tabButtonBackground(isSelected: selectedTab == .vitora))
-            }
-            .buttonStyle(.plain)
-            .frame(minHeight: VitoraTheme.Size.touchTargetMin)
-            .accessibilityLabel("AI管家")
-            .accessibilityIdentifier("tab.vitora")
-
-            dockTabButton(tab: .cycle, title: "周期") {
-                FlowerCycleGlyph(isSelected: selectedTab == .cycle)
-            }
-        }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 4)
-        .frame(width: 208)
-        .frame(height: 47)
-        .background(tabSwitcherBackground)
-        .clipShape(Capsule(style: .continuous))
-        .overlay(Capsule(style: .continuous).stroke(Color.white.opacity(0.70), lineWidth: 0.78))
-        .shadow(color: Color(red: 92 / 255, green: 190 / 255, blue: 220 / 255).opacity(0.13), radius: 13, x: -5, y: 6)
-        .shadow(color: Color(red: 246 / 255, green: 139 / 255, blue: 184 / 255).opacity(0.10), radius: 11, x: 5, y: 5)
-        .accessibilityElement(children: .contain)
-        .accessibilityIdentifier("primary.tabbar")
-    }
-
-    private var quickRecordButton: some View {
-        Button(action: onQuickRecord) {
-            Image(systemName: "plus")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                .frame(width: 43, height: 43)
-                .background(quickRecordBackground)
-                .accessibilityHidden(true)
-        }
-        .buttonStyle(.plain)
-        .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
-        .contentShape(Circle())
-        .accessibilityLabel("快捷记录")
-        .accessibilityHint("打开 Vitora 快捷补充，不切换页面")
-        .accessibilityIdentifier("global.record.quick")
-    }
-
-    private var quickRecordBackground: some View {
-        ZStack {
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color.white.opacity(0.0),
-                            Color(red: 202 / 255, green: 214 / 255, blue: 218 / 255).opacity(0.16),
-                            Color.black.opacity(0.10),
-                            .clear,
-                        ],
-                        center: UnitPoint(x: 0.66, y: 0.64),
-                        startRadius: 6,
-                        endRadius: 42
+    private var bottomEmbeddingRail: some View {
+        Capsule()
+            .fill(.ultraThinMaterial)
+            .overlay {
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.42),
+                                Color(red: 208 / 255, green: 246 / 255, blue: 239 / 255).opacity(0.30),
+                                Color(red: 226 / 255, green: 238 / 255, blue: 255 / 255).opacity(0.22),
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
                     )
-                )
-                .scaleEffect(1.42)
-                .offset(x: 8, y: 9)
+            }
+            .overlay(Capsule().stroke(Color.white.opacity(0.48), lineWidth: 0.6))
+            .frame(width: dockWidth - 46, height: 20)
+            .blur(radius: 0.2)
+            .shadow(color: Color(red: 87 / 255, green: 201 / 255, blue: 188 / 255).opacity(0.12), radius: 18, x: 0, y: 3)
+            .allowsHitTesting(false)
+    }
 
-            Circle()
+    private var dockBody: some View {
+        ZStack {
+            NotchedDockShape(notchRadius: 42, notchDepth: 26, cornerRadius: 30)
                 .fill(.ultraThinMaterial)
-                .overlay(Circle().fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.42)))
-
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.58),
-                            Color(red: 255 / 255, green: 224 / 255, blue: 234 / 255).opacity(0.44),
-                            Color(red: 226 / 255, green: 245 / 255, blue: 250 / 255).opacity(0.44),
-                            Color(red: 228 / 255, green: 220 / 255, blue: 255 / 255).opacity(0.30),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            Color.white.opacity(0.84),
-                            Color.white.opacity(0.30),
-                            .clear,
-                        ],
-                        center: UnitPoint(x: 0.28, y: 0.22),
-                        startRadius: 1,
-                        endRadius: 28
-                    )
-                )
-                .blendMode(.screen)
-
-            Circle()
-                .stroke(Color(red: 190 / 255, green: 199 / 255, blue: 210 / 255).opacity(0.18), lineWidth: 5)
-                .blur(radius: 3)
-                .offset(x: 6, y: 8)
-                .mask {
-                    Circle()
+                .overlay {
+                    NotchedDockShape(notchRadius: 42, notchDepth: 26, cornerRadius: 30)
                         .fill(
                             LinearGradient(
-                                colors: [.clear, .black],
+                                colors: [
+                                    Color.white.opacity(0.88),
+                                    Color(red: 255 / 255, green: 253 / 255, blue: 249 / 255).opacity(0.82),
+                                    Color(red: 244 / 255, green: 252 / 255, blue: 250 / 255).opacity(0.78),
+                                ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
                 }
+                .overlay {
+                    NotchedDockShape(notchRadius: 42, notchDepth: 26, cornerRadius: 30)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.92),
+                                    Color(red: 202 / 255, green: 211 / 255, blue: 218 / 255).opacity(0.34),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            ),
+                            lineWidth: 0.9
+                        )
+                }
+                .shadow(color: Color.black.opacity(0.08), radius: 18, x: 0, y: 10)
+                .shadow(color: Color(red: 104 / 255, green: 214 / 255, blue: 206 / 255).opacity(0.09), radius: 16, x: -10, y: 6)
+                .shadow(color: Color(red: 246 / 255, green: 139 / 255, blue: 184 / 255).opacity(0.08), radius: 16, x: 10, y: 6)
+
+            HStack(spacing: 0) {
+                dockTabButton(tab: .today, title: "今日") {
+                    HomeTabGlyph(isSelected: selectedTab == .today)
+                }
+
+                Spacer(minLength: 68)
+
+                dockTabButton(tab: .cycle, title: "周期") {
+                    FlowerCycleGlyph(isSelected: selectedTab == .cycle)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 13)
+            .frame(height: dockHeight, alignment: .top)
+        }
+        .frame(width: dockWidth, height: dockHeight)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier("primary.tabbar")
+    }
+
+    private var quickRecordButton: some View {
+        ZStack(alignment: .top) {
+            if showVoiceLaunchCue {
+                Label("语音记录", systemImage: "mic.fill")
+                    .font(.system(size: 12, weight: .heavy))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .padding(.horizontal, 12)
+                    .frame(height: 32)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.72), lineWidth: 0.8))
+                    .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 5)
+                    .offset(y: -42)
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.88, anchor: .bottom)))
+                    .allowsHitTesting(false)
+            }
+
+            Button {
+                if suppressNextQuickTap {
+                    suppressNextQuickTap = false
+                    return
+                }
+                onQuickRecord(.manual)
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 25, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: plusDiameter, height: plusDiameter)
+                    .background(quickRecordBackground)
+                    .accessibilityHidden(true)
+            }
+            .buttonStyle(.plain)
+            .frame(width: 68, height: 68)
+            .contentShape(Circle())
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.42)
+                    .onEnded { _ in
+                        launchVoiceQuickRecord()
+                    }
+            )
+            .accessibilityLabel("快捷记录")
+            .accessibilityHint("点按打开手动记录，长按打开语音记录")
+            .accessibilityIdentifier("global.record.quick")
+            .accessibilityAction(named: Text("语音记录")) {
+                onQuickRecord(.voice)
+            }
+            .accessibilityAction(named: Text("打字记录")) {
+                onQuickRecord(.text)
+            }
+        }
+        .frame(width: 68, height: 68)
+    }
+
+    private func launchVoiceQuickRecord() {
+        suppressNextQuickTap = true
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+
+        withAnimation(.spring(response: reduceMotion ? 0.01 : 0.24, dampingFraction: 0.82)) {
+            showVoiceLaunchCue = true
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+            onQuickRecord(.voice)
+            withAnimation(.easeOut(duration: 0.12)) {
+                showVoiceLaunchCue = false
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.55) {
+            suppressNextQuickTap = false
+        }
+    }
+
+    private var quickRecordBackground: some View {
+        ZStack {
+            Circle()
+                .fill(.ultraThinMaterial)
 
             Circle()
-                .stroke(Color.white.opacity(0.76), lineWidth: 0.82)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color(red: 178 / 255, green: 255 / 255, blue: 246 / 255).opacity(0.42),
+                            Color(red: 75 / 255, green: 207 / 255, blue: 213 / 255).opacity(0.34),
+                            Color(red: 96 / 255, green: 150 / 255, blue: 230 / 255).opacity(0.28),
+                        ],
+                        center: UnitPoint(x: 0.30, y: 0.18),
+                        startRadius: 2,
+                        endRadius: 56
+                    )
+                )
+
+            Circle()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.28),
+                            Color(red: 153 / 255, green: 235 / 255, blue: 227 / 255).opacity(0.11),
+                            Color(red: 35 / 255, green: 101 / 255, blue: 180 / 255).opacity(0.06),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .blendMode(.screen)
+
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.50),
+                            Color.white.opacity(0.14),
+                            .clear,
+                        ],
+                        center: UnitPoint(x: 0.28, y: 0.18),
+                        startRadius: 1,
+                        endRadius: 36
+                    )
+                )
+                .blendMode(.screen)
+
+            Circle()
+                .stroke(Color.white.opacity(0.50), lineWidth: 1)
+
+            Circle()
+                .stroke(Color(red: 24 / 255, green: 96 / 255, blue: 148 / 255).opacity(0.10), lineWidth: 0.7)
+                .blur(radius: 0.3)
+                .offset(y: 0.5)
         }
-        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.16), radius: 13, x: 0, y: 9)
-        .shadow(color: Color(red: 104 / 255, green: 214 / 255, blue: 206 / 255).opacity(0.10), radius: 12, x: -6, y: 5)
+        .shadow(color: Color(red: 46 / 255, green: 190 / 255, blue: 184 / 255).opacity(0.14), radius: 15, x: 0, y: 8)
+        .shadow(color: Color(red: 72 / 255, green: 120 / 255, blue: 228 / 255).opacity(0.08), radius: 12, x: 0, y: 5)
+        .shadow(color: Color.white.opacity(0.68), radius: 1, x: 0, y: -0.5)
     }
 
     private func dockTabButton<Content: View>(
@@ -349,111 +371,88 @@ private struct GlobalVitoraDock: View {
                     .minimumScaleFactor(0.78)
             }
             .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.secondaryText.opacity(0.78))
-            .frame(width: 58, height: 35)
+            .frame(width: 84, height: 34)
             .background(tabButtonBackground(isSelected: selectedTab == tab))
         }
         .buttonStyle(.plain)
-        .frame(width: 58, height: VitoraTheme.Size.touchTargetMin)
+        .frame(width: 92, height: VitoraTheme.Size.touchTargetMin)
         .contentShape(Rectangle())
         .accessibilityLabel(title)
         .accessibilityIdentifier("tab.\(tab.rawValue)")
     }
 
-    private var tabSwitcherBackground: some View {
-        ZStack {
-            Capsule(style: .continuous)
-                .fill(.ultraThinMaterial)
-                .overlay(Capsule(style: .continuous).fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.38)))
-
-            Capsule(style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 223 / 255, green: 245 / 255, blue: 250 / 255).opacity(0.44),
-                            Color(red: 118 / 255, green: 224 / 255, blue: 199 / 255).opacity(0.28),
-                            Color(red: 252 / 255, green: 228 / 255, blue: 144 / 255).opacity(0.24),
-                            Color(red: 255 / 255, green: 217 / 255, blue: 232 / 255).opacity(0.36),
-                            Color(red: 226 / 255, green: 219 / 255, blue: 255 / 255).opacity(0.30),
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-
-            Capsule(style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.70),
-                            Color.white.opacity(0.18),
-                            Color.white.opacity(0.44),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .blendMode(.screen)
-        }
-    }
-
     private func tabButtonBackground(isSelected: Bool) -> some View {
         Capsule()
-            .fill(.ultraThinMaterial.opacity(isSelected ? 0.74 : 0.18))
+            .fill(.ultraThinMaterial.opacity(isSelected ? 0.58 : 0.0))
             .overlay {
                 Capsule()
                     .fill(
                         LinearGradient(
                             colors: isSelected ? [
-                                Color.white.opacity(0.72),
-                                Color(red: 255 / 255, green: 232 / 255, blue: 239 / 255).opacity(0.40),
-                                Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.34),
+                                Color.white.opacity(0.74),
+                                Color(red: 255 / 255, green: 232 / 255, blue: 239 / 255).opacity(0.34),
+                                Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.26),
                             ] : [
-                                Color.white.opacity(0.18),
-                                Color(red: 255 / 255, green: 231 / 255, blue: 239 / 255).opacity(0.15),
-                                Color(red: 226 / 255, green: 246 / 255, blue: 250 / 255).opacity(0.12),
+                                Color.clear,
+                                Color.clear,
                             ],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
             }
-            .overlay(Capsule().stroke(Color.white.opacity(isSelected ? 0.80 : 0.24), lineWidth: 0.58))
+            .overlay(Capsule().stroke(Color.white.opacity(isSelected ? 0.82 : 0.0), lineWidth: 0.58))
             .shadow(color: VitoraTheme.ColorToken.paper.opacity(isSelected ? 0.24 : 0.03), radius: 7, x: -1, y: -1)
     }
+}
 
-    private var dockAmbientGlow: some View {
-        ZStack {
-            Capsule(style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 211 / 255, green: 244 / 255, blue: 250 / 255).opacity(0.22),
-                            Color(red: 122 / 255, green: 226 / 255, blue: 199 / 255).opacity(0.14),
-                            Color(red: 250 / 255, green: 225 / 255, blue: 143 / 255).opacity(0.13),
-                            Color(red: 255 / 255, green: 214 / 255, blue: 231 / 255).opacity(0.18),
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .frame(width: 248, height: selectedTab == .vitora ? 126 : 52)
-                .blur(radius: selectedTab == .vitora ? 20 : 15)
-                .offset(y: 10)
+private struct NotchedDockShape: Shape {
+    var notchRadius: CGFloat
+    var notchDepth: CGFloat
+    var cornerRadius: CGFloat
 
-            Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.10))
-                .frame(width: 176, height: 22)
-                .blur(radius: 12)
-                .offset(y: -2)
-        }
-        .allowsHitTesting(false)
-    }
+    func path(in rect: CGRect) -> Path {
+        let radius = min(cornerRadius, rect.height / 2)
+        let centerX = rect.midX
+        let halfNotch = min(notchRadius, rect.width / 2 - radius - 18)
+        let top = rect.minY
+        let bottom = rect.maxY
 
-    private func submit() {
-        guard viewModel.send() else {
-            return
-        }
-        onSubmitted()
+        var path = Path()
+        path.move(to: CGPoint(x: rect.minX + radius, y: top))
+        path.addLine(to: CGPoint(x: centerX - halfNotch, y: top))
+        path.addCurve(
+            to: CGPoint(x: centerX, y: top + notchDepth),
+            control1: CGPoint(x: centerX - halfNotch * 0.54, y: top),
+            control2: CGPoint(x: centerX - halfNotch * 0.50, y: top + notchDepth)
+        )
+        path.addCurve(
+            to: CGPoint(x: centerX + halfNotch, y: top),
+            control1: CGPoint(x: centerX + halfNotch * 0.50, y: top + notchDepth),
+            control2: CGPoint(x: centerX + halfNotch * 0.54, y: top)
+        )
+        path.addLine(to: CGPoint(x: rect.maxX - radius, y: top))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX, y: top + radius),
+            control: CGPoint(x: rect.maxX, y: top)
+        )
+        path.addLine(to: CGPoint(x: rect.maxX, y: bottom - radius))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.maxX - radius, y: bottom),
+            control: CGPoint(x: rect.maxX, y: bottom)
+        )
+        path.addLine(to: CGPoint(x: rect.minX + radius, y: bottom))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.minX, y: bottom - radius),
+            control: CGPoint(x: rect.minX, y: bottom)
+        )
+        path.addLine(to: CGPoint(x: rect.minX, y: top + radius))
+        path.addQuadCurve(
+            to: CGPoint(x: rect.minX + radius, y: top),
+            control: CGPoint(x: rect.minX, y: top)
+        )
+        path.closeSubpath()
+        return path
     }
 }
 
@@ -475,37 +474,6 @@ private struct PrimaryTabBar: View {
     var body: some View {
         HStack(spacing: 10) {
             tabButton(tab: .today)
-
-            Button {
-                onSelect(.vitora)
-            } label: {
-                HStack(spacing: 8) {
-                    VitoraFaceTabButton(isSelected: true)
-                        .frame(width: 38, height: 34)
-
-                    Text("AI管家")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.82)
-                }
-                .padding(.leading, 8)
-                .padding(.trailing, 12)
-                .frame(minHeight: VitoraTheme.Size.touchTargetMin)
-                .layoutPriority(1)
-                .background(
-                    Capsule()
-                        .fill(VitoraTheme.ColorToken.paper.opacity(0.56))
-                        .background(.ultraThinMaterial.opacity(0.46), in: Capsule())
-                )
-                .overlay(Capsule().stroke(Color.white.opacity(0.82), lineWidth: 0.7))
-                .shadow(color: VitoraTheme.ColorToken.paper.opacity(0.34), radius: 10, x: -2, y: -2)
-            }
-            .buttonStyle(.plain)
-            .frame(minHeight: VitoraTheme.Size.touchTargetMin)
-            .accessibilityLabel("AI管家")
-            .accessibilityIdentifier("tab.vitora")
-
             tabButton(tab: .cycle)
         }
         .padding(.horizontal, 9)
@@ -533,8 +501,6 @@ private struct PrimaryTabBar: View {
                     HomeTabGlyph(isSelected: selectedTab == tab)
                 case .cycle:
                     FlowerCycleGlyph(isSelected: selectedTab == tab)
-                case .vitora:
-                    EmptyView()
                 }
             }
             .foregroundStyle(selectedTab == tab ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.paper.opacity(0.88))
@@ -558,8 +524,6 @@ private struct PrimaryTabBar: View {
         switch tab {
         case .today:
             return Color(red: 128 / 255, green: 216 / 255, blue: 184 / 255)
-        case .vitora:
-            return Color(red: 242 / 255, green: 105 / 255, blue: 164 / 255)
         case .cycle:
             return Color(red: 151 / 255, green: 135 / 255, blue: 255 / 255)
         }

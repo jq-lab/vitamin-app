@@ -3,6 +3,7 @@ import SwiftUI
 struct AppGateView: View {
     @ObservedObject var environment: AppEnvironment
     @StateObject private var viewModel: OnboardingViewModel
+    @State private var hasPreparedRegistrationEntry = false
 
     init(environment: AppEnvironment, viewModel: OnboardingViewModel = OnboardingViewModel()) {
         self.environment = environment
@@ -10,42 +11,43 @@ struct AppGateView: View {
     }
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                onboardingBackground
+        ZStack {
+            onboardingBackground
 
-                ScrollViewReader { proxy in
-                    ScrollView(showsIndicators: false) {
-                        VStack(alignment: .leading, spacing: VitoraTheme.Spacing.lg) {
-                            Color.clear
-                                .frame(height: 0)
-                                .id("onboarding.scroll.top")
+            ScrollViewReader { proxy in
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: VitoraTheme.Spacing.lg) {
+                        Color.clear
+                            .frame(height: 0)
+                            .id("onboarding.scroll.top")
 
-                            stepProgress
+                        stepProgress
 
-                            pageContent
-                                .id(viewModel.step)
-                                .transition(
-                                    .asymmetric(
-                                        insertion: .move(edge: .trailing).combined(with: .opacity),
-                                        removal: .move(edge: .leading).combined(with: .opacity)
-                                    )
+                        pageContent
+                            .id(viewModel.step)
+                            .transition(
+                                .asymmetric(
+                                    insertion: .move(edge: .trailing).combined(with: .opacity),
+                                    removal: .move(edge: .leading).combined(with: .opacity)
                                 )
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 24)
-                        .padding(.top, VitoraTheme.Spacing.sm)
-                        .padding(.bottom, 40)
+                            )
                     }
-                    .onChange(of: viewModel.step) { _, _ in
-                        proxy.scrollTo("onboarding.scroll.top", anchor: .top)
-                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 18)
+                    .padding(.bottom, 40)
+                }
+                .onChange(of: viewModel.step) { _, _ in
+                    proxy.scrollTo("onboarding.scroll.top", anchor: .top)
                 }
             }
-            .animation(.easeInOut(duration: 0.42), value: viewModel.step)
-            .navigationTitle(Text("vitora.app.title"))
-            .navigationBarTitleDisplayMode(.inline)
-            .accessibilityIdentifier("onboarding.appgate")
+        }
+        .animation(.easeInOut(duration: 0.42), value: viewModel.step)
+        .accessibilityIdentifier("onboarding.appgate")
+        .onAppear {
+            guard !hasPreparedRegistrationEntry else { return }
+            hasPreparedRegistrationEntry = true
+            viewModel.prepareRegistrationEntry()
         }
     }
 
@@ -107,8 +109,8 @@ struct AppGateView: View {
 
     private var stepLabel: String {
         switch viewModel.step {
-        case .aboutYou: return "STEP 1"
-        case .yourBody: return "STEP 2"
+        case .aboutYou: return "注册"
+        case .yourBody: return "补充信息"
         }
     }
 

@@ -4,6 +4,7 @@ import Foundation
 final class VitoraViewModel: ObservableObject {
     @Published var inputText = ""
     @Published var isVoiceRecording: Bool = CommandLine.arguments.contains("-vitoraUITestInitialVoiceRecording") || CommandLine.arguments.contains("-vitoraUITestStrongVoice")
+    @Published private(set) var isProcessing = CommandLine.arguments.contains("-vitoraUITestInputProcessing")
     @Published private(set) var voiceSignal: VoiceMoodSignal = VitoraViewModel.initialVoiceSignal
     @Published private(set) var capability = AppCapabilityState()
     @Published private(set) var selectedContext = CommandLine.arguments.contains("-vitoraUITestInitialContextCycle") ? "周期" : "睡眠"
@@ -54,6 +55,10 @@ final class VitoraViewModel: ObservableObject {
     }
 
     func toggleVoice() {
+        guard !isProcessing else {
+            return
+        }
+
         isVoiceRecording.toggle()
         voiceSignal = isVoiceRecording ? VoiceMoodSignal.listeningPreview : VoiceMoodSignal.idle
         if isVoiceRecording {
@@ -63,6 +68,10 @@ final class VitoraViewModel: ObservableObject {
 
     @discardableResult
     func send() -> Bool {
+        guard !isProcessing else {
+            return false
+        }
+
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty || isVoiceRecording else {
             return false
@@ -77,11 +86,25 @@ final class VitoraViewModel: ObservableObject {
         isVoiceRecording = false
         voiceSignal = VoiceMoodSignal.idle
         inputText = ""
+        isProcessing = true
+
+        Task { [weak self] in
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            await MainActor.run {
+                self?.finishProcessingResponse()
+            }
+        }
+
+        return true
+    }
+
+    private func finishProcessingResponse() {
+        isProcessing = false
 
         guard capability.canUseAI else {
             messages.append(.init(author: .vitora, text: "Vitora 暂时无法生成新回复，你仍可以保存记录。"))
             messages.append(.init(author: .system, text: "你刚刚说的内容已经保留在本地输入流里，稍后可以再让 Vitora 理解。"))
-            return true
+            return
         }
 
         messages.append(.init(author: .vitora, text: "我会把这件事先理解成影响今天状态的上下文，而不是任务或打卡。"))
@@ -93,7 +116,6 @@ final class VitoraViewModel: ObservableObject {
             ),
             at: 0
         )
-        return true
     }
 }
 

@@ -16,6 +16,14 @@ enum VitoraTheme {
         static let auraCyan = Color(red: 100 / 255, green: 218 / 255, blue: 255 / 255)
         static let auraLavender = Color(red: 151 / 255, green: 135 / 255, blue: 255 / 255)
         static let lutealGold = Color(red: 242 / 255, green: 184 / 255, blue: 78 / 255)
+
+        // Amber brand palette (MoonPerson spec §2)
+        static let amberBase = Color(red: 250 / 255, green: 238 / 255, blue: 218 / 255)    // #FAEEDA
+        static let amberActive = Color(red: 250 / 255, green: 199 / 255, blue: 117 / 255)   // #FAC775
+        static let amberMain = Color(red: 239 / 255, green: 159 / 255, blue: 39 / 255)      // #EF9F27
+        static let amberDeep = Color(red: 186 / 255, green: 117 / 255, blue: 23 / 255)      // #BA7517
+        static let amberDark = Color(red: 133 / 255, green: 79 / 255, blue: 11 / 255)       // #854F0B
+
         static let softSurface = Color(red: 245 / 255, green: 245 / 255, blue: 247 / 255)
         static let blueSoftSurface = Color(red: 232 / 255, green: 244 / 255, blue: 252 / 255)
         static let cardGlass = Color.white.opacity(0.72)

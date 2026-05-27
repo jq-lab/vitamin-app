@@ -1,24 +1,21 @@
 import SwiftUI
-import UIKit
 
 struct CycleView: View {
     @ObservedObject var environment: AppEnvironment
     @State private var sheet: CycleSheet?
-    @State private var shareImage: UIImage?
-    @State private var isSharePresented = false
-    @State private var shareFailurePresented = false
     @State private var isSidebarOpen = false
+    @State private var selectedCycleReportTab: CycleReviewTab = .week
 
     var body: some View {
         ZStack {
             WaterAuraReferenceBackground(scene: .cycle, intensity: 1.02)
 
             ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 14) {
-                    cycleTopBar
+	                VStack(alignment: .leading, spacing: 12) {
+	                    cycleTopBar
 
-                    CycleReviewInsightCard()
-                }
+	                    CycleMapReportFrame(selectedTab: selectedCycleReportTab)
+	                }
                 .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
                 .padding(.top, 4)
                 .padding(.bottom, VitoraTheme.Size.tabBarHeight + 42)
@@ -46,17 +43,6 @@ struct CycleView: View {
                 .zIndex(10)
             }
         }
-        .sheet(isPresented: $isSharePresented) {
-            if let shareImage {
-                CycleShareActivityView(activityItems: [shareImage])
-                    .accessibilityIdentifier("cycle.share.sheet")
-            }
-        }
-        .alert("暂时无法生成周期卡片", isPresented: $shareFailurePresented) {
-            Button("知道了", role: .cancel) {}
-        } message: {
-            Text("稍后再试一次。")
-        }
         .sheet(item: $sheet) { sheet in
             switch sheet {
             case .phase:
@@ -77,8 +63,6 @@ struct CycleView: View {
                     onClose: { self.sheet = nil },
                     onAskVitora: { openVitora(source: insight.title, summary: insight.summary) }
                 )
-            case .hormoneCalendar:
-                HormoneCalendarView(onClose: { self.sheet = nil })
             case .sharePreview:
                 ShareCardPreviewSheet(
                     onClose: { self.sheet = nil },
@@ -86,148 +70,50 @@ struct CycleView: View {
                 )
             }
         }
-        .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil || isSharePresented)
+        .preference(key: AppSheetPresentationPreferenceKey.self, value: sheet != nil)
         .accessibilityIdentifier("cycle.pivot.surface")
     }
 
     private var cycleTopBar: some View {
-        HStack {
-            // 我的 (sidebar)
-            Button { withAnimation(.easeOut(duration: 0.28)) { isSidebarOpen = true } } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .frame(width: 38, height: 38)
-                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("我的")
-            .accessibilityIdentifier("cycle.settings")
-
-            Spacer()
-
-            // 激素日历
-            Button { sheet = .hormoneCalendar } label: {
-                Image(systemName: "calendar")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .frame(width: 38, height: 38)
-                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("激素日历")
-
-            // 分享
-            Button { sheet = .sharePreview } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    .frame(width: 38, height: 38)
-                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72), in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.62), lineWidth: 0.7))
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("分享周期卡片")
-            .accessibilityIdentifier("cycle.share")
-        }
-    }
-
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center) {
-                Button {
-                    sheet = .settings
-                } label: {
-                    ZStack {
-                        GlassSurface(cornerRadius: 19, opacity: 0.62, shadowStrength: 0.28, variant: .cleanResting)
-                            .frame(width: 38, height: 38)
-                            .clipShape(Circle())
-
-                        ZStack {
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            VitoraTheme.ColorToken.actionPrimarySoft.opacity(0.92),
-                                            VitoraTheme.ColorToken.paper.opacity(0.76),
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                            Text("小")
-                                .font(.system(size: 15, weight: .heavy))
-                                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                        }
-                        .frame(width: 30, height: 30)
-                        .overlay(Circle().stroke(Color.white.opacity(0.82), lineWidth: 0.8))
-                    }
-                    .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
-                    .contentShape(Rectangle())
+        GeometryReader { proxy in
+            HStack(spacing: 10) {
+            // 我的 / 设置
+                Button { sheet = .settings } label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.system(size: 23, weight: .medium))
+                        .foregroundStyle(FlowerMapPalette.deepGreen)
+                        .frame(width: 44, height: 44)
+                        .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
+                        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
                 }
                 .buttonStyle(.plain)
-                .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
-                .accessibilityLabel("打开我的")
+                .accessibilityLabel("我的")
                 .accessibilityIdentifier("cycle.settings.open")
 
-                Spacer()
+                Spacer(minLength: 4)
 
-                Button {
-                    presentCycleShareCard()
-                } label: {
-                    ZStack {
-                        GlassSurface(cornerRadius: 18, opacity: 0.58, shadowStrength: 0.28, variant: .cleanResting)
-                            .frame(width: 36, height: 36)
-                            .clipShape(Circle())
+                CycleReportTopSegmentControl(selectedTab: $selectedCycleReportTab)
+                    .frame(width: min(max(proxy.size.width * 0.60, 210), 258), height: 44)
 
-                        Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 19, weight: .medium))
-                            .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    }
-                    .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
-                    .contentShape(Rectangle())
+                Spacer(minLength: 4)
+
+                // 分享
+                Button { sheet = .sharePreview } label: {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(FlowerMapPalette.deepGreen)
+                        .frame(width: 44, height: 44)
+                        .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
+                        .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
+                        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
                 }
                 .buttonStyle(.plain)
-                .frame(width: VitoraTheme.Size.touchTargetMin, height: VitoraTheme.Size.touchTargetMin)
                 .accessibilityLabel("分享周期卡片")
                 .accessibilityIdentifier("cycle.share.open")
             }
-
-            HStack(alignment: .center, spacing: 14) {
-                VStack(alignment: .leading, spacing: 5) {
-                    Text("周期回顾")
-                        .font(.system(size: 30, weight: .heavy, design: .default))
-                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
-
-                    Text("复盘成长 · 洞察规律")
-                        .font(.system(size: 13, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                }
-
-                Spacer(minLength: 0)
-            }
         }
-    }
-
-    @MainActor
-    private func presentCycleShareCard() {
-        let renderer = ImageRenderer(
-            content: CycleShareCardSnapshotView()
-                .frame(width: 360)
-                .padding(.vertical, 1)
-        )
-        renderer.scale = UIScreen.main.scale
-        renderer.isOpaque = false
-
-        guard let image = renderer.uiImage else {
-            shareFailurePresented = true
-            return
-        }
-
-        shareImage = image
-        isSharePresented = true
+        .frame(height: 44)
     }
 
     private func openVitora(source: String, summary: String) {
@@ -237,6 +123,38 @@ struct CycleView: View {
             prompt: "Vitora 会带着这个长期节律上下文来解释或校准。"
         )
         sheet = nil
+    }
+}
+
+private struct CycleMapReportFrame: View {
+    let selectedTab: CycleReviewTab
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            FlowerMapView()
+                .padding(.top, 8)
+                .padding(.horizontal, 2)
+
+            CycleReviewInsightCard(selectedTab: selectedTab, presentation: .embedded)
+                .padding(.horizontal, 8)
+                .padding(.top, -4)
+                .padding(.bottom, 16)
+        }
+        .background(
+            RoundedRectangle(cornerRadius: 34, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.40))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 34, style: .continuous)
+                        .stroke(Color(red: 0.64, green: 0.67, blue: 0.64).opacity(0.34), lineWidth: 1.1)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 34, style: .continuous)
+                        .stroke(Color.white.opacity(0.64), lineWidth: 0.7)
+                        .padding(1)
+                )
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 14, x: 0, y: 7)
+        )
+        .accessibilityIdentifier("cycle.mapReport.frame")
     }
 }
 
@@ -292,141 +210,1797 @@ private struct CycleHeaderIllustration: View {
     }
 }
 
-private struct CycleReviewInsightCard: View {
+// MARK: - Flower Map
+
+private struct FlowerMapView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var selectedTab: CycleReviewTab = .week
-    @State private var selectedInsightRow: CycleReviewRowModel?
+    @State private var selectedCityID: FlowerMapCityID = .shenzhen
+    @State private var hasPlantedToday = false
+    @State private var plantedTileIDs: Set<String> = []
+    @State private var sproutingTileIDs: Set<String> = []
+    @State private var pulseTileID: String?
+    @State private var selectedTile: FlowerMapTile?
+    @State private var overlay: FlowerMapOverlay?
+    @State private var isHandbookPresented = false
+    @State private var isMapTransitioning = false
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 0) {
-                VStack(alignment: .leading, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("这 30 天，Vitora 看见的三件事")
-                            .font(.system(size: 18, weight: .bold))
-                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                            .accessibilityIdentifier("cycle.review.insights")
-                        Text("Vitora 已更新 5月8日 的理解")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                    }
-
-                    CycleReviewSnapshotGrid()
-                }
-                .padding(14)
-            }
-            .background(
-                RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.88))
-                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.10), radius: 14, x: 0, y: 6)
-            )
-            .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
-
-            segmentedTabs
-
-            VStack(spacing: 12) {
-                if selectedTab == .cycle {
-                    CyclePeriodTabContent()
-                } else if selectedTab == .trend {
-                    CycleMonthComparisonView()
-                } else {
-                    // Week tab: rows + curve merged in one card
-                    VStack(spacing: 0) {
-                        ForEach(rowsForSelectedTab, id: \.title) { row in
-                            Button { selectedInsightRow = row } label: {
-                                CycleReviewInsightRow(row: row)
-                            }
-                            .buttonStyle(.plain)
-                            if row.title != rowsForSelectedTab.last?.title {
-                                Divider()
-                                    .overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12))
-                                    .padding(.leading, 34)
-                            }
-                        }
-
-                        Divider().overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.12)).padding(.horizontal, 14)
-
-                        CycleWeeklyEnergyCurve()
-                            .padding(.horizontal, 0)
-                    }
-                    .background(
-                        RoundedRectangle(cornerRadius: 24, style: .continuous)
-                            .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
-                            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(Color.white.opacity(0.68), lineWidth: 0.8))
-                            .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 4)
-                    )
-                }
-
-                // Phase distribution always at bottom
-                CyclePhaseDistributionBar()
-            }
-            .id(selectedTab)
-            .transition(.opacity)
-        }
-        .sheet(item: $selectedInsightRow) { row in
-            InsightDetailSheet(
-                title: "为什么\(row.title) \(row.value)？",
-                onAskVitora: { selectedInsightRow = nil },
-                onClose: { selectedInsightRow = nil }
-            )
-        }
+    private var homeCity: FlowerMapCityConfig {
+        CITY_MAPS[.shenzhen] ?? FlowerMapCityConfig.fallback
     }
 
-    private var segmentedTabs: some View {
-        HStack(spacing: 0) {
-            ForEach(CycleReviewTab.allCases) { tab in
-                Button {
-                    if reduceMotion {
-                        selectedTab = tab
-                    } else {
-                        withAnimation(.easeOut(duration: 0.18)) {
-                            selectedTab = tab
-                        }
-                    }
-                } label: {
-                    CycleReviewTabLabel(tab: tab, isSelected: selectedTab == tab)
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(tab.accessibilityID)
-            }
+    private var currentCity: FlowerMapCityConfig {
+        CITY_MAPS[selectedCityID] ?? homeCity
+    }
+
+    private var homeDisplayedProgress: Int {
+        min(homeCity.total, homeBasePlantedCount + (hasPlantedToday ? 1 : 0))
+    }
+
+    private var displayedProgress: Int {
+        selectedCityID == .shenzhen ? homeDisplayedProgress : currentCity.planted
+    }
+
+    private var progressTotal: Int {
+        currentCity.total
+    }
+
+    private var remainingSteps: Int {
+        max(0, homeCity.total - homeDisplayedProgress)
+    }
+
+    private var isHomeCityComplete: Bool {
+        homeDisplayedProgress >= homeCity.total
+    }
+
+    private var isLockedPreview: Bool {
+        !currentCity.unlocked && !(selectedCityID == .guangzhou && isHomeCityComplete)
+    }
+
+    private var homeBasePlantedCount: Int {
+        if let override = plantedCountLaunchOverride {
+            return min(homeCity.total, max(0, override))
         }
-        .padding(.top, 10)
-        .padding(.horizontal, 4)
-        .padding(.bottom, 6)
-        .background(
-            RoundedRectangle(cornerRadius: 25, style: .continuous)
-                .fill(VitoraTheme.ColorToken.paper.opacity(0.30))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 25, style: .continuous)
-                        .stroke(Color.white.opacity(0.52), lineWidth: 0.7)
-                )
-                .offset(y: 8)
+
+        return homeCity.planted
+    }
+
+    private var plantedCountLaunchOverride: Int? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-vitoraUITestCycleFlowerMapPlantedCount"),
+              arguments.indices.contains(index + 1),
+              let value = Int(arguments[index + 1])
+        else {
+            return nil
+        }
+
+        return value
+    }
+
+    private func basePlantedCount(for city: FlowerMapCityConfig) -> Int {
+        city.id == .shenzhen ? homeBasePlantedCount : city.planted
+    }
+
+    private var visibleTiles: [FlowerMapTile] {
+        FlowerMapTile.tiles(
+            for: currentCity,
+            plantedCount: basePlantedCount(for: currentCity),
+            plantedTileIDs: plantedTileIDs,
+            sproutingTileIDs: sproutingTileIDs,
+            lockedPreview: isLockedPreview
         )
     }
 
-    private var rowsForSelectedTab: [CycleReviewRowModel] {
-        switch selectedTab {
-        case .trend:
-            return [
-                CycleReviewRowModel(icon: "chart.line.uptrend.xyaxis", title: "月内低谷", caption: "仍集中在午后", value: "14:00-16:00", tint: VitoraTheme.ColorToken.lutealGold),
-                CycleReviewRowModel(icon: "arrow.up.right", title: "回升节点", caption: "周五后曲线回稳", value: "周五-周日", tint: VitoraTheme.ColorToken.success),
-                CycleReviewRowModel(icon: "heart.text.square", title: "影响因素", caption: "睡眠、HRV 和周期同向", value: "三项同看", tint: VitoraTheme.ColorToken.auraBlue),
-                CycleReviewRowModel(icon: "scope", title: "仍需校准", caption: "再观察三天，不催促", value: "3 天待确认", tint: VitoraTheme.ColorToken.actionPrimaryDeep),
+    private var nextPlantableTile: FlowerMapTile? {
+        visibleTiles.first(where: { $0.isTodayTarget && $0.kind == .emptySoil })
+            ?? visibleTiles.first(where: { $0.kind == .emptySoil })
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            routeBar
+
+            ZStack(alignment: .topTrailing) {
+                FlowerIsoMapView(
+                    tiles: visibleTiles,
+                    pulseTileID: pulseTileID,
+                    isTransitioning: isMapTransitioning,
+                    onTileTapped: handleTileTap
+                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 300)
+                .accessibilityIdentifier("cycle.flowerMap.isoMap")
+
+                floatingPlantButton
+                    .padding(.top, 8)
+                    .padding(.trailing, 4)
+
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        flowerCollectionButton
+                    }
+                }
+                .padding(.trailing, 8)
+                .padding(.bottom, 20)
+
+                overlayCard
+            }
+            .padding(.top, 10)
+        }
+        .accessibilityIdentifier("cycle.flowerMap")
+        .sheet(isPresented: $isHandbookPresented) {
+            FlowerHandbookSheetView()
+                .presentationDetents([.height(360), .medium])
+                .presentationDragIndicator(.visible)
+                .accessibilityIdentifier("cycle.flowerMap.handbook.sheet")
+        }
+    }
+
+    private var routeBar: some View {
+        HStack(spacing: 9) {
+            Button {
+                setCurrentCity()
+            } label: {
+                FlowerRouteNodeView(
+                    title: "深圳",
+                    isActive: selectedCityID == .shenzhen,
+                    isLocked: false
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("cycle.flowerMap.city.current")
+
+            Button {
+                setNextCity(showUnlock: false)
+            } label: {
+                FlowerRouteProgressDotsView(
+                    progress: CGFloat(homeDisplayedProgress) / CGFloat(max(homeCity.total, 1)),
+                    isComplete: remainingSteps == 0
+                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 24)
+            }
+            .buttonStyle(.plain)
+            .frame(maxWidth: .infinity)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+            .accessibilityIdentifier("cycle.flowerMap.remaining")
+            .accessibilityLabel("路线进度，剩余 \(remainingSteps) 格")
+
+            Button {
+                setNextCity(showUnlock: true)
+            } label: {
+                FlowerRouteNodeView(
+                    title: "广州",
+                    isActive: selectedCityID == .guangzhou,
+                    isLocked: !isHomeCityComplete
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("cycle.flowerMap.city.next")
+        }
+        .padding(.horizontal, 2)
+        .frame(height: 44)
+        .accessibilityElement(children: .contain)
+    }
+
+    private var floatingPlantButton: some View {
+        Button {
+            plantToday()
+        } label: {
+            VStack(spacing: 4) {
+                FlowerPlantGuideBadge(
+                    isPlanted: hasPlantedToday || isHomeCityComplete,
+                    isLocked: isLockedPreview
+                )
+                .frame(width: 68, height: 68)
+
+                Text(isLockedPreview ? "未解锁" : (isHomeCityComplete ? "已点亮" : (hasPlantedToday ? "今日已种下" : "种下今天")))
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(FlowerMapPalette.deepGreen)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.74)
+                    .padding(.horizontal, 8)
+                    .frame(height: 24)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.88), in: Capsule())
+                    .overlay(Capsule().stroke(Color.white.opacity(0.76), lineWidth: 0.7))
+            }
+        }
+        .buttonStyle(.plain)
+        .disabled(hasPlantedToday || isLockedPreview || isHomeCityComplete)
+        .accessibilityIdentifier("cycle.flowerMap.plantToday")
+        .accessibilityLabel(isLockedPreview ? "未解锁" : (isHomeCityComplete ? "城市已点亮" : (hasPlantedToday ? "今日已种下" : "种下今天")))
+    }
+
+    private var flowerCollectionButton: some View {
+        Button {
+            isHandbookPresented = true
+            selectedTile = nil
+            overlay = nil
+        } label: {
+            HStack(spacing: 4) {
+                MiniFlowerIconView()
+                    .frame(width: 18, height: 18)
+
+                Text("\(displayedProgress)朵")
+                    .font(.system(size: 12, weight: .heavy))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+            }
+            .foregroundStyle(FlowerMapPalette.deepGreen)
+            .frame(minWidth: 54, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityIdentifier("cycle.flowerMap.handbook")
+        .accessibilityLabel("已收集 \(displayedProgress) 朵花，打开花朵说明")
+    }
+
+    @ViewBuilder
+    private var overlayCard: some View {
+        if let selectedTile {
+            FlowerMapInfoCard(
+                title: selectedTile.kind == .locked ? "下一站还未解锁" : (selectedTile.kind == .emptySoil ? "可种地块" : "今天的花"),
+                lines: selectedTile.kind == .locked
+                    ? ["\(currentCity.name)地图会在深圳进度完成后打开。", "现在还差 \(remainingSteps) 格。"]
+                    : ["这一格记录今天的恢复资源。", hasPlantedToday ? "地图进度已更新到 \(homeDisplayedProgress)/\(homeCity.total)。" : "点击空地可以把今天的花种下。"],
+                onClose: closeOverlay
+            )
+            .padding(.leading, 6)
+            .padding(.top, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .transition(.move(edge: .leading).combined(with: .opacity))
+        } else if overlay == .help {
+            FlowerMapInfoCard(
+                title: "花之地图说明",
+                lines: ["地图只表达长期节律与恢复资源。", "花朵代表一次温和的身体状态记录。", "点击空地种下今天的花，点击路线查看下一站。"],
+                onClose: closeOverlay
+            )
+            .padding(.leading, 6)
+            .padding(.top, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .transition(.move(edge: .leading).combined(with: .opacity))
+        } else if overlay == .cityPreview {
+            FlowerMapInfoCard(
+                title: "下一站还未解锁",
+                lines: ["正在预览广州的真实地图轮廓。", "完成深圳 \(homeCity.total)/\(homeCity.total) 后打开。", "现在还差 \(remainingSteps) 格。"],
+                onClose: closeOverlay
+            )
+            .padding(.leading, 6)
+            .padding(.top, 14)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .transition(.move(edge: .leading).combined(with: .opacity))
+        }
+    }
+
+    private func setCurrentCity() {
+        switchCity(to: .shenzhen, overlay: nil)
+    }
+
+    private func setNextCity(showUnlock: Bool) {
+        switchCity(to: .guangzhou, overlay: showUnlock ? .cityPreview : nil)
+    }
+
+    private func switchCity(to cityID: FlowerMapCityID, overlay nextOverlay: FlowerMapOverlay?) {
+        guard selectedCityID != cityID || overlay != nextOverlay || selectedTile != nil else {
+            return
+        }
+
+        if reduceMotion {
+            selectedCityID = cityID
+            overlay = nextOverlay
+            selectedTile = nil
+            isMapTransitioning = false
+            return
+        }
+
+        withAnimation(.easeInOut(duration: 0.16)) {
+            isMapTransitioning = true
+            selectedTile = nil
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+            selectedCityID = cityID
+            overlay = nextOverlay
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.86)) {
+                isMapTransitioning = false
+            }
+        }
+    }
+
+    private func plantToday(on tile: FlowerMapTile? = nil) {
+        guard !hasPlantedToday, !isLockedPreview, !isHomeCityComplete else {
+            withAnimation(.easeOut(duration: reduceMotion ? 0 : 0.18)) {
+                overlay = .cityPreview
+                selectedTile = nil
+            }
+            return
+        }
+
+        guard let target = tile ?? nextPlantableTile else {
+            withAnimation(.easeOut(duration: reduceMotion ? 0 : 0.18)) {
+                overlay = .help
+            }
+            return
+        }
+
+        let targetID = target.id
+        let plantingKey = target.plantingKey
+
+        if reduceMotion {
+            hasPlantedToday = true
+            sproutingTileIDs.insert(plantingKey)
+            pulseTileID = targetID
+        } else {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.72)) {
+                hasPlantedToday = true
+                sproutingTileIDs.insert(plantingKey)
+                pulseTileID = targetID
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + (reduceMotion ? 0.05 : 0.52)) {
+            withAnimation(.spring(response: 0.30, dampingFraction: 0.78)) {
+                sproutingTileIDs.remove(plantingKey)
+                plantedTileIDs.insert(plantingKey)
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.15) {
+            withAnimation(.easeOut(duration: reduceMotion ? 0 : 0.18)) {
+                pulseTileID = nil
+            }
+        }
+    }
+
+    private func handleTileTap(_ tile: FlowerMapTile) {
+        guard tile.kind != .void else {
+            return
+        }
+
+        if tile.kind == .emptySoil, !hasPlantedToday, !isLockedPreview {
+            plantToday(on: tile)
+            return
+        }
+
+        withAnimation(.easeOut(duration: reduceMotion ? 0 : 0.2)) {
+            selectedTile = tile
+            overlay = nil
+        }
+    }
+
+    private func closeOverlay() {
+        withAnimation(.easeOut(duration: reduceMotion ? 0 : 0.18)) {
+            overlay = nil
+            selectedTile = nil
+        }
+    }
+}
+
+private struct CycleReportTopSegmentControl: View {
+    @Binding var selectedTab: CycleReviewTab
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(CycleReviewTab.allCases) { tab in
+                Button {
+                    selectedTab = tab
+                } label: {
+                    Text(tab.segmentTitle)
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(selectedTab == tab ? Color.white : VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.74)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 36)
+                        .background {
+                            if selectedTab == tab {
+                                Capsule(style: .continuous)
+                                    .fill(FlowerMapPalette.deepGreen)
+                                    .shadow(color: FlowerMapPalette.deepGreen.opacity(0.20), radius: 8, x: 0, y: 3)
+                            }
+                        }
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier(tab.accessibilityID)
+                .accessibilityLabel(tab.segmentTitle)
+            }
+        }
+        .padding(4)
+        .background(
+            Capsule(style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.68))
+                .overlay(Capsule(style: .continuous).stroke(FlowerMapPalette.deepGreen.opacity(0.42), lineWidth: 1))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 10, x: 0, y: 5)
+        )
+    }
+}
+
+private enum FlowerMapCityID: String, CaseIterable, Identifiable {
+    case shenzhen
+    case guangzhou
+    case hongkong
+    case dongguan
+    case huizhou
+
+    var id: String { rawValue }
+}
+
+private struct FlowerMapCityConfig {
+    let id: FlowerMapCityID
+    let name: String
+    let nextName: String
+    let total: Int
+    let planted: Int
+    let unlocked: Bool
+    let shape: [String]
+
+    static let fallback = FlowerMapCityConfig(
+        id: .shenzhen,
+        name: "深圳",
+        nextName: "广州",
+        total: 36,
+        planted: 24,
+        unlocked: true,
+        shape: [
+            "000gggg00",
+            "00gggggg0",
+            "0gggggggg",
+            "gggggggg0",
+            "0gggggg00",
+            "00g000g00",
+            "g0000000g",
+        ]
+    )
+}
+
+private enum FlowerMapOverlay: Equatable {
+    case help
+    case cityPreview
+}
+
+private enum FlowerMapTileKind {
+    case void
+    case emptySoil
+    case sprout
+    case bloom
+    case today
+    case locked
+}
+
+private enum FlowerDecorationLevel: Equatable {
+    case none
+    case small
+    case medium
+    case large
+    case featured
+
+    var scale: CGFloat {
+        switch self {
+        case .none:
+            return 1
+        case .small:
+            return 0.50
+        case .medium:
+            return 0.64
+        case .large:
+            return 0.76
+        case .featured:
+            return 0.82
+        }
+    }
+
+    var lift: CGFloat {
+        switch self {
+        case .none:
+            return 0
+        case .small:
+            return 0.48
+        case .medium:
+            return 0.56
+        case .large:
+            return 0.64
+        case .featured:
+            return 0.68
+        }
+    }
+}
+
+private let CITY_MAPS: [FlowerMapCityID: FlowerMapCityConfig] = [
+    .shenzhen: .fallback,
+    .guangzhou: FlowerMapCityConfig(
+        id: .guangzhou,
+        name: "广州",
+        nextName: "香港",
+        total: 42,
+        planted: 0,
+        unlocked: false,
+        shape: [
+            "0000gggg00",
+            "00gggffg00",
+            "0gfgsfgfg0",
+            "gffgfgsfg0",
+            "0gfgfgffg0",
+            "00gfgfg000",
+            "000gggg000",
+        ]
+    ),
+    .hongkong: FlowerMapCityConfig(
+        id: .hongkong,
+        name: "香港",
+        nextName: "东莞",
+        total: 30,
+        planted: 0,
+        unlocked: false,
+        shape: [
+            "000gg000",
+            "00gffg00",
+            "0gfgfg0",
+            "gffgfg0",
+            "0gfg000",
+            "00gg000",
+        ]
+    ),
+    .dongguan: FlowerMapCityConfig(
+        id: .dongguan,
+        name: "东莞",
+        nextName: "惠州",
+        total: 36,
+        planted: 0,
+        unlocked: false,
+        shape: [
+            "000ggg000",
+            "00gsgfg00",
+            "0gfgfgfg0",
+            "gfgsfgfg0",
+            "0gfgsg000",
+            "00ggg0000",
+        ]
+    ),
+    .huizhou: FlowerMapCityConfig(
+        id: .huizhou,
+        name: "惠州",
+        nextName: "中国地图",
+        total: 36,
+        planted: 0,
+        unlocked: false,
+        shape: [
+            "000gggg00",
+            "00gfgfg00",
+            "gfgfgsfg0",
+            "0gsgfgfg0",
+            "00gfgfg00",
+            "000gg0000",
+        ]
+    ),
+]
+
+private struct FlowerMapTile: Identifiable {
+    let cityID: FlowerMapCityID
+    let row: Int
+    let col: Int
+    var kind: FlowerMapTileKind
+    let variant: Int
+    let isTodayTarget: Bool
+    let showsPlus: Bool
+    let decorationLevel: FlowerDecorationLevel
+
+    var id: String { "\(cityID.rawValue)-\(row)-\(col)" }
+    var plantingKey: String { id }
+
+    static func tiles(
+        for city: FlowerMapCityConfig,
+        plantedCount: Int,
+        plantedTileIDs: Set<String>,
+        sproutingTileIDs: Set<String>,
+        lockedPreview: Bool
+    ) -> [FlowerMapTile] {
+        var tileOrdinal = 0
+        let cappedPlantedCount = min(city.total, max(0, plantedCount))
+
+        return city.shape.enumerated().flatMap { rowIndex, row in
+            Array(row).enumerated().map { colIndex, char in
+                let parsed = parsedTile(for: char)
+                let ordinal: Int?
+                if parsed.isDrawable {
+                    ordinal = tileOrdinal
+                    tileOrdinal += 1
+                } else {
+                    ordinal = nil
+                }
+
+                let baseID = "\(city.id.rawValue)-\(rowIndex)-\(colIndex)"
+                let isSprouting = sproutingTileIDs.contains(baseID)
+                let isPlantedToday = plantedTileIDs.contains(baseID)
+                let isNextTarget = ordinal == min(cappedPlantedCount, max(0, city.total - 1))
+                let resolvedKind: FlowerMapTileKind
+                if !parsed.isDrawable {
+                    resolvedKind = .void
+                } else if lockedPreview {
+                    resolvedKind = .locked
+                } else if isSprouting {
+                    resolvedKind = .sprout
+                } else if isPlantedToday {
+                    resolvedKind = .today
+                } else if let ordinal, ordinal < cappedPlantedCount {
+                    if cappedPlantedCount >= city.total {
+                        resolvedKind = .bloom
+                    } else if ordinal % 7 == 0 || ordinal >= max(0, cappedPlantedCount - 2) {
+                        resolvedKind = .sprout
+                    } else {
+                        resolvedKind = .bloom
+                    }
+                } else {
+                    resolvedKind = .emptySoil
+                }
+                let todayTarget = parsed.isTodayTarget || (!lockedPreview && isNextTarget && cappedPlantedCount < city.total)
+                let plusVisible = resolvedKind == .emptySoil
+                    && (todayTarget || ((ordinal ?? -1) > cappedPlantedCount && ((ordinal ?? 0) - cappedPlantedCount) % 5 == 0))
+
+                return FlowerMapTile(
+                    cityID: city.id,
+                    row: rowIndex,
+                    col: colIndex,
+                    kind: resolvedKind,
+                    variant: (rowIndex * 5 + colIndex * 3 + city.id.rawValue.count) % 8,
+                    isTodayTarget: todayTarget,
+                    showsPlus: plusVisible,
+                    decorationLevel: decorationLevel(
+                        for: resolvedKind,
+                        ordinal: ordinal ?? 0,
+                        isTodayTarget: todayTarget || isPlantedToday,
+                        isComplete: cappedPlantedCount >= city.total
+                    )
+                )
+            }
+        }
+    }
+
+    private static func parsedTile(for char: Character) -> (isDrawable: Bool, isTodayTarget: Bool) {
+        switch char {
+        case "g", "f", "s":
+            return (true, false)
+        case "t":
+            return (true, true)
+        default:
+            return (false, false)
+        }
+    }
+
+    private static func decorationLevel(
+        for kind: FlowerMapTileKind,
+        ordinal: Int,
+        isTodayTarget: Bool,
+        isComplete: Bool
+    ) -> FlowerDecorationLevel {
+        switch kind {
+        case .today:
+            return .featured
+        case .sprout:
+            return isTodayTarget ? .medium : .small
+        case .bloom:
+            if ordinal == 4 || ordinal == 13 {
+                return .large
+            }
+            return isComplete || ordinal % 3 == 0 ? .medium : .small
+        default:
+            return .none
+        }
+    }
+}
+
+private enum FlowerMapPalette {
+    static let deepGreen = Color(red: 0.13, green: 0.43, blue: 0.20)
+    static let leaf = Color(red: 0.38, green: 0.67, blue: 0.20)
+    static let leafLight = Color(red: 0.64, green: 0.82, blue: 0.30)
+    static let soilTop = Color(red: 0.78, green: 0.60, blue: 0.39)
+    static let soilTopDeep = Color(red: 0.66, green: 0.47, blue: 0.27)
+    static let soilSideLeft = Color(red: 0.55, green: 0.37, blue: 0.20)
+    static let soilSideRight = Color(red: 0.40, green: 0.28, blue: 0.14)
+    static let grassTop = Color(red: 0.66, green: 0.84, blue: 0.41)
+    static let grassDeep = Color(red: 0.49, green: 0.73, blue: 0.32)
+    static let lockedTop = Color(red: 0.78, green: 0.69, blue: 0.54)
+    static let flowerPink = Color(red: 0.96, green: 0.45, blue: 0.61)
+    static let flowerYellow = Color(red: 0.98, green: 0.81, blue: 0.22)
+    static let flowerPurple = Color(red: 0.62, green: 0.45, blue: 0.96)
+    static let waterBlue = Color(red: 0.22, green: 0.58, blue: 0.80)
+    static let sun = Color(red: 0.96, green: 0.61, blue: 0.10)
+}
+
+private struct FlowerIsoMapView: View {
+    let tiles: [FlowerMapTile]
+    let pulseTileID: String?
+    let isTransitioning: Bool
+    let onTileTapped: (FlowerMapTile) -> Void
+
+    var body: some View {
+        GeometryReader { proxy in
+            let visibleTiles = tiles.filter { $0.kind != .void }
+            let rowCount = (visibleTiles.map(\.row).max() ?? 0) + 1
+            let colCount = (visibleTiles.map(\.col).max() ?? 0) + 1
+            let baseTileWidth: CGFloat = 54
+            let baseTileHeight: CGFloat = 31
+            let baseDepth: CGFloat = 13.5
+            let gapX: CGFloat = 1.4
+            let gapY: CGFloat = 0.9
+            let rawStepX = (baseTileWidth + gapX) * 0.50
+            let rawStepY = (baseTileHeight + gapY) * 0.50
+            let rawMapWidth = CGFloat(rowCount + colCount) * rawStepX + baseTileWidth
+            let rawMapHeight = CGFloat(rowCount + colCount) * rawStepY + baseDepth + 92
+            let fittedScale = min((proxy.size.width * 1.08) / rawMapWidth, (proxy.size.height * 0.92) / rawMapHeight)
+            let scale = min(1.02, max(0.70, fittedScale))
+            let tileWidth = baseTileWidth * scale
+            let tileHeight = baseTileHeight * scale
+            let depth = baseDepth * scale
+            let stepX = (tileWidth + gapX * scale) * 0.50
+            let stepY = (tileHeight + gapY * scale) * 0.50
+            let centerX = proxy.size.width / 2
+            let topY = max(CGFloat(18), (proxy.size.height - rawMapHeight * scale) * 0.32)
+
+            ZStack {
+                Ellipse()
+                    .fill(Color.black.opacity(0.08))
+                    .frame(width: min(proxy.size.width * 0.96, rawMapWidth * scale * 0.82), height: tileHeight * 2.25)
+                    .blur(radius: 15)
+                    .position(x: centerX + tileWidth * 0.18, y: topY + CGFloat(rowCount + colCount) * stepY * 0.72)
+
+                ForEach(visibleTiles) { tile in
+                    let x = centerX + (CGFloat(tile.col) - CGFloat(tile.row)) * stepX
+                    let y = topY + (CGFloat(tile.col) + CGFloat(tile.row)) * stepY
+
+                    Button {
+                        onTileTapped(tile)
+                    } label: {
+                        FlowerIsoTileView(
+                            tile: tile,
+                            tileWidth: tileWidth,
+                            tileHeight: tileHeight,
+                            depth: depth,
+                            isPulsing: pulseTileID == tile.id
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .frame(width: max(44, tileWidth * 1.28), height: max(52, tileHeight * 2.62))
+                    .position(x: x, y: y)
+                    .zIndex(Double(tile.row + tile.col))
+                    .accessibilityLabel(accessibilityLabel(for: tile))
+                    .accessibilityIdentifier("cycle.flowerMap.tile.\(tile.id)")
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .opacity(isTransitioning ? 0.18 : 1)
+            .scaleEffect(isTransitioning ? 0.96 : 1)
+        }
+    }
+
+    private func accessibilityLabel(for tile: FlowerMapTile) -> String {
+        switch tile.kind {
+        case .void:
+            return "地图空白"
+        case .emptySoil:
+            return "可种花的耕地"
+        case .sprout:
+            return "正在生长的幼苗"
+        case .bloom:
+            return "已开花的地块"
+        case .today:
+            return "今天的花"
+        case .locked:
+            return "未解锁地块"
+        }
+    }
+}
+
+private struct FlowerIsoTileView: View {
+    let tile: FlowerMapTile
+    let tileWidth: CGFloat
+    let tileHeight: CGFloat
+    let depth: CGFloat
+    let isPulsing: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var topFill: Color {
+        switch tile.kind {
+        case .emptySoil, .sprout:
+            return FlowerMapPalette.soilTop
+        case .bloom, .today:
+            return FlowerMapPalette.grassTop
+        case .locked:
+            return FlowerMapPalette.lockedTop
+        case .void:
+            return Color.clear
+        }
+    }
+
+    private var topHighlight: Color {
+        switch tile.kind {
+        case .emptySoil, .sprout:
+            return Color(red: 0.86, green: 0.66, blue: 0.43)
+        case .locked:
+            return Color(red: 0.78, green: 0.80, blue: 0.74)
+        default:
+            return Color(red: 0.70, green: 0.88, blue: 0.32)
+        }
+    }
+
+    var body: some View {
+        ZStack {
+            if isPulsing {
+                DiamondShape()
+                    .stroke(FlowerMapPalette.flowerYellow.opacity(0.78), lineWidth: 3)
+                    .frame(width: tileWidth * 1.26, height: tileHeight * 1.26)
+                    .scaleEffect(reduceMotion ? 1.05 : 1.34)
+                    .opacity(reduceMotion ? 0.55 : 0.22)
+                    .offset(y: -tileHeight * 0.14)
+            }
+
+            DiamondShape()
+                .fill(Color.black.opacity(0.13))
+                .frame(width: tileWidth * 1.04, height: tileHeight * 1.03)
+                .blur(radius: 1.8)
+                .offset(x: tileWidth * 0.08, y: tileHeight * 0.62)
+
+            IsoSideShape(side: .left, depthRatio: depth / (tileHeight + depth))
+                .fill(
+                    tile.kind == .locked
+                        ? AnyShapeStyle(Color.gray.opacity(0.38))
+                        : AnyShapeStyle(LinearGradient(
+                            colors: [
+                                FlowerMapPalette.soilSideLeft,
+                                Color(red: 0.27, green: 0.18, blue: 0.09),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ))
+                )
+                .frame(width: tileWidth, height: tileHeight + depth)
+
+            IsoSideShape(side: .right, depthRatio: depth / (tileHeight + depth))
+                .fill(
+                    tile.kind == .locked
+                        ? AnyShapeStyle(Color.gray.opacity(0.28))
+                        : AnyShapeStyle(LinearGradient(
+                            colors: [
+                                FlowerMapPalette.soilSideRight,
+                                Color(red: 0.34, green: 0.22, blue: 0.11),
+                            ],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        ))
+                )
+                .frame(width: tileWidth, height: tileHeight + depth)
+
+            DiamondShape()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            topHighlight,
+                            topFill,
+                            tile.kind == .emptySoil || tile.kind == .sprout ? FlowerMapPalette.soilTopDeep : topFill.opacity(0.88),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .frame(width: tileWidth, height: tileHeight)
+                .overlay {
+                    IsoTileTextureView(kind: tile.kind, variant: tile.variant)
+                        .clipShape(DiamondShape())
+                }
+                .overlay(
+                    DiamondShape()
+                        .stroke(Color.black.opacity(tile.kind == .locked ? 0.06 : 0.065), lineWidth: 0.6)
+                        .offset(y: 0.2)
+                )
+                .overlay(
+                    DiamondShape()
+                        .stroke(Color.white.opacity(tile.kind == .locked ? 0.06 : 0.075), lineWidth: 0.4)
+                )
+                .offset(y: -depth * 0.50)
+
+            tileOverlay
+                .frame(width: tileWidth * 1.18, height: tileHeight * 2.10)
+                .scaleEffect(tile.decorationLevel.scale)
+                .offset(y: -tileHeight * tile.decorationLevel.lift)
+        }
+        .scaleEffect(isPulsing && !reduceMotion ? 1.06 : 1)
+        .animation(.spring(response: 0.34, dampingFraction: 0.74), value: isPulsing)
+    }
+
+    @ViewBuilder
+    private var tileOverlay: some View {
+        switch tile.kind {
+        case .emptySoil:
+            if tile.showsPlus {
+                Image(systemName: "plus")
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.88))
+            }
+        case .sprout:
+            SproutPatchGlyph(variant: tile.variant, isTodayTarget: tile.isTodayTarget)
+        case .bloom:
+            FlowerPatchGlyph(variant: tile.variant, level: tile.decorationLevel, isToday: false)
+        case .today:
+            FlowerPatchGlyph(variant: tile.variant, level: tile.decorationLevel, isToday: true)
+        case .locked:
+            Image(systemName: "lock.fill")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundStyle(Color.white.opacity(0.58))
+        case .void:
+            EmptyView()
+        }
+    }
+}
+
+private struct DiamondShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.midY))
+        path.closeSubpath()
+        return path
+    }
+}
+
+private struct IsoSideShape: Shape {
+    enum Side {
+        case left
+        case right
+    }
+
+    let side: Side
+    let depthRatio: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        let depth = max(1, rect.height * min(0.55, max(0.12, depthRatio)))
+        let topHeight = rect.height - depth
+        var path = Path()
+        switch side {
+        case .left:
+            path.move(to: CGPoint(x: rect.minX, y: topHeight * 0.50))
+            path.addLine(to: CGPoint(x: rect.midX, y: topHeight))
+            path.addLine(to: CGPoint(x: rect.midX, y: topHeight + depth))
+            path.addLine(to: CGPoint(x: rect.minX, y: topHeight * 0.50 + depth))
+        case .right:
+            path.move(to: CGPoint(x: rect.maxX, y: topHeight * 0.50))
+            path.addLine(to: CGPoint(x: rect.midX, y: topHeight))
+            path.addLine(to: CGPoint(x: rect.midX, y: topHeight + depth))
+            path.addLine(to: CGPoint(x: rect.maxX, y: topHeight * 0.50 + depth))
+        }
+        path.closeSubpath()
+        return path
+    }
+}
+
+private struct IsoTileTextureView: View {
+    let kind: FlowerMapTileKind
+    let variant: Int
+
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            let isGreen = kind == .bloom || kind == .today
+            let isDirt = kind == .emptySoil || kind == .sprout
+
+            for index in 0..<24 {
+                let seed = CGFloat((index * 31 + variant * 17) % 97) / 97
+                let seedB = CGFloat((index * 47 + variant * 23) % 89) / 89
+                let point = CGPoint(x: size.width * (0.12 + seed * 0.76), y: size.height * (0.16 + seedB * 0.66))
+                let inside = abs(point.x - center.x) / (size.width / 2) + abs(point.y - center.y) / (size.height / 2) < 0.88
+                guard inside else {
+                    continue
+                }
+
+                if isGreen {
+                    let radius = size.width * (0.016 + CGFloat(index % 3) * 0.004)
+                    context.fill(
+                        Path(ellipseIn: CGRect(x: point.x - radius, y: point.y - radius, width: radius * 2, height: radius * 2)),
+                        with: .color((index % 2 == 0 ? Color.white : FlowerMapPalette.deepGreen).opacity(index % 2 == 0 ? 0.16 : 0.18))
+                    )
+
+                    if index % 4 == 0 {
+                        var blade = Path()
+                        blade.move(to: CGPoint(x: point.x, y: point.y + size.height * 0.10))
+                        blade.addQuadCurve(
+                            to: CGPoint(x: point.x + CGFloat(index % 2 == 0 ? -1 : 1) * size.width * 0.045, y: point.y - size.height * 0.12),
+                            control: CGPoint(x: point.x, y: point.y)
+                        )
+                        context.stroke(blade, with: .color(FlowerMapPalette.deepGreen.opacity(0.34)), style: StrokeStyle(lineWidth: 0.9, lineCap: .round))
+                    }
+                } else if isDirt {
+                    let dot = CGRect(x: point.x - 1, y: point.y - 0.8, width: 2.2, height: 1.6)
+                    let dotColor = index % 3 == 0 ? Color(red: 0.38, green: 0.25, blue: 0.13) : Color.white
+                    context.fill(Path(ellipseIn: dot), with: .color(dotColor.opacity(index % 3 == 0 ? 0.18 : 0.11)))
+                } else if kind == .locked {
+                    context.fill(
+                        Path(ellipseIn: CGRect(x: point.x - 0.8, y: point.y - 0.8, width: 1.6, height: 1.6)),
+                        with: .color(Color.white.opacity(0.10))
+                    )
+                }
+            }
+
+            if isDirt {
+                for index in 0..<4 {
+                    let y = size.height * (0.28 + CGFloat(index) * 0.12)
+                    var ridge = Path()
+                    ridge.move(to: CGPoint(x: size.width * (0.23 + CGFloat(index % 2) * 0.04), y: y))
+                    ridge.addQuadCurve(
+                        to: CGPoint(x: size.width * (0.72 - CGFloat(index % 2) * 0.04), y: y + size.height * 0.04),
+                        control: CGPoint(x: size.width * 0.48, y: y - size.height * 0.06)
+                    )
+                    context.stroke(
+                        ridge,
+                        with: .color(Color(red: 0.46, green: 0.30, blue: 0.16).opacity(0.30)),
+                        style: StrokeStyle(lineWidth: 1.2, lineCap: .round)
+                    )
+                }
+            }
+
+            if isGreen {
+                var edge = Path()
+                edge.move(to: CGPoint(x: size.width * 0.08, y: center.y))
+                edge.addLine(to: CGPoint(x: center.x, y: size.height * 0.92))
+                edge.addLine(to: CGPoint(x: size.width * 0.92, y: center.y))
+                context.stroke(edge, with: .color(FlowerMapPalette.deepGreen.opacity(0.22)), style: StrokeStyle(lineWidth: 1.1, lineCap: .round, dash: [2, 3]))
+            }
+        }
+    }
+}
+
+private struct SproutPatchGlyph: View {
+    let variant: Int
+    let isTodayTarget: Bool
+
+    var body: some View {
+        Canvas { context, size in
+            let base = CGPoint(x: size.width * 0.50, y: size.height * 0.76)
+            let stemTop = CGPoint(x: size.width * 0.50, y: size.height * 0.34)
+            var stem = Path()
+            stem.move(to: base)
+            stem.addQuadCurve(
+                to: stemTop,
+                control: CGPoint(x: size.width * (variant % 2 == 0 ? 0.45 : 0.55), y: size.height * 0.54)
+            )
+            context.stroke(stem, with: .color(FlowerMapPalette.deepGreen.opacity(0.82)), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+
+            let leftLeaf = CGRect(x: size.width * 0.25, y: size.height * 0.34, width: size.width * 0.25, height: size.height * 0.18)
+            let rightLeaf = CGRect(x: size.width * 0.50, y: size.height * 0.31, width: size.width * 0.27, height: size.height * 0.19)
+            context.fill(Path(ellipseIn: leftLeaf), with: .color(FlowerMapPalette.leafLight.opacity(0.90)))
+            context.fill(Path(ellipseIn: rightLeaf), with: .color(FlowerMapPalette.leaf.opacity(0.88)))
+            context.stroke(Path(ellipseIn: leftLeaf), with: .color(Color.white.opacity(0.24)), lineWidth: 0.7)
+            context.stroke(Path(ellipseIn: rightLeaf), with: .color(Color.white.opacity(0.22)), lineWidth: 0.7)
+
+            let soilShadow = CGRect(x: size.width * 0.34, y: size.height * 0.72, width: size.width * 0.32, height: size.height * 0.08)
+            context.fill(Path(ellipseIn: soilShadow), with: .color(Color(red: 0.37, green: 0.24, blue: 0.12).opacity(0.20)))
+
+            if isTodayTarget {
+                let glowRect = CGRect(x: size.width * 0.28, y: size.height * 0.20, width: size.width * 0.44, height: size.width * 0.44)
+                context.stroke(Path(ellipseIn: glowRect), with: .color(FlowerMapPalette.flowerYellow.opacity(0.42)), lineWidth: 1.3)
+            }
+        }
+    }
+}
+
+private struct FlowerPatchGlyph: View {
+    let variant: Int
+    let level: FlowerDecorationLevel
+    let isToday: Bool
+
+    private var flowerColor: Color {
+        switch variant % 4 {
+        case 0:
+            return FlowerMapPalette.flowerYellow
+        case 1:
+            return FlowerMapPalette.flowerPink
+        case 2:
+            return FlowerMapPalette.flowerPurple
+        default:
+            return Color.white
+        }
+    }
+
+    var body: some View {
+        Canvas { context, size in
+            switch variant % 6 {
+            case 0:
+                drawFlowerCluster(context: &context, size: size, color: FlowerMapPalette.flowerYellow, count: 5)
+            case 1:
+                drawFlowerCluster(context: &context, size: size, color: FlowerMapPalette.flowerPink, count: 6)
+            case 2:
+                drawBlueBloom(context: &context, size: size)
+            case 3 where level == .large || level == .featured:
+                drawSmallTree(context: &context, size: size)
+            case 4:
+                drawFlowerCluster(context: &context, size: size, color: Color.white, count: 7)
+            default:
+                if level == .large {
+                    drawMushroomBloom(context: &context, size: size)
+                } else {
+                    drawFlowerCluster(context: &context, size: size, color: FlowerMapPalette.flowerYellow, count: 4)
+                }
+            }
+
+            if isToday {
+                let glowRect = CGRect(x: size.width * 0.18, y: size.height * 0.08, width: size.width * 0.64, height: size.width * 0.64)
+                context.stroke(Path(ellipseIn: glowRect), with: .color(FlowerMapPalette.flowerYellow.opacity(0.54)), lineWidth: 1.6)
+            }
+        }
+    }
+
+    private func drawFlowerCluster(context: inout GraphicsContext, size: CGSize, color: Color, count: Int) {
+        let usesWhitePetals = count >= 7
+        let positions: [CGPoint] = [
+            CGPoint(x: 0.31, y: 0.52),
+            CGPoint(x: 0.47, y: 0.36),
+            CGPoint(x: 0.62, y: 0.48),
+            CGPoint(x: 0.39, y: 0.26),
+            CGPoint(x: 0.55, y: 0.25),
+            CGPoint(x: 0.69, y: 0.34),
+            CGPoint(x: 0.26, y: 0.36),
+        ]
+
+        for index in 0..<min(count, positions.count) {
+            let point = CGPoint(x: size.width * positions[index].x, y: size.height * positions[index].y)
+            var stem = Path()
+            stem.move(to: CGPoint(x: point.x, y: size.height * 0.82))
+            stem.addQuadCurve(
+                to: point,
+                control: CGPoint(x: point.x + CGFloat(index % 2 == 0 ? -1 : 1) * size.width * 0.05, y: size.height * 0.58)
+            )
+            context.stroke(stem, with: .color(FlowerMapPalette.deepGreen.opacity(0.82)), style: StrokeStyle(lineWidth: 1.3, lineCap: .round))
+
+            let petalRadius = size.width * 0.045
+            for angle in stride(from: 0.0, to: Double.pi * 2, by: Double.pi / 4) {
+                let petalCenter = CGPoint(x: point.x + cos(angle) * petalRadius * 1.5, y: point.y + sin(angle) * petalRadius * 1.1)
+                context.fill(
+                    Path(ellipseIn: CGRect(x: petalCenter.x - petalRadius, y: petalCenter.y - petalRadius, width: petalRadius * 1.9, height: petalRadius * 1.9)),
+                    with: .color(color.opacity(usesWhitePetals ? 0.95 : 0.92))
+                )
+            }
+            context.fill(
+                Path(ellipseIn: CGRect(x: point.x - petalRadius * 0.58, y: point.y - petalRadius * 0.58, width: petalRadius * 1.16, height: petalRadius * 1.16)),
+                with: .color(usesWhitePetals ? FlowerMapPalette.flowerYellow : Color.white.opacity(0.88))
+            )
+        }
+    }
+
+    private func drawBlueBloom(context: inout GraphicsContext, size: CGSize) {
+        let base = CGPoint(x: size.width * 0.50, y: size.height * 0.82)
+        for index in 0..<6 {
+            let angle = -Double.pi * 0.78 + Double(index) * Double.pi * 0.28
+            let end = CGPoint(
+                x: base.x + cos(angle) * size.width * 0.32,
+                y: base.y + sin(angle) * size.height * 0.48
+            )
+            var branch = Path()
+            branch.move(to: base)
+            branch.addQuadCurve(to: end, control: CGPoint(x: size.width * 0.50, y: size.height * 0.44))
+            context.stroke(branch, with: .color(Color(red: 0.22, green: 0.58, blue: 0.92)), style: StrokeStyle(lineWidth: 2.0, lineCap: .round))
+            context.fill(Path(ellipseIn: CGRect(x: end.x - 3, y: end.y - 3, width: 6, height: 6)), with: .color(FlowerMapPalette.flowerPink.opacity(0.88)))
+        }
+
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.26, y: size.height * 0.72, width: size.width * 0.48, height: size.height * 0.12)), with: .color(FlowerMapPalette.flowerPurple.opacity(0.74)))
+    }
+
+    private func drawSmallTree(context: inout GraphicsContext, size: CGSize) {
+        var trunk = Path()
+        trunk.move(to: CGPoint(x: size.width * 0.50, y: size.height * 0.86))
+        trunk.addLine(to: CGPoint(x: size.width * 0.50, y: size.height * 0.36))
+        context.stroke(trunk, with: .color(Color(red: 0.28, green: 0.18, blue: 0.10)), style: StrokeStyle(lineWidth: 3.8, lineCap: .round))
+
+        let blossom = Color(red: 0.96, green: 0.64, blue: 0.72)
+        let crowns = [
+            CGRect(x: size.width * 0.34, y: size.height * 0.23, width: size.width * 0.24, height: size.height * 0.19),
+            CGRect(x: size.width * 0.48, y: size.height * 0.18, width: size.width * 0.25, height: size.height * 0.20),
+            CGRect(x: size.width * 0.42, y: size.height * 0.30, width: size.width * 0.31, height: size.height * 0.18),
+        ]
+        for rect in crowns {
+            context.fill(Path(ellipseIn: rect), with: .color(blossom.opacity(0.88)))
+            context.stroke(Path(ellipseIn: rect), with: .color(Color.white.opacity(0.32)), lineWidth: 0.8)
+        }
+    }
+
+    private func drawMushroomBloom(context: inout GraphicsContext, size: CGSize) {
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.28, y: size.height * 0.44, width: size.width * 0.25, height: size.height * 0.36)), with: .color(Color(red: 0.48, green: 0.24, blue: 0.16)))
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.46, y: size.height * 0.48, width: size.width * 0.22, height: size.height * 0.30)), with: .color(Color(red: 0.48, green: 0.24, blue: 0.16)))
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.18, y: size.height * 0.20, width: size.width * 0.42, height: size.height * 0.30)), with: .color(Color(red: 0.07, green: 0.42, blue: 0.48)))
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.45, y: size.height * 0.26, width: size.width * 0.36, height: size.height * 0.28)), with: .color(FlowerMapPalette.flowerPink))
+        context.fill(Path(ellipseIn: CGRect(x: size.width * 0.58, y: size.height * 0.36, width: 5, height: 5)), with: .color(Color.white.opacity(0.86)))
+    }
+}
+
+private struct GrassPatchGlyph: View {
+    let variant: Int
+
+    var body: some View {
+        Canvas { context, size in
+            for index in 0..<5 {
+                let frac = CGFloat(index) / 4
+                var blade = Path()
+                let x = size.width * (0.24 + frac * 0.52)
+                blade.move(to: CGPoint(x: x, y: size.height * 0.76))
+                blade.addQuadCurve(
+                    to: CGPoint(x: x + CGFloat((index % 2 == 0) ? -1 : 1) * size.width * 0.08, y: size.height * (0.36 + CGFloat((variant + index) % 3) * 0.06)),
+                    control: CGPoint(x: x, y: size.height * 0.54)
+                )
+                context.stroke(blade, with: .color(FlowerMapPalette.deepGreen.opacity(0.52)), style: StrokeStyle(lineWidth: 1.3, lineCap: .round))
+            }
+        }
+    }
+}
+
+private struct FlowerCitySkylineView: View {
+    let isLocked: Bool
+
+    var body: some View {
+        Canvas { context, size in
+            let tint = isLocked ? Color.gray.opacity(0.42) : FlowerMapPalette.deepGreen.opacity(0.40)
+            let baseY = size.height * 0.92
+            var ground = Path()
+            ground.move(to: CGPoint(x: 0, y: baseY))
+            ground.addLine(to: CGPoint(x: size.width, y: baseY))
+            context.stroke(ground, with: .color(tint.opacity(0.32)), lineWidth: 1)
+
+            let buildings: [(CGFloat, CGFloat, CGFloat)] = [
+                (0.12, 0.38, 0.08),
+                (0.25, 0.62, 0.10),
+                (0.40, 0.48, 0.12),
+                (0.58, 0.78, 0.08),
+                (0.74, 0.50, 0.10),
+                (0.88, 0.36, 0.11),
             ]
-        case .cycle:
-            return [
-                CycleReviewRowModel(icon: "calendar", title: "当前阶段", caption: "今天处在黄体中段", value: "D18", tint: VitoraTheme.ColorToken.lutealGold),
-                CycleReviewRowModel(icon: "clock", title: "经期窗口", caption: "只是估算，支持校准", value: "5月8日-5月12日", tint: Color(red: 245 / 255, green: 143 / 255, blue: 176 / 255)),
-                CycleReviewRowModel(icon: "leaf", title: "有效助力", caption: "轻量运动反馈更稳", value: "轻量运动", tint: VitoraTheme.ColorToken.success),
-                CycleReviewRowModel(icon: "slider.horizontal.3", title: "下周期调整", caption: "强安排先避开恢复慢日", value: "周一缓冲", tint: VitoraTheme.ColorToken.actionPrimaryDeep),
-            ]
-        case .week:
-            return [
-                CycleReviewRowModel(icon: "clock", title: "低谷集中窗口", caption: "本周最需要留余量", value: "14:00-16:00", tint: VitoraTheme.ColorToken.lutealGold),
-                CycleReviewRowModel(icon: "sun.max", title: "恢复较好时段", caption: "适合安排需要专注的事", value: "上午", tint: VitoraTheme.ColorToken.success),
-                CycleReviewRowModel(icon: "waveform.path.ecg", title: "影响因素", caption: "睡眠、HRV 和周期共同解释", value: "睡眠 + HRV + 周期", tint: VitoraTheme.ColorToken.auraBlue),
-                CycleReviewRowModel(icon: "target", title: "仍需校准", caption: "中性确认，不是失败", value: "3 天待确认", tint: VitoraTheme.ColorToken.actionPrimaryDeep),
-            ]
+            for building in buildings {
+                let width = size.width * building.2
+                let height = size.height * building.1
+                let rect = CGRect(x: size.width * building.0 - width / 2, y: baseY - height, width: width, height: height)
+                context.fill(Path(roundedRect: rect, cornerRadius: width * 0.18), with: .color(tint))
+                var spire = Path()
+                spire.move(to: CGPoint(x: rect.midX, y: rect.minY - height * 0.24))
+                spire.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
+                context.stroke(spire, with: .color(tint), lineWidth: 1.4)
+            }
+
+            var bridge = Path()
+            bridge.move(to: CGPoint(x: size.width * 0.04, y: baseY))
+            bridge.addQuadCurve(to: CGPoint(x: size.width * 0.96, y: baseY), control: CGPoint(x: size.width * 0.50, y: size.height * 0.54))
+            context.stroke(bridge, with: .color(tint.opacity(0.56)), style: StrokeStyle(lineWidth: 2.2, lineCap: .round))
+        }
+        .opacity(isLocked ? 0.62 : 1)
+    }
+}
+
+private struct SeedlingBadgeView: View {
+    let isPlanted: Bool
+
+    var body: some View {
+        Canvas { context, size in
+            let bowl = CGRect(x: size.width * 0.16, y: size.height * 0.62, width: size.width * 0.68, height: size.height * 0.22)
+            context.fill(Path(ellipseIn: bowl), with: .color(Color(red: 0.70, green: 0.54, blue: 0.28)))
+            context.stroke(Path(ellipseIn: bowl.insetBy(dx: -1, dy: -1)), with: .color(Color.white.opacity(0.48)), lineWidth: 1.2)
+
+            let soil = CGRect(x: size.width * 0.26, y: size.height * 0.59, width: size.width * 0.48, height: size.height * 0.16)
+            context.fill(Path(ellipseIn: soil), with: .color(Color(red: 0.47, green: 0.34, blue: 0.18)))
+
+            var stem = Path()
+            stem.move(to: CGPoint(x: size.width * 0.50, y: size.height * 0.62))
+            stem.addQuadCurve(to: CGPoint(x: size.width * 0.50, y: size.height * 0.20), control: CGPoint(x: size.width * 0.46, y: size.height * 0.42))
+            context.stroke(stem, with: .color(Color.white.opacity(0.92)), style: StrokeStyle(lineWidth: 2.4, lineCap: .round))
+
+            let leafColor = isPlanted ? Color(red: 0.80, green: 0.94, blue: 0.46) : Color(red: 0.68, green: 0.86, blue: 0.42)
+            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.24, y: size.height * 0.22, width: size.width * 0.30, height: size.height * 0.20)), with: .color(leafColor))
+            context.fill(Path(ellipseIn: CGRect(x: size.width * 0.50, y: size.height * 0.20, width: size.width * 0.32, height: size.height * 0.21)), with: .color(leafColor.opacity(0.92)))
+
+            if isPlanted {
+                context.fill(Path(ellipseIn: CGRect(x: size.width * 0.13, y: size.height * 0.18, width: 4, height: 4)), with: .color(Color.white.opacity(0.86)))
+                context.fill(Path(ellipseIn: CGRect(x: size.width * 0.84, y: size.height * 0.30, width: 4, height: 4)), with: .color(Color.white.opacity(0.86)))
+            }
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct FlowerPlantGuideBadge: View {
+    let isPlanted: Bool
+    let isLocked: Bool
+
+    private var ringColor: Color {
+        if isLocked {
+            return VitoraTheme.ColorToken.secondaryText.opacity(0.38)
+        }
+
+        return isPlanted ? FlowerMapPalette.sun.opacity(0.82) : FlowerMapPalette.deepGreen.opacity(0.58)
+    }
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(isPlanted ? 0.26 : 0.42))
+                .overlay(
+                    Circle()
+                        .stroke(
+                            ringColor,
+                            style: StrokeStyle(lineWidth: 1.8, lineCap: .round, dash: [3.2, 5.4])
+                        )
+                )
+                .shadow(color: FlowerMapPalette.deepGreen.opacity(isPlanted ? 0.03 : 0.12), radius: 14, x: 0, y: 8)
+
+            if isPlanted {
+                SunflowerGuideGlyph()
+                    .frame(width: 43, height: 48)
+                    .opacity(isLocked ? 0.32 : 0.70)
+            } else {
+                SeedlingBadgeView(isPlanted: false)
+                    .frame(width: 42, height: 42)
+                    .opacity(isLocked ? 0.30 : 0.96)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            Image(systemName: "chevron.compact.down")
+                .font(.system(size: 17, weight: .heavy))
+                .foregroundStyle(ringColor.opacity(isPlanted ? 0.58 : 0.86))
+                .offset(y: 13)
+                .opacity(isLocked ? 0 : 1)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct SunflowerGuideGlyph: View {
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width * 0.50, y: size.height * 0.28)
+            let petalColor = Color(red: 0.96, green: 0.67, blue: 0.12)
+            let petalSize = CGSize(width: size.width * 0.17, height: size.height * 0.27)
+
+            for index in 0..<12 {
+                let angle = CGFloat(index) * .pi * 2 / 12
+                let petalCenter = CGPoint(
+                    x: center.x + cos(angle) * size.width * 0.19,
+                    y: center.y + sin(angle) * size.height * 0.15
+                )
+                let rect = CGRect(
+                    x: petalCenter.x - petalSize.width / 2,
+                    y: petalCenter.y - petalSize.height / 2,
+                    width: petalSize.width,
+                    height: petalSize.height
+                )
+                context.fill(Path(ellipseIn: rect), with: .color(petalColor.opacity(0.92)))
+            }
+
+            context.fill(
+                Path(ellipseIn: CGRect(x: center.x - size.width * 0.14, y: center.y - size.width * 0.14, width: size.width * 0.28, height: size.width * 0.28)),
+                with: .color(Color(red: 0.70, green: 0.36, blue: 0.11))
+            )
+            context.fill(
+                Path(ellipseIn: CGRect(x: center.x - size.width * 0.07, y: center.y - size.width * 0.07, width: size.width * 0.14, height: size.width * 0.14)),
+                with: .color(Color(red: 0.86, green: 0.51, blue: 0.13))
+            )
+
+            var stem = Path()
+            stem.move(to: CGPoint(x: center.x, y: center.y + size.height * 0.16))
+            stem.addLine(to: CGPoint(x: center.x, y: size.height * 0.84))
+            context.stroke(stem, with: .color(Color(red: 0.28, green: 0.56, blue: 0.22)), style: StrokeStyle(lineWidth: 2.6, lineCap: .round))
+
+            context.fill(
+                Path(ellipseIn: CGRect(x: size.width * 0.17, y: size.height * 0.57, width: size.width * 0.30, height: size.height * 0.18)),
+                with: .color(Color(red: 0.45, green: 0.74, blue: 0.30))
+            )
+            context.fill(
+                Path(ellipseIn: CGRect(x: size.width * 0.53, y: size.height * 0.53, width: size.width * 0.30, height: size.height * 0.18)),
+                with: .color(Color(red: 0.53, green: 0.79, blue: 0.34))
+            )
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct FlowerRouteNodeView: View {
+    let title: String
+    let isActive: Bool
+    let isLocked: Bool
+
+    var body: some View {
+        HStack(spacing: 5) {
+            Circle()
+                .fill(
+                    isActive
+                        ? FlowerMapPalette.deepGreen
+                        : (isLocked ? VitoraTheme.ColorToken.secondaryText.opacity(0.28) : FlowerMapPalette.leaf.opacity(0.62))
+                )
+                .frame(width: 13, height: 13)
+                .shadow(color: FlowerMapPalette.deepGreen.opacity(isActive ? 0.18 : 0.04), radius: 6, x: 0, y: 3)
+
+            Text(title)
+                .font(.system(size: 13, weight: .heavy))
+                .foregroundStyle(isActive ? FlowerMapPalette.deepGreen : VitoraTheme.ColorToken.strongText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.76)
+        }
+        .frame(minHeight: 44)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(title)
+    }
+}
+
+private struct FlowerRouteProgressDotsView: View {
+    let progress: CGFloat
+    let isComplete: Bool
+
+    private let dotCount = 12
+
+    var body: some View {
+        HStack(spacing: 5) {
+            ForEach(0..<dotCount, id: \.self) { index in
+                let filledCount = Int((progress * CGFloat(dotCount)).rounded(.down))
+                let isFilled = isComplete || index < filledCount
+
+                Circle()
+                    .fill(isFilled ? FlowerMapPalette.deepGreen.opacity(0.76) : VitoraTheme.ColorToken.secondaryText.opacity(0.24))
+                    .frame(width: 5.6, height: 5.6)
+                    .shadow(color: FlowerMapPalette.deepGreen.opacity(isFilled ? 0.10 : 0), radius: 3, x: 0, y: 1)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct FlowerRouteLineView: View {
+    let isComplete: Bool
+
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            path.move(to: CGPoint(x: 2, y: size.height / 2))
+            path.addLine(to: CGPoint(x: size.width - 2, y: size.height / 2))
+            context.stroke(
+                path,
+                with: .color((isComplete ? FlowerMapPalette.deepGreen : FlowerMapPalette.deepGreen.opacity(0.58))),
+                style: StrokeStyle(lineWidth: 2.2, lineCap: .round, dash: isComplete ? [] : [5, 5])
+            )
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct MiniFlowerIconView: View {
+    var body: some View {
+        Canvas { context, size in
+            let center = CGPoint(x: size.width * 0.50, y: size.height * 0.36)
+            let petal = CGSize(width: size.width * 0.22, height: size.height * 0.25)
+            let petalColor = Color(red: 0.93, green: 0.46, blue: 0.64)
+
+            for index in 0..<6 {
+                let angle = CGFloat(index) * .pi * 2 / 6
+                let point = CGPoint(
+                    x: center.x + cos(angle) * size.width * 0.17,
+                    y: center.y + sin(angle) * size.height * 0.15
+                )
+                context.fill(
+                    Path(ellipseIn: CGRect(x: point.x - petal.width / 2, y: point.y - petal.height / 2, width: petal.width, height: petal.height)),
+                    with: .color(petalColor)
+                )
+            }
+
+            context.fill(
+                Path(ellipseIn: CGRect(x: center.x - size.width * 0.09, y: center.y - size.width * 0.09, width: size.width * 0.18, height: size.width * 0.18)),
+                with: .color(FlowerMapPalette.sun)
+            )
+
+            var stem = Path()
+            stem.move(to: CGPoint(x: center.x, y: size.height * 0.50))
+            stem.addLine(to: CGPoint(x: center.x, y: size.height * 0.88))
+            context.stroke(stem, with: .color(FlowerMapPalette.deepGreen.opacity(0.74)), style: StrokeStyle(lineWidth: 1.8, lineCap: .round))
+
+            context.fill(
+                Path(ellipseIn: CGRect(x: size.width * 0.25, y: size.height * 0.62, width: size.width * 0.22, height: size.height * 0.12)),
+                with: .color(FlowerMapPalette.leaf.opacity(0.84))
+            )
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct FlowerRouteDotsView: View {
+    var body: some View {
+        Canvas { context, size in
+            var path = Path()
+            path.move(to: CGPoint(x: 2, y: size.height / 2))
+            path.addLine(to: CGPoint(x: size.width - 12, y: size.height / 2))
+            context.stroke(path, with: .color(FlowerMapPalette.deepGreen.opacity(0.75)), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [2, 8]))
+
+            var arrow = Path()
+            arrow.move(to: CGPoint(x: size.width - 13, y: size.height / 2 - 5))
+            arrow.addLine(to: CGPoint(x: size.width - 4, y: size.height / 2))
+            arrow.addLine(to: CGPoint(x: size.width - 13, y: size.height / 2 + 5))
+            context.stroke(arrow, with: .color(FlowerMapPalette.deepGreen.opacity(0.82)), style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct FlowerMapInfoCard: View {
+    let title: String
+    let lines: [String]
+    let onClose: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 15, weight: .heavy))
+                    .foregroundStyle(FlowerMapPalette.deepGreen)
+                Spacer()
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .frame(width: 28, height: 28)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("关闭")
+            }
+
+            ForEach(lines, id: \.self) { line in
+                Text(line)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .padding(12)
+        .frame(width: 188, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.94))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Color.white.opacity(0.86), lineWidth: 0.8)
+                )
+                .shadow(color: Color.black.opacity(0.10), radius: 16, x: 0, y: 8)
+        )
+    }
+}
+
+private struct FlowerHandbookSheetView: View {
+    private let flowerTypes = [
+        ("黄花", "恢复资源", "常见"),
+        ("粉花", "情绪回暖", "常见"),
+        ("蓝紫花", "睡眠线索", "稀有"),
+        ("小树", "阶段节点", "稀有"),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Capsule()
+                .fill(VitoraTheme.ColorToken.secondaryText.opacity(0.22))
+                .frame(width: 42, height: 5)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
+
+            HStack(alignment: .center) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("花朵说明")
+                        .font(.system(size: 22, weight: .heavy))
+                        .foregroundStyle(FlowerMapPalette.deepGreen)
+                    Text("已收集 1 / 34")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+
+                Spacer()
+
+                SeedlingBadgeView(isPlanted: true)
+                    .frame(width: 48, height: 48)
+            }
+
+            VStack(spacing: 10) {
+                ForEach(flowerTypes, id: \.0) { flower in
+                    HStack(spacing: 12) {
+                        Circle()
+                            .fill(FlowerMapPalette.deepGreen.opacity(0.10))
+                            .frame(width: 34, height: 34)
+                            .overlay {
+                                Image(systemName: flower.2 == "稀有" ? "sparkles" : "leaf.fill")
+                                    .font(.system(size: 14, weight: .bold))
+                                    .foregroundStyle(FlowerMapPalette.deepGreen)
+                            }
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(flower.0)
+                                .font(.system(size: 15, weight: .heavy))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                            Text(flower.1)
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        }
+
+                        Spacer()
+
+                        Text(flower.2)
+                            .font(.system(size: 11, weight: .heavy))
+                            .foregroundStyle(FlowerMapPalette.deepGreen)
+                            .padding(.horizontal, 9)
+                            .frame(height: 24)
+                            .background(FlowerMapPalette.deepGreen.opacity(0.08), in: Capsule())
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 56)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.72))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(Color.white.opacity(0.78), lineWidth: 0.8)
+                            )
+                    )
+                }
+            }
+
+            Text("这里只说明花朵类型、稀有度和已收集预览。")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 16)
+        .background(WaterAuraReferenceBackground(scene: .cycle, intensity: 0.72))
+    }
+}
+
+private enum FlowerProgressIcon {
+    case seedling
+    case city(isLocked: Bool)
+}
+
+private struct FlowerProgressCard: View {
+    let icon: FlowerProgressIcon
+    let title: String
+    let primary: String
+    let caption: String?
+    let isSelected: Bool
+
+    var body: some View {
+        VStack(spacing: 5) {
+            iconView
+                .frame(width: 38, height: 30)
+
+            Text(title)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.76)
+
+            Text(primary)
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(isSelected ? FlowerMapPalette.deepGreen : VitoraTheme.ColorToken.strongText)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+
+            if let caption {
+                Text(caption)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(isSelected ? FlowerMapPalette.deepGreen : VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.66)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity)
+        .frame(height: 88)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(isSelected ? 0.94 : 0.78))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(isSelected ? FlowerMapPalette.deepGreen.opacity(0.82) : Color.white.opacity(0.78), lineWidth: isSelected ? 1.2 : 0.8)
+                )
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(isSelected ? 0.12 : 0.06), radius: 12, x: 0, y: 5)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title)，\(primary)\(caption.map { "，\($0)" } ?? "")")
+    }
+
+    @ViewBuilder
+    private var iconView: some View {
+        switch icon {
+        case .seedling:
+            SeedlingBadgeView(isPlanted: false)
+        case let .city(isLocked):
+            FlowerCitySkylineView(isLocked: isLocked)
+        }
+    }
+}
+
+private enum CycleReviewCardPresentation {
+    case standalone
+    case embedded
+}
+
+private struct CycleReviewInsightCard: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    let selectedTab: CycleReviewTab
+    var presentation: CycleReviewCardPresentation = .standalone
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 14) {
+                if selectedTab != .week {
+                    reportHeader
+                }
+
+                Group {
+                    switch selectedTab {
+                    case .week:
+                        CycleReportWeekContent(accent: selectedTab.accent)
+                    case .trend:
+                        CycleReportTrendContent(accent: selectedTab.accent)
+                    case .recent:
+                        CycleReportRecentContent(accent: selectedTab.accent)
+                    }
+                }
+                .id(selectedTab)
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .bottom)))
+            }
+            .padding(presentation == .embedded ? 8 : 16)
+            .background(
+                Group {
+                    if presentation == .standalone {
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .fill(selectedTab.paperFill)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 26, style: .continuous)
+                                    .stroke(Color.white.opacity(0.78), lineWidth: 0.9)
+                            )
+                            .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 14, x: 0, y: 7)
+                    }
+                }
+            )
+            .accessibilityIdentifier("cycle.review.insights")
+        }
+    }
+
+    private var reportHeader: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(selectedTab.title)
+                        .font(.system(size: 24, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text(selectedTab.subtitle)
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(selectedTab.accent)
+                }
+
+                Spacer()
+
+                Text(selectedTab.badge)
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(selectedTab.accent)
+                    .padding(.horizontal, 10)
+                    .frame(height: 28)
+                    .background(selectedTab.accent.opacity(0.12), in: Capsule())
+            }
+
+            HStack(spacing: 7) {
+                ForEach(selectedTab.statusItems, id: \.self) { status in
+                    Text(status)
+                        .font(.system(size: 10.5, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.68)
+                        .padding(.horizontal, 8)
+                        .frame(height: 26)
+                        .background(Color.white.opacity(0.56), in: Capsule())
+                }
+            }
         }
     }
 }
@@ -434,7 +2008,7 @@ private struct CycleReviewInsightCard: View {
 private enum CycleReviewTab: String, CaseIterable, Identifiable {
     case week
     case trend
-    case cycle
+    case recent
 
     var id: String { rawValue }
 
@@ -444,8 +2018,74 @@ private enum CycleReviewTab: String, CaseIterable, Identifiable {
             return "本周"
         case .trend:
             return "趋势（对比）"
-        case .cycle:
-            return "周期"
+        case .recent:
+            return "近期"
+        }
+    }
+
+    var segmentTitle: String {
+        switch self {
+        case .week:
+            return "本周"
+        case .trend:
+            return "趋势对比"
+        case .recent:
+            return "近期"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .week:
+            return "This Week"
+        case .trend:
+            return "Trend Comparison"
+        case .recent:
+            return "Recent"
+        }
+    }
+
+    var badge: String {
+        switch self {
+        case .week:
+            return "恢复 A-"
+        case .trend:
+            return "恢复 B+"
+        case .recent:
+            return "状态良好"
+        }
+    }
+
+    var statusItems: [String] {
+        switch self {
+        case .week:
+            return ["黄体期 D18", "低谷时段 14-16 点", "恢复 A-"]
+        case .trend:
+            return ["较上月改善", "整体上升", "恢复 B+"]
+        case .recent:
+            return ["黄体期中后段", "能量回升中", "状态良好"]
+        }
+    }
+
+    var accent: Color {
+        switch self {
+        case .week:
+            return Color(red: 0.86, green: 0.42, blue: 0.54)
+        case .trend:
+            return VitoraTheme.ColorToken.actionPrimaryDeep
+        case .recent:
+            return Color(red: 0.76, green: 0.58, blue: 0.20)
+        }
+    }
+
+    var paperFill: Color {
+        switch self {
+        case .week:
+            return Color(red: 1.00, green: 0.97, blue: 0.96).opacity(0.92)
+        case .trend:
+            return Color(red: 0.95, green: 0.98, blue: 1.00).opacity(0.92)
+        case .recent:
+            return Color(red: 1.00, green: 0.98, blue: 0.91).opacity(0.92)
         }
     }
 
@@ -455,39 +2095,574 @@ private enum CycleReviewTab: String, CaseIterable, Identifiable {
             return "cycle.review.tab.week"
         case .trend:
             return "cycle.review.tab.trend"
-        case .cycle:
-            return "cycle.review.tab.cycle"
+        case .recent:
+            return "cycle.review.tab.recent"
         }
     }
 }
 
-private struct CycleReviewTabLabel: View {
-    let tab: CycleReviewTab
-    let isSelected: Bool
+private struct CycleReportWeekContent: View {
+    let accent: Color
 
     var body: some View {
-        VStack(spacing: 5) {
-            Text(tab.title)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(isSelected ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.secondaryText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.76)
+        VStack(alignment: .leading, spacing: 14) {
+            CycleWeeklyReviewHero(accent: accent)
 
-            Capsule()
-                .fill(isSelected ? VitoraTheme.ColorToken.auraCyan : Color.clear)
-                .frame(width: 23, height: 3)
+            CycleWeeklyReviewInfoPanel(accent: accent)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 50)
-        .background(
-            Group {
-                if isSelected {
-                    GlassSurface(cornerRadius: 22, opacity: 0.76, shadowStrength: 0.26, variant: .cleanElevated)
+    }
+}
+
+private struct CycleWeeklyReviewHero: View {
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline) {
+                Text("05.21 — 05.27 2026")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+
+                Spacer(minLength: 8)
+
+                CycleReportMiniCounters()
+            }
+
+            HStack(spacing: 7) {
+                ForEach(["黄体期 D18", "低谷 14-16 点", "恢复 A-"], id: \.self) { status in
+                    Text(status)
+                        .font(.system(size: 10.5, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.68)
+                        .padding(.horizontal, 8)
+                        .frame(height: 26)
+                        .background(Color.white.opacity(0.56), in: Capsule())
                 }
             }
+
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("本周复盘")
+                        .font(.system(size: 18, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("用高低变化看本周能量，不把它变成任务。")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 0) {
+                    Text("62")
+                        .font(.system(size: 34, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("/100")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("本周平均六十二分")
+            }
+
+            CycleWeeklyEnergyBarsView(accent: accent)
+                .frame(height: 168)
+        }
+    }
+}
+
+private struct CycleReportMiniCounters: View {
+    var body: some View {
+        HStack(spacing: 10) {
+            miniCounter(systemName: "leaf.circle.fill", value: "24")
+            miniCounter(systemName: "flame.circle.fill", value: "0")
+        }
+        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("花朵二十四，待确认零")
+    }
+
+    private func miniCounter(systemName: String, value: String) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemName)
+                .font(.system(size: 12, weight: .bold))
+            Text(value)
+                .font(.system(size: 12, weight: .heavy))
+                .monospacedDigit()
+        }
+    }
+}
+
+private struct CycleWeeklyEnergyBarsView: View {
+    let accent: Color
+
+    private var data: [CycleEnergyBarDatum] {
+        [
+            .init(day: "一", value: 68, color: Color(red: 0.98, green: 0.73, blue: 0.20), icon: "sun.max.fill"),
+            .init(day: "二", value: 54, color: Color(red: 0.98, green: 0.53, blue: 0.20), icon: "leaf.fill"),
+            .init(day: "三", value: 72, color: Color(red: 0.20, green: 0.58, blue: 0.92), icon: "equal.circle.fill"),
+            .init(day: "四", value: 42, color: Color(red: 0.65, green: 0.48, blue: 0.95), icon: "moon.fill"),
+            .init(day: "五", value: 58, color: Color(red: 0.45, green: 0.86, blue: 0.20), icon: "wind"),
+            .init(day: "六", value: 48, color: Color(red: 1.00, green: 0.35, blue: 0.28), icon: "exclamationmark.circle.fill"),
+            .init(day: "日", value: 65, color: accent, icon: "heart.fill"),
+        ]
+    }
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            ForEach(data) { item in
+                VStack(spacing: 6) {
+                    Text("\(item.value)%")
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(Color.white.opacity(0.94))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.70)
+                        .padding(.horizontal, 4)
+                        .frame(height: 24)
+                        .background(item.color.opacity(0.88), in: Capsule())
+
+                    RoundedRectangle(cornerRadius: 13, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    item.color.opacity(0.95),
+                                    item.color.opacity(0.52),
+                                    item.color.opacity(0.12),
+                                ],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(height: max(26, CGFloat(item.value) * 1.02))
+                        .overlay(alignment: .bottom) {
+                            Image(systemName: item.icon)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(item.color.opacity(0.86))
+                                .frame(width: 24, height: 24)
+                                .background(Color.white.opacity(0.28), in: Circle())
+                                .padding(.bottom, 7)
+                        }
+
+                    Text(item.day)
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.top, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("本周能量柱状复盘，最高七十二，最低四十二")
+    }
+}
+
+private struct CycleEnergyBarDatum: Identifiable {
+    var id: String { day }
+    let day: String
+    let value: Int
+    let color: Color
+    let icon: String
+}
+
+private struct CycleWeeklyReviewInfoPanel: View {
+    let accent: Color
+
+    private let distributionRows: [CycleDistributionDatum] = [
+        .init(title: "稳定恢复", value: "42%", detail: "上午更稳", color: Color(red: 0.63, green: 0.74, blue: 0.30), percent: 0.42),
+        .init(title: "低谷窗口", value: "31%", detail: "14-16 点", color: Color(red: 0.90, green: 0.43, blue: 0.34), percent: 0.31),
+        .init(title: "睡眠影响", value: "24%", detail: "2 晚偏低", color: Color(red: 0.39, green: 0.77, blue: 0.82), percent: 0.24),
+        .init(title: "待校准", value: "3%", detail: "继续观察", color: Color(red: 0.47, green: 0.76, blue: 0.59), percent: 0.03),
+    ]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .center, spacing: 16) {
+                CycleReportDonutView(segments: distributionRows.map { ($0.percent, $0.color) })
+                    .frame(width: 112, height: 112)
+
+                VStack(alignment: .leading, spacing: 9) {
+                    Text("影响来源分布")
+                        .font(.system(size: 17, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                    ForEach(distributionRows, id: \.title) { row in
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(row.color)
+                                .frame(width: 8, height: 8)
+
+                            Text(row.title)
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                                .lineLimit(1)
+
+                            Spacer(minLength: 4)
+
+                            Text(row.value)
+                                .font(.system(size: 11, weight: .heavy))
+                                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                                .monospacedDigit()
+
+                            Text(row.detail)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                                .lineLimit(1)
+                        }
+                    }
+                }
+            }
+
+            Divider()
+                .overlay(VitoraTheme.ColorToken.secondaryText.opacity(0.13))
+
+            CycleReportThreeLines(
+                rows: [
+                    ("重点发现", "高低差主要集中在午后，上午恢复更稳定。"),
+                    ("为什么", "睡眠、HRV 和黄体期位置一起解释这周波动。"),
+                    ("下周建议", "保留周一缓冲，把高强度安排拆成更小块。"),
+                ],
+                accent: accent,
+                showsBackground: false
+            )
+
+            CycleReportMetricGrid(
+                items: [
+                    ("平均", "62%"),
+                    ("低谷", "14-16"),
+                    ("校准", "3 天"),
+                    ("周期", "D18"),
+                ],
+                accent: accent
+            )
+
+            CycleReportProgressLine(title: "当前周期进度", value: "黄体期 D18", progress: 0.64, accent: accent)
+        }
+        .padding(14)
+        .background(Color.white.opacity(0.34), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .stroke(VitoraTheme.ColorToken.secondaryText.opacity(0.26), lineWidth: 0.9)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
-        .contentShape(Rectangle())
+    }
+}
+
+private struct CycleDistributionDatum: Identifiable {
+    var id: String { title }
+    let title: String
+    let value: String
+    let detail: String
+    let color: Color
+    let percent: CGFloat
+}
+
+private struct CycleReportDonutView: View {
+    let segments: [(value: CGFloat, color: Color)]
+
+    var body: some View {
+        Canvas { context, size in
+            let lineWidth = min(size.width, size.height) * 0.18
+            let radius = min(size.width, size.height) * 0.40
+            let center = CGPoint(x: size.width / 2, y: size.height / 2)
+            var startAngle = -CGFloat.pi / 2
+
+            for segment in segments {
+                let endAngle = startAngle + segment.value * 2 * .pi
+                var path = Path()
+                path.addArc(
+                    center: center,
+                    radius: radius,
+                    startAngle: .radians(Double(startAngle)),
+                    endAngle: .radians(Double(endAngle)),
+                    clockwise: false
+                )
+                context.stroke(
+                    path,
+                    with: .color(segment.color.opacity(0.88)),
+                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .butt)
+                )
+                startAngle = endAngle
+            }
+        }
+        .overlay {
+            Circle()
+                .stroke(VitoraTheme.ColorToken.secondaryText.opacity(0.18), lineWidth: 1)
+        }
+        .accessibilityHidden(true)
+    }
+}
+
+private struct CycleReportTrendContent: View {
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: "chart.line.uptrend.xyaxis")
+                    .font(.system(size: 18, weight: .heavy))
+                    .foregroundStyle(accent)
+                    .frame(width: 40, height: 40)
+                    .background(accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("月度综合对比")
+                        .font(.system(size: 16, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                    Text("平均能量、低谷天和深睡恢复都比上月更稳。")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            VStack(spacing: 10) {
+                CycleReportProgressLine(title: "平均能量", value: "62%", progress: 0.62, accent: accent)
+                CycleReportProgressLine(title: "深睡恢复", value: "B+", progress: 0.74, accent: accent)
+                CycleReportProgressLine(title: "低谷减少", value: "-3 天", progress: 0.68, accent: accent)
+                CycleReportProgressLine(title: "周期稳定", value: "28 天", progress: 0.78, accent: accent)
+            }
+
+            CycleReportThreeLines(
+                rows: [
+                    ("归因解释", "深睡增加和轻运动反馈让午后低谷缩短。"),
+                    ("本月总结", "整体节律向上，但仍保留三天校准窗口。"),
+                ],
+                accent: accent
+            )
+        }
+    }
+}
+
+private struct CycleReportRecentContent: View {
+    let accent: Color
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("近期能量")
+                .font(.system(size: 16, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+            CycleReportLineChart(accent: accent)
+                .frame(height: 126)
+
+            CycleReportThreeLines(
+                rows: [
+                    ("监测到了什么", "黄体期中后段开始回升，低谷没有继续加深。"),
+                    ("近期结论", "这几天适合稳住恢复，不需要强行加量。"),
+                    ("下一步", "继续观察睡眠和午后反馈。"),
+                ],
+                accent: accent
+            )
+
+            Button {} label: {
+                HStack(spacing: 8) {
+                    Text("告诉 Vitora 近期感受")
+                        .font(.system(size: 13, weight: .heavy))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .heavy))
+                }
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .padding(.horizontal, 14)
+                .frame(height: 44)
+                .background(Color.white.opacity(0.42), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(accent.opacity(0.54), lineWidth: 1.2)
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("告诉 Vitora 近期感受")
+        }
+    }
+}
+
+private struct CycleReportBarChart: View {
+    let accent: Color
+    private let values: [CGFloat] = [0.48, 0.58, 0.42, 0.66, 0.72, 0.64, 0.70]
+    private let labels = ["一", "二", "三", "四", "五", "六", "日"]
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            ForEach(values.indices, id: \.self) { index in
+                VStack(spacing: 6) {
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .fill(
+                            LinearGradient(
+                                colors: [accent.opacity(0.90), accent.opacity(0.34)],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                        )
+                        .frame(height: 78 * values[index])
+                        .frame(maxHeight: 86, alignment: .bottom)
+
+                    Text(labels[index])
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 12)
+        .background(Color.white.opacity(0.44), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+}
+
+private struct CycleReportLineChart: View {
+    let accent: Color
+    private let values: [CGFloat] = [0.42, 0.46, 0.40, 0.55, 0.62, 0.68, 0.73]
+
+    var body: some View {
+        GeometryReader { proxy in
+            let width = proxy.size.width
+            let height = proxy.size.height
+
+            ZStack(alignment: .topLeading) {
+                Canvas { context, _ in
+                    let gridFractions: [CGFloat] = [0.25, 0.50, 0.75]
+                    for frac in gridFractions {
+                        var grid = Path()
+                        grid.move(to: CGPoint(x: 0, y: height * frac))
+                        grid.addLine(to: CGPoint(x: width, y: height * frac))
+                        context.stroke(grid, with: .color(VitoraTheme.ColorToken.secondaryText.opacity(0.14)), style: StrokeStyle(lineWidth: 1, dash: [4, 5]))
+                    }
+
+                    var path = Path()
+                    for index in values.indices {
+                        let point = chartPoint(index: index, width: width, height: height)
+                        if index == 0 {
+                            path.move(to: point)
+                        } else {
+                            path.addLine(to: point)
+                        }
+                    }
+                    context.stroke(path, with: .color(accent), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                }
+
+                ForEach(values.indices, id: \.self) { index in
+                    Circle()
+                        .fill(index == values.count - 1 ? accent : Color.white)
+                        .overlay(Circle().stroke(accent.opacity(0.82), lineWidth: 2))
+                        .frame(width: index == values.count - 1 ? 12 : 9, height: index == values.count - 1 ? 12 : 9)
+                        .position(chartPoint(index: index, width: width, height: height))
+                }
+            }
+        }
+        .padding(14)
+        .background(Color.white.opacity(0.42), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+    }
+
+    private func chartPoint(index: Int, width: CGFloat, height: CGFloat) -> CGPoint {
+        let value = values[index]
+        return CGPoint(
+            x: width * CGFloat(index) / CGFloat(values.count - 1),
+            y: height * (1 - value) * 0.72 + height * 0.12
+        )
+    }
+}
+
+private struct CycleReportThreeLines: View {
+    let rows: [(title: String, body: String)]
+    let accent: Color
+    var showsBackground = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 9) {
+            ForEach(rows, id: \.title) { row in
+                HStack(alignment: .top, spacing: 9) {
+                    Circle()
+                        .fill(accent.opacity(0.78))
+                        .frame(width: 7, height: 7)
+                        .offset(y: 6)
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(row.title)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        Text(row.body)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+        }
+        .padding(showsBackground ? 12 : 0)
+        .background {
+            if showsBackground {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.white.opacity(0.42))
+            }
+        }
+    }
+}
+
+private struct CycleReportMetricGrid: View {
+    let items: [(title: String, value: String)]
+    let accent: Color
+
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+            ForEach(items, id: \.title) { item in
+                VStack(spacing: 3) {
+                    Text(item.title)
+                        .font(.system(size: 10, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    Text(item.value)
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                }
+                .frame(maxWidth: .infinity)
+                .frame(height: 54)
+                .background(Color.white.opacity(0.46), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(accent.opacity(0.12), lineWidth: 0.8)
+                )
+            }
+        }
+    }
+}
+
+private struct CycleReportProgressLine: View {
+    let title: String
+    let value: String
+    let progress: CGFloat
+    let accent: Color
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Text(title)
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                .frame(width: 80, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.72)
+
+            GeometryReader { proxy in
+                Capsule(style: .continuous)
+                    .fill(Color.white.opacity(0.56))
+                    .overlay(alignment: .leading) {
+                        Capsule(style: .continuous)
+                            .fill(accent.opacity(0.82))
+                            .frame(width: max(12, proxy.size.width * min(1, max(0, progress))))
+                    }
+            }
+            .frame(height: 8)
+
+            Text(value)
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .frame(width: 52, alignment: .trailing)
+                .lineLimit(1)
+                .minimumScaleFactor(0.70)
+        }
     }
 }
 
@@ -630,137 +2805,6 @@ private struct CycleReviewInsightRow: View {
     }
 }
 
-private struct CycleShareCardSnapshotView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .center, spacing: 10) {
-                PixelVitoraScene(
-                    state: .idle,
-                    size: 36,
-                    accessory: .none,
-                    showsSparkles: true,
-                    showsBaseShadow: true
-                )
-                .frame(width: 50, height: 50)
-
-                VStack(alignment: .leading, spacing: 3) {
-                    Text("Vitora 周期回顾")
-                        .font(.system(size: 20, weight: .heavy))
-                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                    Text("黄体期 Day 18 · 轻量分享卡")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                }
-            }
-
-            HStack(alignment: .firstTextBaseline, spacing: 8) {
-                Text("今日能量")
-                    .font(.system(size: 13, weight: .bold))
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                Text("68%")
-                    .font(.system(size: 44, weight: .heavy))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                Spacer()
-                Text("低谷 14:00")
-                    .font(.system(size: 12, weight: .heavy))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    .padding(.horizontal, 10)
-                    .frame(height: 30)
-                    .background(VitoraTheme.ColorToken.actionPrimarySoft.opacity(0.62), in: Capsule())
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
-                CycleShareInsightLine(symbol: "clock", title: "低谷集中窗口", value: "14:00-16:00")
-                CycleShareInsightLine(symbol: "sun.max", title: "恢复较好时段", value: "上午")
-                CycleShareInsightLine(symbol: "waveform.path.ecg", title: "影响因素", value: "睡眠 + HRV + 周期")
-            }
-            .padding(14)
-            .background(VitoraTheme.ColorToken.paper.opacity(0.58), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .stroke(Color.white.opacity(0.70), lineWidth: 0.8)
-            )
-
-            Text("这张卡只包含当前可见的周期摘要，不包含记录原文或隐藏健康数据。")
-                .font(.system(size: 10.5, weight: .semibold))
-                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(22)
-        .frame(width: 360, alignment: .leading)
-        .background(
-            ZStack {
-                LinearGradient(
-                    colors: [
-                        Color(red: 236 / 255, green: 250 / 255, blue: 255 / 255),
-                        Color(red: 249 / 255, green: 253 / 255, blue: 252 / 255),
-                        Color(red: 242 / 255, green: 248 / 255, blue: 255 / 255),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-
-                Circle()
-                    .fill(VitoraTheme.ColorToken.auraCyan.opacity(0.22))
-                    .frame(width: 180, height: 180)
-                    .blur(radius: 42)
-                    .offset(x: 96, y: -132)
-
-                Circle()
-                    .fill(VitoraTheme.ColorToken.lutealGold.opacity(0.16))
-                    .frame(width: 160, height: 160)
-                    .blur(radius: 42)
-                    .offset(x: -108, y: 128)
-            }
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(Color.white.opacity(0.88), lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-    }
-}
-
-private struct CycleShareInsightLine: View {
-    let symbol: String
-    let title: String
-    let value: String
-
-    var body: some View {
-        HStack(spacing: 9) {
-            Image(systemName: symbol)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                .frame(width: 26, height: 26)
-                .background(VitoraTheme.ColorToken.actionPrimarySoft.opacity(0.62), in: Circle())
-
-            Text(title)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(VitoraTheme.ColorToken.strongText)
-
-            Spacer()
-
-            Text(value)
-                .font(.system(size: 13, weight: .heavy))
-                .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                .lineLimit(1)
-                .minimumScaleFactor(0.76)
-        }
-    }
-}
-
-private struct CycleShareActivityView: UIViewControllerRepresentable {
-    let activityItems: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-        controller.view.accessibilityIdentifier = "cycle.share.sheet"
-        return controller
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-
 private enum CycleRhythmInsight: String, CaseIterable, Identifiable {
     case regularity
     case support
@@ -806,7 +2850,7 @@ private enum CycleRhythmInsight: String, CaseIterable, Identifiable {
         case .regularity:
             return ["低谷集中窗口 14:00-16:00", "恢复较好时段 上午", "仍需 3 天确认"]
         case .support:
-            return ["轻走 10 分钟后反馈更好", "蛋白补充靠近低谷前", "不是任务完成率"]
+            return ["轻走 10 分钟后反馈更好", "蛋白补充靠近低谷前", "只作为身体观察"]
         case .adjustment:
             return ["黄体期中段更需要余量", "周三后恢复变慢", "下周期先保留周一缓冲"]
         }
@@ -815,9 +2859,9 @@ private enum CycleRhythmInsight: String, CaseIterable, Identifiable {
     var recommendation: String {
         switch self {
         case .regularity:
-            return "今天先把需要专注的事放到上午，午后只保留一件轻任务。"
+            return "今天先把需要专注的事放到上午，午后只保留一件轻安排。"
         case .support:
-            return "继续保留轻走和蛋白补充，但不把它变成每日任务。"
+            return "继续保留轻走和蛋白补充，但不把它变成每日压力。"
         case .adjustment:
             return "下周期第 1 周先把强安排拆小，等 Vitora 再确认三天趋势。"
         }
@@ -1004,7 +3048,6 @@ private enum CycleSheet: Identifiable {
     case energy
     case settings
     case insight(CycleRhythmInsight)
-    case hormoneCalendar
     case sharePreview
 
     var id: String {
@@ -1013,153 +3056,7 @@ private enum CycleSheet: Identifiable {
         case .energy: return "energy"
         case .settings: return "settings"
         case let .insight(insight): return "insight.\(insight.id)"
-        case .hormoneCalendar: return "hormoneCalendar"
         case .sharePreview: return "sharePreview"
-        }
-    }
-}
-
-// MARK: - 30天成长册
-
-private struct CycleGrowthJournal: View {
-    let currentDay: Int
-    let recordedDays: Set<Int>
-    let confirmedDays: Set<Int>
-
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 6), count: 5)
-
-    private var completedCount: Int {
-        (1...30).filter { recordedDays.contains($0) || confirmedDays.contains($0) }.count
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                Text("30天成长册")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-
-                Spacer()
-
-                Text("\(completedCount) / 30")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule().fill(VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.12))
-                    )
-            }
-
-            Text("每天一张能量花卡，回看哪里更像你")
-                .font(.caption)
-                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
-
-            // Grid
-            LazyVGrid(columns: columns, spacing: 6) {
-                ForEach(1...30, id: \.self) { day in
-                    FlowerDayCell(
-                        day: day,
-                        state: flowerState(for: day),
-                        isCurrent: day == currentDay,
-                        isFuture: day > currentDay
-                    )
-                }
-            }
-
-            // Legend
-            HStack(spacing: 16) {
-                legendItem(emoji: "🌱", label: "花苞", caption: "待确认")
-                legendItem(emoji: "🌸", label: "半开", caption: "已记录")
-                legendItem(emoji: "🌺", label: "盛开", caption: "已反馈")
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 4)
-        }
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.82))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
-                        .stroke(Color.white.opacity(0.72), lineWidth: 0.8)
-                )
-                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 12, x: 0, y: 4)
-        )
-        .accessibilityIdentifier("cycle.growth.journal")
-    }
-
-    private func flowerState(for day: Int) -> FlowerDayCell.FlowerState {
-        if confirmedDays.contains(day) { return .fullBloom }
-        if recordedDays.contains(day) { return .halfBloom }
-        return .bud
-    }
-
-    private func legendItem(emoji: String, label: String, caption: String) -> some View {
-        HStack(spacing: 5) {
-            Text(emoji)
-                .font(.system(size: 16))
-            VStack(alignment: .leading, spacing: 0) {
-                Text(label)
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
-                Text(caption)
-                    .font(.caption2)
-                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
-            }
-        }
-    }
-}
-
-private struct FlowerDayCell: View {
-    enum FlowerState {
-        case bud, halfBloom, fullBloom
-    }
-
-    let day: Int
-    let state: FlowerState
-    let isCurrent: Bool
-    let isFuture: Bool
-
-    private var flowerEmoji: String {
-        if isFuture { return "🪴" }
-        switch state {
-        case .bud: return "🌱"
-        case .halfBloom: return "🌸"
-        case .fullBloom: return "🌺"
-        }
-    }
-
-    var body: some View {
-        VStack(spacing: 2) {
-            Text("\(day)")
-                .font(.system(size: 11, weight: isCurrent ? .bold : .medium))
-                .foregroundStyle(isCurrent
-                    ? VitoraTheme.ColorToken.actionPrimaryDeep
-                    : (isFuture ? VitoraTheme.ColorToken.tertiaryText : VitoraTheme.ColorToken.strongText))
-
-            Text(flowerEmoji)
-                .font(.system(size: isFuture ? 18 : 22))
-                .opacity(isFuture ? 0.35 : 1)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 58)
-        .background(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(isCurrent ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.06) : Color.clear)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(isCurrent ? VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.52) : Color.clear, lineWidth: 1.5)
-                )
-        )
-        .overlay(alignment: .bottomTrailing) {
-            if isCurrent {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                    .offset(x: 2, y: 2)
-            }
         }
     }
 }

@@ -51,7 +51,15 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
     var lastPeriodDate: Date?
     var flowAmount: FlowAmount?
     var hasDysmenorrhea: Bool
+    var dysmenorrheaSeverity: DysmenorrheaSeverity
     var dysmenorrheaReminderEnabled: Bool
+    var averagePeriodDuration: Int?
+    var periodImpactAreas: [PeriodImpactArea]
+    var exerciseIntensity: ExerciseIntensity?
+    var customExercise: String?
+    var improvementGoals: [ImprovementGoal]
+    var specialConditions: [SpecialCondition]
+    var specialConditionNote: String?
     var energyWindowPreference: EnergyWindowPreference
     var guidanceStyle: VitoraGuidanceStyle
     var reminderPreference: OnboardingReminderPreference
@@ -69,7 +77,15 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
         lastPeriodDate: Date? = nil,
         flowAmount: FlowAmount? = nil,
         hasDysmenorrhea: Bool = false,
+        dysmenorrheaSeverity: DysmenorrheaSeverity = .none,
         dysmenorrheaReminderEnabled: Bool = false,
+        averagePeriodDuration: Int? = nil,
+        periodImpactAreas: [PeriodImpactArea] = [],
+        exerciseIntensity: ExerciseIntensity? = nil,
+        customExercise: String? = nil,
+        improvementGoals: [ImprovementGoal] = [],
+        specialConditions: [SpecialCondition] = [],
+        specialConditionNote: String? = nil,
         energyWindowPreference: EnergyWindowPreference = .unsure,
         guidanceStyle: VitoraGuidanceStyle = .explainFirst,
         reminderPreference: OnboardingReminderPreference = .eveningReview,
@@ -86,7 +102,15 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
         self.lastPeriodDate = lastPeriodDate
         self.flowAmount = flowAmount
         self.hasDysmenorrhea = hasDysmenorrhea
+        self.dysmenorrheaSeverity = dysmenorrheaSeverity
         self.dysmenorrheaReminderEnabled = dysmenorrheaReminderEnabled
+        self.averagePeriodDuration = averagePeriodDuration
+        self.periodImpactAreas = periodImpactAreas
+        self.exerciseIntensity = exerciseIntensity
+        self.customExercise = customExercise
+        self.improvementGoals = improvementGoals
+        self.specialConditions = specialConditions
+        self.specialConditionNote = specialConditionNote
         self.energyWindowPreference = energyWindowPreference
         self.guidanceStyle = guidanceStyle
         self.reminderPreference = reminderPreference
@@ -98,7 +122,10 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case id, focusAreas, sportPreferences, cycleContext, cycleSummary
         case periodRegularity, lastPeriodDate, flowAmount
-        case hasDysmenorrhea, dysmenorrheaReminderEnabled
+        case hasDysmenorrhea, dysmenorrheaSeverity, dysmenorrheaReminderEnabled
+        case averagePeriodDuration, periodImpactAreas
+        case exerciseIntensity, customExercise
+        case improvementGoals, specialConditions, specialConditionNote
         case energyWindowPreference, guidanceStyle, reminderPreference
         case dataSourceAuthorization, notificationPermissionState, completedAt
     }
@@ -114,7 +141,15 @@ struct OnboardingContext: Identifiable, Codable, Equatable {
         lastPeriodDate = try container.decodeIfPresent(Date.self, forKey: .lastPeriodDate)
         flowAmount = try container.decodeIfPresent(FlowAmount.self, forKey: .flowAmount)
         hasDysmenorrhea = try container.decodeIfPresent(Bool.self, forKey: .hasDysmenorrhea) ?? false
+        dysmenorrheaSeverity = try container.decodeIfPresent(DysmenorrheaSeverity.self, forKey: .dysmenorrheaSeverity) ?? .none
         dysmenorrheaReminderEnabled = try container.decodeIfPresent(Bool.self, forKey: .dysmenorrheaReminderEnabled) ?? false
+        averagePeriodDuration = try container.decodeIfPresent(Int.self, forKey: .averagePeriodDuration)
+        periodImpactAreas = try container.decodeIfPresent([PeriodImpactArea].self, forKey: .periodImpactAreas) ?? []
+        exerciseIntensity = try container.decodeIfPresent(ExerciseIntensity.self, forKey: .exerciseIntensity)
+        customExercise = try container.decodeIfPresent(String.self, forKey: .customExercise)
+        improvementGoals = try container.decodeIfPresent([ImprovementGoal].self, forKey: .improvementGoals) ?? []
+        specialConditions = try container.decodeIfPresent([SpecialCondition].self, forKey: .specialConditions) ?? []
+        specialConditionNote = try container.decodeIfPresent(String.self, forKey: .specialConditionNote)
         energyWindowPreference = try container.decodeIfPresent(EnergyWindowPreference.self, forKey: .energyWindowPreference) ?? .unsure
         guidanceStyle = try container.decodeIfPresent(VitoraGuidanceStyle.self, forKey: .guidanceStyle) ?? .explainFirst
         reminderPreference = try container.decodeIfPresent(OnboardingReminderPreference.self, forKey: .reminderPreference) ?? .eveningReview
@@ -203,6 +238,55 @@ enum FlowAmount: String, CaseIterable, Codable, Equatable, Hashable {
     var accessibilityID: String {
         "onboarding.flowAmount.\(rawValue)"
     }
+}
+
+enum DysmenorrheaSeverity: String, CaseIterable, Codable, Equatable, Hashable {
+    case none
+    case occasional
+    case frequent
+    case severe
+
+    var accessibilityID: String { "onboarding.dysmenorrhea.\(rawValue)" }
+}
+
+enum PeriodImpactArea: String, CaseIterable, Codable, Equatable, Hashable {
+    case energyDrop
+    case sleepWorse
+    case moodSwings
+    case physicalPain
+    case appetiteChange
+
+    var accessibilityID: String { "onboarding.periodImpact.\(rawValue)" }
+}
+
+enum ExerciseIntensity: String, CaseIterable, Codable, Equatable, Hashable {
+    case high
+    case moderate
+    case light
+    case flexible
+
+    var accessibilityID: String { "onboarding.exerciseIntensity.\(rawValue)" }
+}
+
+enum ImprovementGoal: String, CaseIterable, Codable, Equatable, Hashable {
+    case sleepQuality
+    case moodManagement
+    case nutritionBalance
+    case energyManagement
+    case cycleRegularity
+
+    var accessibilityID: String { "onboarding.goal.\(rawValue)" }
+}
+
+enum SpecialCondition: String, CaseIterable, Codable, Equatable, Hashable {
+    case tryingToConceive
+    case hormoneTreatment
+    case chronicIllness
+    case pcos
+    case endometriosis
+    case noneSpecial
+
+    var accessibilityID: String { "onboarding.specialCondition.\(rawValue)" }
 }
 
 enum EnergyWindowPreference: String, CaseIterable, Codable, Equatable, Hashable {

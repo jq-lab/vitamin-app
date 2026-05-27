@@ -90,9 +90,9 @@
 - [x] T040 [US1] 在 `ios/Vitora/Domains/Onboarding/AppGateService.swift` 实现 `DS-001` 的 `AppGateService`
 - [x] T041 [US1] 在 `ios/Vitora/Domains/Onboarding/OnboardingService.swift` 实现 `DS-002` 的 `OnboardingService`
 - [x] T042 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/AppGateView.swift` 按 `C-APP-001`、`RF-000-01`、`RF-002-01` 实现 AppGate 组装屏幕
-- [x] T043 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingIdentityView.swift` 实现 `IA-001` / `WF-001` / `RF-001-01` / `RF-001-02` onboarding 身份屏，并在 `ios/QA/figma-check.md` 记录 Figma 复查
-- [x] T044 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingContextView.swift` 实现 `IA-002` / `WF-001` / `RF-001-03` 到 `RF-001-05` 上下文与 HealthKit 选择屏
-- [x] T045 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingReadyView.swift` 实现 `IA-003` / `WF-001` / `RF-001-06` ready 屏
+- [x] T043 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingIdentityView.swift` 实现 `IA-001` 注册进入页，并在 `ios/QA/figma-check.md` 记录 Figma 复查
+- [x] T044 [US1] [UI] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingContextView.swift` 实现 `IA-002` 聊天式补充信息与 HealthKit / 设备绑定选择屏
+- [x] T045 [US1] [UI] `IA-003` ready 屏已按 D-063 合并为 `进入 Vitora` 后直接进入 Today，不再作为独立屏幕
 - [x] T046 [US1] 在 `ios/Vitora/Features/OnboardingFeature/OnboardingViewModel.swift` 实现 onboarding view model 状态流
 - [x] T047 [US1] 在 `ios/Vitora/Core/HealthKit/HealthKitClient.swift` 实现 HealthKit 可选授权动作
 - [x] T048 [US1] 在 `ios/Vitora/Resources/zh-Hans.lproj/Localizable.strings` 添加 onboarding 与低数据中文字符串
@@ -414,3 +414,102 @@
 - [x] T190 [P] [D-052] 按花园手册 MVP 文档收敛轻闭环：Today 周期圆弧下移到碗外一个字间距；新增花园手册/成长反馈；AI 管家承接晚间复盘种子选择；Cycle 改为 `30 天成长册`，不保留花田地图入口。此方向已被 D-053/D-055 覆盖。
 - [x] T191 [P] [D-053] 移除 Today 花园手册、早晨成长反馈、Cycle `30 天成长册` 和花园化种子入口，回到 Today 建议、AI 管家复盘和 Cycle 长期节律三条主路径。
 - [x] T192 [P] [D-055] 实现睡眠种子实验层：晚间复盘反馈后选 3 类种子；Today 建议卡解释昨晚种子状态、生理原因和今日行动；AI 管家承接种子解释；Cycle 增加低权重 `本周期花架证据`，并保持无花田地图、无成长册进度、无打卡任务。
+- [x] T193 [P] [D-057] 将 AI 管家输入快捷栏与三 Tab 主切换栏上下分层；点击 `AI管家` 只切页不自动聚焦，点击输入栏本身才聚焦；发送中显示 `Vitora 正在整理...` 状态轨。
+- [x] T194 [P] [D-058] 新增真实花种素材档案和花园轻证据层：10 种真实花种目录、分阶段资产命名、`SleepSeedCard` 花种字段、Today 进度条、复盘方向选种、早安/晚安卡和 Cycle 花架证据统一读取真实花种。
+- [x] T195 [P] [D-059] 将 Today 建议卡顶部改为 `开放态度` 分段进度和花种阶段；移除 `组合推荐/专家建议组合`；默认组合改为 `休息 + 补剂`，`换一换` 放在组合标题旁；`一键提醒` 改为金黄色，并让提醒 Sheet 支持上下滑动调时间和单选提醒。
+- [x] T196 [P] [D-060] 将 Today 建议卡标题改为 `今日提醒`，左侧生成低像素早上太阳；推荐组合改为嵌入式大卡，左右竖向行动卡中间加号；数据来源改为动态指标胶囊并移除“监测到”；去掉行动卡勾选控件；提醒 Sheet 顶部展示白雏菊进度条。
+- [x] T197 [P] [D-061] 优化 Energy Bowl：水位从 0 映射到分数目标并支持点击增长反馈；当前周期圆弧段加粗着色；能量数字改为黄体期金色低像素密集格和右下对角 `能量低 / 查看数据`；点击碗和点击数据入口统一打开新版 `今日分析`，展示 `黄体期 Day 18`、球形分数报告、关键监测项、综合实时预测和今日推荐。
+- [x] T198 [P] [D-062] 将 Today 建议组件改为 `智能监测`：开放状态归属身体翻译器；去掉动态睡眠胶囊、`推荐组合` 和重复 `休息+补剂` 标题；方案改为置顶横向长条卡，集中展示主题和早/中/晚推送时间，行动一行长条用大号 `+` 连接，`换一换` 与金黄色 `一键提醒` 放在卡片下方。
+- [x] T199 [P] [D-063] 将 Onboarding 改为两页：注册进入页只处理 Apple / 微信 / QQ / 本地体验和协议；聊天式补充页合并关注方向、恢复方式、周期清晰度和可选设备绑定；点击 `进入 Vitora` 后直接进入 Today。
+- [x] T200 [P] [D-064] 将 Today 下滑后的 `智能监测` 内部改为扑克牌式大圆角内嵌卡：移除首页开放状态和白雏菊进度；顶部大标题 `身体翻译器` 占约 1.5/4；下方左侧 `今日推送` 两张竖向行动卡，右侧 `周期建议` 长方形卡；保留 `换一换` 和金黄色 `一键提醒`，不移动能量碗和 Today 页面顺序。
+- [x] T201 [P] [D-065] 更新 004 规格、decision log 和 Pixel IP change-log，正式记录 Today 首页蓝晶 Pixel Egg、展开主题弧和 `TodayInsightPanel` 改版。
+- [x] T202 [P] [D-065] 在 `ios/Vitora/Core/DesignSystem/PixelEggView.swift` 增加蓝晶混合材质：半透明蓝白外壳、像素晶格、水感颗粒和白/蓝像素眼。
+- [x] T203 [P] [D-065] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 将首页模式收口为 `TodayInsightTopic.energy/sleep/period/nutrition`，移除顶部黑色三格 `TopModeSelector`，实现点击小圆球展开/收起半圆弧主题。
+- [x] T204 [P] [D-065] 在 `ios/Vitora/Features/TodayFeature/VitoraDailySuggestionCard.swift` 新增 `TodayInsightPanel`，替换 Today 首页旧 `VitoraDailySuggestionCard` 位置，支持今日能量原因/建议/提醒、睡眠、经期和营养详情。
+- [x] T205 [P] [D-065] 构建并在 Simulator 保存 Today 默认态、弧展开态、今日能量详情、睡眠详情和营养记录入口截图；反向确认无 Luna、无打卡/完成率/红点、无第四主 Tab。
+- [x] T206 [P] [D-066] 更新 004 规格与 decision log，明确主题圆圈逐个展开信息条，独立加号只做快捷记录。
+- [x] T207 [P] [D-066] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 将主题入口改为四个默认可见收起圆圈；点击圆圈展开对应信息条，点击其他圆圈切换，点击同一圆圈收起。
+- [x] T208 [P] [D-066] 在 Today 首页新增独立快捷记录加号，点击直接打开 Vitora contextual sheet，展开主题时记录来源带主题，否则为 `快捷记录`。
+- [x] T209 [P] [D-066] 将 `68/100 查看分析` 移到蓝晶蛋下方居中；将 `CycleSmileArc` 调整为图3样式粗渐变经期条，中心白圆 + 黄色阶段标记。
+- [x] T210 [P] [D-066] 构建并保存默认态、主题圆圈展开态、经期条和快捷记录 sheet 截图；反向确认不出现右侧黑色 `X`。
+- [x] T211 [P] [D-067] 更新 004 规格与 decision log，明确 Cycle 主回顾卡改为淡色物理折页式 `本周 / 趋势 / 经历 / 监测` 四 tab。
+- [x] T212 [P] [D-067] 在 `ios/Vitora/Features/CycleFeature/CycleView.swift` 将 `CycleReviewInsightCard` 替换为四个淡色折页 tab；active tab 与主卡融合，inactive tabs 降饱和露出标签。
+- [x] T213 [P] [D-067] 实现四个 tab 内容：本周复盘、趋势对比、经历 pattern、监测时间线；保留 Cycle 下方能量动态、洞察卡和花架证据。
+- [x] T214 [P] [D-067] 更新 Cycle UI tests 和 Accessibility tests，覆盖 `cycle.review.tab.experience`、`cycle.review.tab.monitoring` 与 44pt 触控。
+- [x] T215 [P] [D-067] 构建并保存 Cycle 本周、趋势、经历、监测四张 active 截图；反向确认无日历首页、无打卡/完成率/红点、无 Luna。
+- [ ] T216 [P] [D-069] 更新 004 规格与 decision log，明确 Today 首屏合并为统一圆弧轨道，并暂停 D-068 快捷记录页继续实现。
+- [ ] T217 [P] [D-069] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 新增统一圆弧轨道，替代 `TodayTopicOrbitArc` + 独立快捷加号，节点固定为 `能量 / 睡眠 / 经期 / 营养 / +记录`。
+- [ ] T218 [P] [D-069] 从 `ios/Vitora/Features/TodayFeature/TodayView.swift` 移除独立 `CycleSmileArc` section，将底部经期能量条并入 Today 主视觉轨道。
+- [ ] T219 [P] [D-069] 更新 Today UI tests 与 accessibility ids，覆盖 `today.unifiedOrbit.energy/sleep/period/nutrition/quickRecord/cycleArc`，并反向确认不再出现 `today.cycle.smile.arc`。
+- [ ] T220 [P] [D-069] 构建并保存 Today 默认态、能量展开、睡眠展开、经期展开、营养展开和快捷记录 sheet 截图；反向确认无黑色 `X`、无独立下方周期条、无 Playwright/web 依赖、无 Luna。
+- [x] T221 [P] [D-068] 更新 facts、wireframes、components、interaction acceptance 和 tasks，明确快捷记录页由 Dock 右侧 `+` 与 Today 统一轨道 `+记录` 双入口打开，并忽略最后一个记账键盘视频/第 5 个参考。
+- [x] T222 [P] [D-068] 在 `ios/Vitora/Features/VitoraFeature/VitoraContextualSheet.swift` 将记录页替换为 `手动记录 / AI记录` 双模式，保留来源上下文、关闭回来源和 sheet 展示时隐藏全局 Dock。
+- [x] T223 [P] [D-068] 实现手动记录 `症状 / 情绪 / 月经 / 营养 / 更多` sub-tab、分类色彩、圆形选项卡、强度/剂量详情面板、`再记 / 完成` 底部按钮和选中态加深过渡。
+- [x] T224 [P] [D-068] 新增 `VitoraQuickRecordParser` 本地规则解析和结构化预览，覆盖 `头痛/头疼`、程度词、B6 与镁剂量，不接真实模型、不新增 schema。
+- [x] T225 [P] [D-068] 更新 unit/UI tests：parser 三条规则、`global.record.quick`、`today.unifiedOrbit.quickRecord`、手动 sub-tab、AI 解析预览和完成/再记路径。
+- [x] T226 [P] [D-068] 构建并保存 `手动-症状`、`手动-情绪`、`手动-月经`、`手动-营养`、`AI解析结果` 五张截图；反向确认无 Luna、无打卡/完成率/红点、无购买引导、无医学诊断、无完成后时间线页面。
+- [ ] T227 [P] [D-070] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，明确 Today 首屏右侧只有一条单半圆弧轨道，展开态是浅白弧形信息条而不是直线胶囊。
+- [ ] T228 [P] [D-070] 在 `ios/Vitora/Features/TodayFeature/TodayStatusCard.swift` 将轨道几何收口为同一条椭圆半圆路径，五个节点沿路径紧贴排列且默认不显示旁侧文字。
+- [ ] T229 [P] [D-070] 移除选中态旋转 Capsule，改为 Canvas 局部加粗浅白渐变弧段，icon 嵌在弧段起点，数值沿弧线切线方向展示。
+- [ ] T230 [P] [D-070] 去掉蛋下方独立经期能量条和 `排卵期 / 黄体期 D18 / 月经期` 标签组，保留经期主题和下方 `TodayInsightPanel`。
+- [ ] T231 [P] [D-070] 更新 Today UI tests，构建并保存默认态、能量展开、睡眠展开、经期展开、营养展开和快捷记录 sheet 截图；反向确认无直线胶囊、无斜向圆角矩形、无底部独立周期条、无节点旁文字、无 Luna。
+- [x] T232 [P] [D-072] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，明确 Today 顶部压缩日期能量卡与文具周期日历浮层。
+- [x] T233 [P] [D-072] 在 `ios/Vitora/Features/TodayFeature/TodayView.swift` 压缩 `TodayHeaderDailyEnergyCard`，仅保留星期、日期、`黄体 D18`、横向能量条和数值。
+- [x] T234 [P] [D-072] 调整 `CalendarDrawerOverlay` 为左侧约 3/4 宽浮层，右侧露出暖色虚化 Today 背景且背景不可交互。
+- [x] T235 [P] [D-072] 重做 `ios/Vitora/Features/TodayFeature/TodayCalendarSheet.swift` 为文具日历：极简顶部、阶段图例、英文周标题、阶段色虚线月历、浅粉撕边便签和 2x2 木制记忆箱。
+- [x] T236 [P] [D-072] 构建并保存 Today 默认态顶部卡片、周期日历抽屉、月切换后状态和更多菜单截图；反向确认 Cycle 首页无日历、无 Luna、无打卡/完成率/红点、无第四主 Tab。
+- [x] T237 [P] [D-073] 更新 facts、wireframes、components、interaction acceptance、cycle-page spec、tasks 和 decision log，正式记录 Cycle 报告卡三 tab 与 1536 展示图方向。
+- [x] T238 [P] [D-073] 新增 `QA/Screenshots/VitoraReport/vitora-report-3up.html`，用 HTML/CSS/SVG 渲染 `本周 / 趋势（对比） / 近期` 三张并排报告卡，不引入图表库。
+- [x] T239 [P] [D-073] 输出并校验 `QA/Screenshots/VitoraReport/vitora-report-3up-1536x1024.png`，尺寸必须为 `1536×1024`，反向确认无手机壳、本子、厚重拟物或 AI 乱码。
+- [x] T240 [P] [D-073] 在 `ios/Vitora/Features/CycleFeature/CycleView.swift` 将 `CycleReviewInsightCard` 收口为 `本周 / 趋势（对比） / 近期` 三个文件夹 tab，iPhone 内使用叠层单卡展示。
+- [x] T241 [P] [D-073] 实现三页报告内容：本周柱状复盘、趋势月度对比进度条、近期能量折线与下一步按钮，并移除旧 `经历 / 监测` 首页一级 tab。
+- [x] T242 [P] [D-073] 更新 `CyclePivotUITests` 和 `AccessibilityUITests`，覆盖三个 tab、内容切换、旧 experience/monitoring 不再出现和 44pt 触控。
+- [ ] T243 [P] [D-073] 构建并保存 Cycle 默认态、趋势态、近期态截图；反向确认 Cycle 首页不是日历、无 Luna、无打卡/完成率/红点、无复杂医疗 dashboard、无第四主 Tab。
+- [x] T244 [P] [D-074] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录快捷记录误触修复、删除金额数字键盘、首页花组件和小日历入口。
+- [x] T245 [P] [D-074] 在 `ios/Vitora/App/AppRouter.swift` 为 `VitoraContextualSheet` 增加全屏透明 hit-test backdrop，点空白只关闭 sheet，不透传到 Today 日历或 Dock。
+- [x] T246 [P] [D-074] 在 `ios/Vitora/Features/VitoraFeature/VitoraContextualSheet.swift` 增加 44pt 关闭按钮和下拉关闭；手动模式删除金额输入、数字键盘和金额提交依赖，仅保留分类、字段、图片/拍照/语音入口，默认分类即可完成。
+- [x] T247 [P] [D-074] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 新增 SwiftUI/Canvas `FlowerEnergyBloomView` 并替换首页主蛋，保留 `egg.compound.mascot` id、主数字、CTA 和右侧维度切换。
+- [x] T248 [P] [D-074] 在 `ios/Vitora/Features/TodayFeature/TodayView.swift` 将 `TodayHeaderDailyEnergyCard` 收口为 38-44pt 小日历 icon，并在日历抽屉开关动画期间禁止后方 hit testing。
+- [ ] T249 [P] [D-074] 构建并保存 Today 默认态、快捷记录手动页、AI 页和日历抽屉截图；点击关闭、空白、下拉、分类、更多、媒体入口、再记、完成、AI 示例/发送，反向确认无误触弹窗、无金额数字键盘、无 Luna/打卡/红点/第四 Tab。
+- [x] T250 [P] [D-075] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 记录反馈条、首屏花区压缩和快捷记录健康大纲。
+- [x] T251 [P] [D-075] 在 `ios/Vitora/App/AppEnvironment.swift` 新增运行态 `RecentRecordFeedback`，并让快捷记录完成后关闭 sheet、回写记录摘要和温馨提示。
+- [x] T252 [P] [D-075] 在 `ios/Vitora/Features/VitoraFeature/VitoraContextualSheet.swift` 为手动记账和 AI 记录增加 `vitora.record.note.input` 留言条，完成后生成生活方式提示，不新增持久化 schema。
+- [x] T253 [P] [D-075] 在 `ios/Vitora/Features/TodayFeature/TodayView.swift` 和 `TodayVitoraMessageCard.swift` 上移 `today.record.feedback`，优先展示最近记录反馈；无记录时展示当前 Vitora 提示。
+- [x] T254 [P] [D-075/D-079] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 压缩花组件和右侧胶囊维度切换到首屏上方约 1/3，并收短红色虚线避免遮挡反馈条；D-079 后不再保留花下独立主分数。
+- [x] T254A [P] [D-075] 在 `ios/Vitora/Features/VitoraFeature/VitoraContextualSheet.swift` 将手动页从 `支出 / 收入 / 转账` 改为 `是经期 / 否经期` + 健康大纲；默认 5 个词条，点击大纲或 `更多` 展开支线，删除财务分类/金额心智。
+- [x] T255 [P] [D-076] 更新 facts、wireframes、components、interaction acceptance、cycle-page spec、tasks 和 decision log，正式记录 Cycle 顶部 SwiftUI 花之地图模块。
+- [x] T256 [P] [D-076] 在 `ios/Vitora/Features/CycleFeature/CycleView.swift` 新增 `FlowerMapView`、`FlowerMapCity`、`FlowerMapTile` 和 `FlowerKind`，用二维字符串数组绘制深圳不规则菱形地图。
+- [x] T257 [P] [D-076] 实现 `种下今天的花`、空地种花、已种花详情、问号说明和城市路线节点交互；种花动效使用 SwiftUI scale + pulse，不引入 RN/Expo、图片素材或地图 SVG。
+- [ ] T258 [P] [D-075/D-076] 构建并保存 Today 默认态、Today 记录反馈态、快捷记录手动页、快捷记录 AI 页、Cycle 花之地图默认态、种花后状态和花详情浮层截图；反向确认无第四 Tab、无打卡/完成率/红点、无诊断/购买引导、无后方误触。
+- [x] T259 [P] [D-077] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 花朵首页与 Aura 背景加浓规则。
+- [x] T260 [P] [D-077] 在 `ios/Vitora/Core/DesignSystem/Surfaces.swift` 加浓 Today 左上粉橘和右下蓝绿 Aura，移除底部灰感，增加中部凝态玻璃和底部霜态玻璃层次。
+- [x] T261 [P] [D-077] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 扩展 `FlowerEnergyBloomView`：三节点时间轴、80% 能量碗、黄体期标签、成长提示和同品种双朵共生气泡。
+- [ ] T262 [P] [D-077] 构建并保存 Today 默认态、花朵点击反馈态和向下滚动到底背景截图；反向确认无蛋主视觉、无打卡/完成率/红点、无 Luna、无灰底。
+- [x] T263 [P] [D-078] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 花朵主视觉阈值、默认 68% 种子苗状态和动效修正规则。
+- [x] T264 [P] [D-078] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 将 `FlowerEnergyBloomView` 改为 `energyProgress = 0.68` 数据驱动：68% 只进入水桶，未达 80% 显示种子苗，移除整体呼吸缩放，保留慢速轻摆和点击反馈。
+- [ ] T265 [P] [D-078] 构建并保存 `Today-68-seedling-default`、点击反馈态、80% 开花 mock 和 100% 共生 mock 截图；反向确认无 68% 开花、无 80% 当前值、无堆叠、无误触弹窗。
+- [x] T266 [P] [D-079] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录移除 Today 花下独立 `68/100 查看分析`。
+- [ ] T267 [P] [D-079] 构建并保存 Today 默认态截图，确认花组件下方不再出现 `68/100 查看分析`，右侧维度和下方信息卡仍可用。
+- [x] T268 [P] [D-080] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 花朵主视觉宽画布、图 2 布局比例目标和右侧胶囊分层规则。
+- [x] T269 [P] [D-080] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 将 `FlowerEnergyBloomView` 改为接近整屏宽 hero band，重算直线时间线、能量水桶、阈值提示、种子苗和读数层级，并把右侧维度胶囊移出水桶覆盖区。
+- [x] T270 [P] [D-080] 构建并保存 `Today-68-seedling-wide-default`、80% 开花 mock、100% 共生 mock 截图；反向确认无堆叠、无胶囊覆盖水桶、无独立 `68/100 查看分析`。
+- [x] T271 [P] [D-081] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 花朵主视觉疏散排版修正。
+- [x] T272 [P] [D-081] 在 `ios/Vitora/Features/TodayFeature/EggCompoundView.swift` 收敛水桶宽度、拉开前天/昨天/今天节点、上移阈值提示并缩小上移右侧维度胶囊，避免图 1 式挤压。
+- [x] T273 [P] [D-081] 构建并保存 `Today-68-seedling-spacious-default` 截图；反向确认水桶不横跨历史节点、右侧胶囊不压红线、阈值提示/种子苗/今天标签/读数不堆叠。
+- [x] T274 [P] [D-082] 更新 wireframes、components、interaction acceptance、tasks 和 decision log，正式记录移除 Today 反馈条右侧灰色圆形记录/提醒按钮。
+- [x] T275 [P] [D-082] 构建并保存 Today 默认态截图，反向确认 `记录饮食 / 补水提醒 / 查看记录 / 继续补充` 等后置圆形按钮不再出现，主反馈条、右侧维度切换和全局快捷记录仍可用。
+- [x] T276 [P] [D-083] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Today 折叠态移除维度 chips，并用微缩花盆能量状态替换 compact 小蛋。
+- [ ] T277 [P] [D-083] 构建并保存 Today 折叠态截图；反向确认无 `今日 / 睡眠 / 经期 / 营养` 折叠 chips、无 compact Pixel Egg，顶部只显示小日历和微缩花盆 `68/100`。
+- [x] T278 [P] [D-085] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录 Dock `+` 点按手动记录、长按语音记录，以及 AI 记录内 `语音 / 打字` 二级切换。
+- [x] T279 [P] [D-085] 在 `ios/Vitora/App/AppEnvironment.swift` 和 `ios/Vitora/App/AppRouter.swift` 新增 `QuickRecordLaunchMode.manual/voice/text`，保持 `global.record.quick` 点按进入手动记录，长按触发 haptic 和语音浮岛后进入 `AI记录 > 语音`，并提供无障碍 `语音记录 / 打字记录` 辅助操作。
+- [x] T280 [P] [D-085] 在 `ios/Vitora/Features/VitoraFeature/VitoraContextualSheet.swift` 为 AI 记录新增 `VitoraAIInputMode.voice/text`、语音面板、打字面板、权限拒绝降级打字和本地 parser 解析，不恢复首页常驻输入框或发送按钮。
+- [x] T281 [P] [D-085] 更新 `ios/VitoraUITests/ContextualVitoraSheetUITests.swift` 覆盖点按手动、长按语音、AI 打字解析和健康大纲记录路径；主 app build 已通过。
+- [x] T282 [P] [D-087] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录底部 Tab 栏改为一体式白色凹槽 Dock。
+- [x] T283 [P] [D-087] 在 `ios/Vitora/App/AppRouter.swift` 将 `GlobalVitoraDock` 从居中玻璃胶囊 + 右侧独立 `+` 改为左右 `今日 / 周期` + 中心凹槽悬浮圆形 `+`，保留 `global.record.quick` 点按手动和长按语音。
+- [x] T284 [P] [D-087] 构建并在模拟器检查 Today 底部凹槽 Dock、Tab 切换、点按/长按 `+`、sheet 展示隐藏 Dock 和无底部输入框/发送按钮残留。
+- [x] T285 [P] [D-088] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录底部凹槽 Dock 下移镶嵌与中心 `+` 蓝绿色霜态玻璃微调。
+- [x] T286 [P] [D-088] 在 `ios/Vitora/App/AppRouter.swift` 将 `GlobalVitoraDock` 整体下压贴近 bottom safe area，增加轻霜态底部嵌入底座，并将中心 `+` 从蓝紫实心球改为蓝绿色半透明霜态玻璃按钮。
+- [x] T287 [P] [D-088] 构建并保存 Today / Cycle 底部 Dock 截图，确认 Dock 镶嵌感、中心 `+` 颜色和点击/长按快捷记录语义不变。
+- [x] T288 [P] [D-090] 更新 facts、wireframes、components、interaction acceptance、tasks 和 decision log，正式记录底部 Dock 尺寸收窄、中心 `+` 进一步透明化和短按/长按记录语义。
+- [x] T289 [P] [D-090] 在 `ios/Vitora/App/AppRouter.swift` 收窄 `GlobalVitoraDock` 宽高、左右 Tab 胶囊和中心 `+` 按钮尺寸，并降低中心 `+` 的青蓝渐变不透明度，保留短按 `.manual` 与长按 `.voice`。
+- [x] T290 [P] [D-090] 构建并保存底部 Dock 截图，确认 Dock 更窄、更薄，中心 `+` 更透明且短按/长按入口仍可用。

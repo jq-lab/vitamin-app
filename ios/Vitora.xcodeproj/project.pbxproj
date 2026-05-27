@@ -54,6 +54,7 @@
 		C10000000000000000000010 /* HealthKitOptionalUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000010 /* HealthKitOptionalUITests.swift */; };
 		C10000000000000000000050 /* OnboardingPageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = C20000000000000000000050 /* OnboardingPageCard.swift */; };
 		CE3CEB65EE6AC4D7C54CE569 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = BE9F9AFB414C2D46C3BE631E /* PrivacyInfo.xcprivacy */; };
+		CSA000000000000000000002 /* CycleSmileArc.swift in Sources */ = {isa = PBXBuildFile; fileRef = CSA000000000000000000001 /* CycleSmileArc.swift */; };
 		D10000000000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = D20000000000000000000001 /* Localizable.strings */; };
 		E10000000000000000000001 /* TodayStateService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000001 /* TodayStateService.swift */; };
 		E10000000000000000000002 /* EnergyRitualService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20000000000000000000002 /* EnergyRitualService.swift */; };
@@ -122,7 +123,6 @@
 		H30000000000000000000006 /* AskableSurfaceUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000006 /* AskableSurfaceUITests.swift */; };
 		H30000000000000000000007 /* VisualLanguageSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000007 /* VisualLanguageSmokeTests.swift */; };
 		H30000000000000000000008 /* LegacyLunaTextScanTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = H40000000000000000000008 /* LegacyLunaTextScanTests.swift */; };
-		HCAL001 /* HormoneCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = HCAL002 /* HormoneCalendarView.swift */; };
 		I10000000000000000000001 /* EveningReviewService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000001 /* EveningReviewService.swift */; };
 		I10000000000000000000002 /* VitoraLearningSignalService.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000002 /* VitoraLearningSignalService.swift */; };
 		I10000000000000000000003 /* EveningReviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = I20000000000000000000003 /* EveningReviewSheet.swift */; };
@@ -151,7 +151,21 @@
 		L30000000000000000000002 /* AccessibilityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = L40000000000000000000002 /* AccessibilityUITests.swift */; };
 		M10000000000000000000001 /* DynamicAuraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000001 /* DynamicAuraBackground.swift */; };
 		M10000000000000000000002 /* DynamicAura in Resources */ = {isa = PBXBuildFile; fileRef = M20000000000000000000002 /* DynamicAura */; };
+		ORB000000000000000000201 /* OrbStageOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000101 /* OrbStageOrchestrator.swift */; };
+		ORB000000000000000000202 /* OrbTextEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000102 /* OrbTextEffects.swift */; };
+		ORB000000000000000000203 /* OrbRingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000103 /* OrbRingView.swift */; };
+		ORB000000000000000000204 /* OrbDataBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000104 /* OrbDataBubble.swift */; };
+		ORB000000000000000000205 /* OrbConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000105 /* OrbConfettiView.swift */; };
+		ORB000000000000000000206 /* EnergyOrbFullView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000106 /* EnergyOrbFullView.swift */; };
+		ORB000000000000000000207 /* BodyAnalysisCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = ORB000000000000000000107 /* BodyAnalysisCard.swift */; };
+		PEV000000000000000000002 /* PixelEggView.swift in Sources */ = {isa = PBXBuildFile; fileRef = PEV000000000000000000001 /* PixelEggView.swift */; };
 		SHAR001 /* ShareCardPreviewSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SHAR002 /* ShareCardPreviewSheet.swift */; };
+		SRS000000000000000000002 /* SmartReminderSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = SRS000000000000000000001 /* SmartReminderSheet.swift */; };
+		ECV000000000000000000002 /* EggCompoundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECV000000000000000000001 /* EggCompoundView.swift */; };
+		SDV000000000000000000002 /* SideDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = SDV000000000000000000001 /* SideDialView.swift */; };
+		TCH000000000000000000002 /* TodayCollapsedHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = TCH000000000000000000001 /* TodayCollapsedHeader.swift */; };
+		TVD000000000000000000002 /* TodayVoiceDock.swift in Sources */ = {isa = PBXBuildFile; fileRef = TVD000000000000000000001 /* TodayVoiceDock.swift */; };
+		TVM000000000000000000002 /* TodayVitoraMessageCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = TVM000000000000000000001 /* TodayVitoraMessageCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +237,7 @@
 		C20000000000000000000009 /* OnboardingLowDataUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLowDataUITests.swift; sourceTree = "<group>"; };
 		C20000000000000000000010 /* HealthKitOptionalUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitOptionalUITests.swift; sourceTree = "<group>"; };
 		C20000000000000000000050 /* OnboardingPageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingPageCard.swift; sourceTree = "<group>"; };
+		CSA000000000000000000001 /* CycleSmileArc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CycleSmileArc.swift; path = Vitora/Features/TodayFeature/CycleSmileArc.swift; sourceTree = SOURCE_ROOT; };
 		D20000000000000000000001 /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D88FEBB099F05D0A2CCEE119 /* libPods-Vitora.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Vitora.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E20000000000000000000001 /* TodayStateService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayStateService.swift; sourceTree = "<group>"; };
@@ -292,7 +307,6 @@
 		H40000000000000000000006 /* AskableSurfaceUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AskableSurfaceUITests.swift; sourceTree = "<group>"; };
 		H40000000000000000000007 /* VisualLanguageSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualLanguageSmokeTests.swift; sourceTree = "<group>"; };
 		H40000000000000000000008 /* LegacyLunaTextScanTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LegacyLunaTextScanTests.swift; sourceTree = "<group>"; };
-		HCAL002 /* HormoneCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HormoneCalendarView.swift; sourceTree = "<group>"; };
 		I20000000000000000000001 /* EveningReviewService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewService.swift; sourceTree = "<group>"; };
 		I20000000000000000000002 /* VitoraLearningSignalService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VitoraLearningSignalService.swift; sourceTree = "<group>"; };
 		I20000000000000000000003 /* EveningReviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EveningReviewSheet.swift; sourceTree = "<group>"; };
@@ -321,7 +335,21 @@
 		L40000000000000000000002 /* AccessibilityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityUITests.swift; sourceTree = "<group>"; };
 		M20000000000000000000001 /* DynamicAuraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicAuraBackground.swift; sourceTree = "<group>"; };
 		M20000000000000000000002 /* DynamicAura */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DynamicAura; sourceTree = "<group>"; };
+		ORB000000000000000000101 /* OrbStageOrchestrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbStageOrchestrator.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/OrbStageOrchestrator.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000102 /* OrbTextEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbTextEffects.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/OrbTextEffects.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000103 /* OrbRingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbRingView.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/OrbRingView.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000104 /* OrbDataBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbDataBubble.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/OrbDataBubble.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000105 /* OrbConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = OrbConfettiView.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/OrbConfettiView.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000106 /* EnergyOrbFullView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = EnergyOrbFullView.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/EnergyOrbFullView.swift; sourceTree = SOURCE_ROOT; };
+		ORB000000000000000000107 /* BodyAnalysisCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BodyAnalysisCard.swift; path = Vitora/Features/TodayFeature/EnergyOrbFull/BodyAnalysisCard.swift; sourceTree = SOURCE_ROOT; };
+		PEV000000000000000000001 /* PixelEggView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PixelEggView.swift; path = Vitora/Core/DesignSystem/PixelEggView.swift; sourceTree = SOURCE_ROOT; };
 		SHAR002 /* ShareCardPreviewSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareCardPreviewSheet.swift; sourceTree = "<group>"; };
+		SRS000000000000000000001 /* SmartReminderSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SmartReminderSheet.swift; path = Vitora/Features/TodayFeature/SmartReminderSheet.swift; sourceTree = SOURCE_ROOT; };
+		ECV000000000000000000001 /* EggCompoundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EggCompoundView.swift; sourceTree = "<group>"; };
+		SDV000000000000000000001 /* SideDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideDialView.swift; sourceTree = "<group>"; };
+		TCH000000000000000000001 /* TodayCollapsedHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayCollapsedHeader.swift; sourceTree = "<group>"; };
+		TVD000000000000000000001 /* TodayVoiceDock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = TodayVoiceDock.swift; path = Vitora/Features/TodayFeature/TodayVoiceDock.swift; sourceTree = SOURCE_ROOT; };
+		TVM000000000000000000001 /* TodayVitoraMessageCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayVitoraMessageCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -690,6 +718,10 @@
 				H20000000000000000000020 /* TodayCalendarSheet.swift */,
 				F20000000000000000000002 /* ABChoiceGroup.swift */,
 				F20000000000000000000003 /* ABIntentSummary.swift */,
+				TCH000000000000000000001 /* TodayCollapsedHeader.swift */,
+				TVM000000000000000000001 /* TodayVitoraMessageCard.swift */,
+				ECV000000000000000000001 /* EggCompoundView.swift */,
+				SDV000000000000000000001 /* SideDialView.swift */,
 			);
 			path = TodayFeature;
 			sourceTree = "<group>";
@@ -719,7 +751,6 @@
 				H20000000000000000000017 /* CycleDetailSheets.swift */,
 				H20000000000000000000018 /* CycleView.swift */,
 				SHAR002 /* ShareCardPreviewSheet.swift */,
-				HCAL002 /* HormoneCalendarView.swift */,
 			);
 			path = CycleFeature;
 			sourceTree = "<group>";
@@ -1086,8 +1117,22 @@
 				H10000000000000000000017 /* CycleDetailSheets.swift in Sources */,
 				H10000000000000000000018 /* CycleView.swift in Sources */,
 				SHAR001 /* ShareCardPreviewSheet.swift in Sources */,
-				HCAL001 /* HormoneCalendarView.swift in Sources */,
 				9629D3DB012451A65D79F948 /* ExpoModulesProvider.swift in Sources */,
+				ORB000000000000000000201 /* OrbStageOrchestrator.swift in Sources */,
+				ORB000000000000000000202 /* OrbTextEffects.swift in Sources */,
+				ORB000000000000000000203 /* OrbRingView.swift in Sources */,
+				ORB000000000000000000204 /* OrbDataBubble.swift in Sources */,
+				ORB000000000000000000205 /* OrbConfettiView.swift in Sources */,
+				ORB000000000000000000206 /* EnergyOrbFullView.swift in Sources */,
+				ORB000000000000000000207 /* BodyAnalysisCard.swift in Sources */,
+				TVD000000000000000000002 /* TodayVoiceDock.swift in Sources */,
+				SRS000000000000000000002 /* SmartReminderSheet.swift in Sources */,
+				PEV000000000000000000002 /* PixelEggView.swift in Sources */,
+				CSA000000000000000000002 /* CycleSmileArc.swift in Sources */,
+				TCH000000000000000000002 /* TodayCollapsedHeader.swift in Sources */,
+				TVM000000000000000000002 /* TodayVitoraMessageCard.swift in Sources */,
+				ECV000000000000000000002 /* EggCompoundView.swift in Sources */,
+				SDV000000000000000000002 /* SideDialView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1295,6 +1340,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Vitora;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Vitora 需要麦克风权限，用于把你的快捷语音记录转成可确认的文字。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Vitora 需要语音识别权限，用于把你的快捷语音记录转成可确认的文字。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -1325,6 +1372,8 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Vitora;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Vitora 需要麦克风权限，用于把你的快捷语音记录转成可确认的文字。";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Vitora 需要语音识别权限，用于把你的快捷语音记录转成可确认的文字。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";

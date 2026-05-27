@@ -280,7 +280,7 @@ struct SuggestionDetailSheet: View {
     let onAskVitora: () -> Void
 
     var body: some View {
-        detailContainer(title: "Vitora 今日建议", subtitle: "推荐你今天试这个", onClose: onClose) {
+        detailContainer(title: "智能监测", subtitle: "管家方案会随早、中、晚时段调整", onClose: onClose) {
             Text("推荐你今天试这个")
                 .font(.headline.weight(.semibold))
             Text("午后补一点蛋白和镁，把重点任务拆成两段。")

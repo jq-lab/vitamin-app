@@ -47,6 +47,16 @@ enum TodayMetricMode: String, CaseIterable, Equatable {
         }
     }
 
+    var scoreValue: Int {
+        switch self {
+        case .energy: return 68
+        case .sleep: return 72
+        case .cycle: return 78
+        case .heart: return 76
+        case .hrv: return 48
+        }
+    }
+
     var unit: String {
         switch self {
         case .energy: return "%"
@@ -227,13 +237,7 @@ enum TodayMetricMode: String, CaseIterable, Equatable {
     }
 
     var fillLevel: CGFloat {
-        switch self {
-        case .energy: return 0.54
-        case .sleep: return 0.46
-        case .cycle: return 0.62
-        case .heart: return 0.58
-        case .hrv: return 0.42
-        }
+        EnergyBowlWaterScale.fillLevel(forScore: scoreValue)
     }
 
     var showsDynamicCurve: Bool {
@@ -242,8 +246,173 @@ enum TodayMetricMode: String, CaseIterable, Equatable {
 
 }
 
+enum EnergyBowlWaterScale {
+    static func fillLevel(forScore score: Int) -> CGFloat {
+        let clampedScore = min(max(score, 0), 100)
+        // Keep a visible shallow baseline while preserving a real 0...100 score mapping.
+        return 0.04 + CGFloat(clampedScore) / 100 * 0.82
+    }
+}
+
+enum TodayInsightTopic: String, CaseIterable, Identifiable, Hashable {
+    case energy
+    case sleep
+    case period
+    case nutrition
+
+    var id: String { rawValue }
+
+    static var launchOverride: TodayInsightTopic {
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-vitoraUITestTopicSleep") { return .sleep }
+        if arguments.contains("-vitoraUITestTopicPeriod") { return .period }
+        if arguments.contains("-vitoraUITestTopicNutrition") { return .nutrition }
+        return .energy
+    }
+
+    static var launchExpandedTopic: TodayInsightTopic? {
+        ProcessInfo.processInfo.arguments.contains("-vitoraUITestExpandedTopic") ? launchOverride : nil
+    }
+
+    var title: String {
+        switch self {
+        case .energy: return "今日能量"
+        case .sleep: return "睡眠"
+        case .period: return "经期"
+        case .nutrition: return "营养"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .energy: return "bolt.fill"
+        case .sleep: return "moon.fill"
+        case .period: return "drop.fill"
+        case .nutrition: return "leaf.fill"
+        }
+    }
+
+    var metric: String {
+        switch self {
+        case .energy: return "68/100"
+        case .sleep: return "7.2h"
+        case .period: return "D18"
+        case .nutrition: return "水 5/8"
+        }
+    }
+
+    var scoreNumber: String {
+        switch self {
+        case .energy: return "68"
+        case .sleep: return "7.2"
+        case .period: return "D18"
+        case .nutrition: return "5/8"
+        }
+    }
+
+    var scoreUnit: String {
+        switch self {
+        case .energy: return "/100"
+        case .sleep: return "h"
+        case .period: return ""
+        case .nutrition: return "水"
+        }
+    }
+
+    var ctaLabel: String {
+        switch self {
+        case .energy: return "查看分析"
+        case .sleep: return "睡眠详情"
+        case .period: return "阶段解释"
+        case .nutrition: return "记录补给"
+        }
+    }
+
+    var sourceTitle: String { title }
+
+    var sourceSummary: String {
+        switch self {
+        case .energy: return "今日 68/100，恢复 65，燃料 75，黄体期 D18"
+        case .sleep: return "昨夜睡眠 7.2h，深睡 1.4h，中断 2 次"
+        case .period: return "黄体期 Day 18，今天适合留余量"
+        case .nutrition: return "水 5/8，镁和 B6 仅记录已在使用内容"
+        }
+    }
+
+    var recordSummary: String {
+        switch self {
+        case .energy: return "补充今天影响能量的事"
+        case .sleep: return "补充昨晚睡眠或醒来感受"
+        case .period: return "补充经期或黄体期身体变化"
+        case .nutrition: return "记录已在使用的补给或补水"
+        }
+    }
+
+    var analysisMode: TodayMetricMode {
+        switch self {
+        case .energy, .nutrition: return .energy
+        case .sleep: return .sleep
+        case .period: return .cycle
+        }
+    }
+
+    var accent: Color {
+        switch self {
+        case .energy: return Color(red: 205 / 255, green: 127 / 255, blue: 22 / 255)
+        case .sleep: return Color(red: 70 / 255, green: 134 / 255, blue: 220 / 255)
+        case .period: return Color(red: 104 / 255, green: 157 / 255, blue: 74 / 255)
+        case .nutrition: return Color(red: 61 / 255, green: 148 / 255, blue: 126 / 255)
+        }
+    }
+
+    var softAccent: Color {
+        switch self {
+        case .energy: return Color(red: 255 / 255, green: 201 / 255, blue: 107 / 255)
+        case .sleep: return Color(red: 221 / 255, green: 238 / 255, blue: 255 / 255)
+        case .period: return Color(red: 224 / 255, green: 241 / 255, blue: 208 / 255)
+        case .nutrition: return Color(red: 212 / 255, green: 244 / 255, blue: 232 / 255)
+        }
+    }
+
+    var pillRotationDegrees: Double {
+        switch self {
+        case .energy: return 12
+        case .sleep: return -4
+        case .period: return -8
+        case .nutrition: return -14
+        }
+    }
+
+    var pillOffset: CGSize {
+        switch self {
+        case .energy: return CGSize(width: -62, height: -2)
+        case .sleep: return CGSize(width: -72, height: -2)
+        case .period: return CGSize(width: -72, height: 2)
+        case .nutrition: return CGSize(width: -68, height: 6)
+        }
+    }
+}
+
+enum TodayChatMode: Equatable {
+    case expanded
+    case collapsed
+}
+
+enum TodayHeroVariant: String, CaseIterable {
+    case v1, v2, v3
+
+    var label: String {
+        switch self {
+        case .v1: return "V1 居中满展"
+        case .v2: return "V2 信息并排"
+        case .v3: return "V3 紧凑一体"
+        }
+    }
+}
+
 struct TodayStatusCard: View {
-    @Binding var selectedMode: TodayMetricMode
+    @Binding var selectedTopic: TodayInsightTopic
+    @Binding var expandedTopic: TodayInsightTopic?
     let cycleDay: Int
     let cyclePhase: String
     let eventTrigger: Int
@@ -251,11 +420,17 @@ struct TodayStatusCard: View {
     let onOpenEvidence: () -> Void
     let onAskVitora: () -> Void
     let onCalibrate: (String) -> Void
+    let onQuickRecord: () -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private let stageHeight: CGFloat = 330
+    private func eggExpression() -> PixelEggExpression {
+        .from(phase: cyclePhase, energyScore: 68)
+    }
+
+    // MARK: - Compact Chat-First Layout
 
     var body: some View {
-        VStack(spacing: 4) {
+        VStack(spacing: 12) {
             Text("现在状态")
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
@@ -263,692 +438,480 @@ struct TodayStatusCard: View {
                 .opacity(0.01)
                 .accessibilityHidden(false)
 
-            ZStack(alignment: .bottomTrailing) {
-                Color.clear
-                    .frame(maxWidth: .infinity)
-                    .frame(height: stageHeight)
-                    .accessibilityIdentifier("today.energy.stage")
-                    .allowsHitTesting(false)
-
-                EnergyBowlView(
-                    mode: selectedMode,
-                    trigger: eventTrigger,
-                    cycleDay: cycleDay,
-                    cyclePhase: cyclePhase,
-                    onOpenData: onOpenEvidence
-                )
-                .frame(height: stageHeight)
-
-                VStack {
-                    Spacer(minLength: 122)
-                    Button(action: onOpenDetail) {
-                        Color.clear
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 160)
-                            .contentShape(RoundedRectangle(cornerRadius: VitoraTheme.Radius.card, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button("问 Vitora 为什么", action: onAskVitora)
-                        Button("告诉 Vitora 这里不准") {
-                            onCalibrate("这里不准")
-                        }
-                        Button("查看详情", action: onOpenDetail)
-                    }
-                    .accessibilityLabel("\(selectedMode.statusText)，\(selectedMode.number)\(selectedMode.unit)")
-                    .accessibilityHint("点按查看今日状态详情，长按可以问 Vitora 或校准这个判断")
-                    .accessibilityIdentifier("today.status.card")
+            // Compact hero: egg left + score right (方案A chat-first)
+            HStack(spacing: 16) {
+                Button(action: onOpenDetail) {
+                    PixelEggView(
+                        size: 60,
+                        expression: eggExpression(),
+                        materialStyle: .blueCrystal
+                    )
+                    .shadow(color: Color(red: 119 / 255, green: 197 / 255, blue: 255 / 255).opacity(0.22), radius: 8, x: 0, y: 4)
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("蓝晶 Pixel Egg，今日能量 \(selectedTopic.metric)")
+                .accessibilityIdentifier("today.pixel.egg")
+
+                Button(action: onOpenDetail) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        HStack(alignment: .lastTextBaseline, spacing: 4) {
+                            Text(selectedTopic.scoreNumber)
+                                .font(.system(size: 32, weight: .bold, design: .rounded))
+                                .foregroundStyle(selectedTopic.accent)
+                                .monospacedDigit()
+                            if !selectedTopic.scoreUnit.isEmpty {
+                                Text(selectedTopic.scoreUnit)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                            }
+                        }
+
+                        HStack(spacing: 5) {
+                            Text(selectedTopic.ctaLabel)
+                                .font(.system(size: 14, weight: .semibold))
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                        }
+                        .foregroundStyle(selectedTopic.accent)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(selectedTopic.metric) \(selectedTopic.ctaLabel)")
+                .accessibilityIdentifier("today.status.card")
+
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 4)
+            .padding(.vertical, 6)
+            .contextMenu {
+                Button("问 Vitora 为什么", action: onAskVitora)
+                Button("告诉 Vitora 这里不准") { onCalibrate("这里不准") }
+                Button("查看分析", action: onOpenDetail)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.horizontal, 0)
-        .padding(.top, 0)
         .padding(.bottom, 2)
-        .animation(.easeOut(duration: 0.22), value: selectedMode)
+        .animation(.easeOut(duration: 0.22), value: selectedTopic)
     }
 }
 
-private struct CyclePhaseStrip: View {
-    let cycleDay: Int
-    let phaseLabel: String
+struct TodayTopicStrip: View {
+    @Binding var selectedTopic: TodayInsightTopic
+    @Binding var expandedTopic: TodayInsightTopic?
+    let onQuickRecord: () -> Void
+
+    private let pillTopics: [TodayInsightTopic] = [.period, .sleep, .nutrition]
 
     var body: some View {
-        GeometryReader { proxy in
-            let width = proxy.size.width
-            let nodes = visiblePhaseNodes
-            let positions = [0.16, 0.50, 0.84].map { arcPoint(t: $0, width: width) }
-
-            ZStack(alignment: .topLeading) {
-                Canvas { context, size in
-                    let path = cycleArcPath(width: size.width)
-
-                    context.stroke(
-                        path,
-                        with: .linearGradient(
-                            Gradient(colors: nodes.map { $0.color.opacity(0.35) }),
-                            startPoint: CGPoint(x: 20, y: 24),
-                            endPoint: CGPoint(x: size.width - 20, y: 24)
-                        ),
-                        style: StrokeStyle(lineWidth: 3.2, lineCap: .round, lineJoin: .round)
+        HStack(spacing: 8) {
+            ForEach(pillTopics) { topic in
+                let isActive = selectedTopic == topic
+                Button {
+                    withAnimation(.easeOut(duration: 0.22)) {
+                        if isActive {
+                            selectedTopic = .energy
+                            expandedTopic = nil
+                        } else {
+                            selectedTopic = topic
+                            expandedTopic = topic
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: topic.icon)
+                            .font(.system(size: 14, weight: .semibold))
+                        Text(topic.title)
+                            .font(.system(size: 14, weight: .bold))
+                    }
+                    .foregroundStyle(isActive ? .white : VitoraTheme.ColorToken.strongText)
+                    .padding(.horizontal, 18)
+                    .frame(height: 38)
+                    .background(
+                        isActive
+                            ? VitoraTheme.ColorToken.strongText
+                            : Color.white.opacity(0.82),
+                        in: Capsule()
                     )
-
-                    context.stroke(
-                        path,
-                        with: .linearGradient(
-                            Gradient(colors: nodes.map(\.color)),
-                            startPoint: CGPoint(x: 20, y: 24),
-                            endPoint: CGPoint(x: size.width - 20, y: 24)
-                        ),
-                        style: StrokeStyle(lineWidth: 5.0, lineCap: .round, lineJoin: .round)
+                    .overlay(
+                        isActive
+                            ? nil
+                            : Capsule().stroke(Color.black.opacity(0.08), lineWidth: 0.7)
                     )
                 }
-
-                ForEach(Array(nodes.enumerated()), id: \.element.phase) { index, node in
-                    let point = positions[index]
-                    phaseMarker(systemName: node.symbol, color: node.color, selected: node.isCurrent)
-                        .position(x: point.x, y: point.y)
-                        .accessibilityHidden(true)
-
-                    phaseLabel(node.label, selected: node.isCurrent)
-                        .position(x: point.x, y: 61)
-                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(topic.title) \(topic.metric)")
+                .accessibilityIdentifier("today.topic.\(topic.rawValue)")
             }
+
+            Spacer(minLength: 0)
         }
-        .frame(height: 72)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("周期圆弧，\(phaseLabel) Day \(cycleDay)，展示上一阶段、当前阶段和下一阶段")
-        .accessibilityIdentifier("today.cycle.phase.strip")
+        .accessibilityIdentifier("today.topic.strip")
+    }
+}
+
+private struct TodayUnifiedOrbitArc: View {
+    @Binding var selectedTopic: TodayInsightTopic
+    @Binding var expandedTopic: TodayInsightTopic?
+    let stageWidth: CGFloat
+    let stageHeight: CGFloat
+    let center: CGPoint
+    let cycleDay: Int
+    let reduceMotion: Bool
+    let onQuickRecord: () -> Void
+
+    private struct OrbitTopic: Identifiable {
+        let topic: TodayInsightTopic
+        let point: CGPoint
+
+        var id: TodayInsightTopic { topic }
     }
 
-    private enum StripPhase: CaseIterable {
-        case menstrual
-        case follicular
-        case ovulation
-        case luteal
-
-        var previous: StripPhase {
-            switch self {
-            case .menstrual: return .luteal
-            case .follicular: return .menstrual
-            case .ovulation: return .follicular
-            case .luteal: return .ovulation
-            }
-        }
-
-        var next: StripPhase {
-            switch self {
-            case .menstrual: return .follicular
-            case .follicular: return .ovulation
-            case .ovulation: return .luteal
-            case .luteal: return .menstrual
-            }
-        }
-    }
-
-    private struct PhaseNode {
-        let phase: StripPhase
-        let label: String
-        let symbol: String
-        let color: Color
-        let isCurrent: Bool
-    }
-
-    private var visiblePhaseNodes: [PhaseNode] {
-        let current = phase(for: cycleDay)
-        return [current.previous, current, current.next].map { phase in
-            PhaseNode(
-                phase: phase,
-                label: label(for: phase, isCurrent: phase == current),
-                symbol: symbol(for: phase),
-                color: phaseColor(phase),
-                isCurrent: phase == current
+    private var topicPositions: [OrbitTopic] {
+        TodayInsightTopic.allCases.map { topic in
+            OrbitTopic(
+                topic: topic,
+                point: TodayOrbitArcGeometry.point(
+                    stageWidth: stageWidth,
+                    stageHeight: stageHeight,
+                    center: center,
+                    angle: TodayOrbitArcGeometry.angle(for: topic)
+                )
             )
         }
     }
 
-    private func phase(for day: Int) -> StripPhase {
-        switch day {
-        case 1...5:
-            return .menstrual
-        case 6...13:
-            return .follicular
-        case 14...16:
-            return .ovulation
-        default:
-            return .luteal
+    private var quickRecordPoint: CGPoint {
+        TodayOrbitArcGeometry.point(
+            stageWidth: stageWidth,
+            stageHeight: stageHeight,
+            center: center,
+            angle: TodayOrbitArcGeometry.quickRecordAngle
+        )
+    }
+
+    var body: some View {
+        ZStack {
+            TodayUnifiedOrbitTrack(
+                stageWidth: stageWidth,
+                stageHeight: stageHeight,
+                center: center,
+                expandedTopic: expandedTopic,
+                cycleDay: cycleDay
+            )
+
+            ForEach(topicPositions) { item in
+                TodayUnifiedOrbitTopicButton(
+                    topic: item.topic,
+                    isExpanded: expandedTopic == item.topic,
+                    action: {
+                        withTopicAnimation {
+                            if expandedTopic == item.topic {
+                                expandedTopic = nil
+                            } else {
+                                selectedTopic = item.topic
+                                expandedTopic = item.topic
+                            }
+                        }
+                    }
+                )
+                .position(item.point)
+                .transition(.scale(scale: 0.92).combined(with: .opacity))
+            }
+
+            if let expandedTopic {
+                TodayUnifiedOrbitArcInfoOverlay(
+                    topic: expandedTopic,
+                    stageWidth: stageWidth,
+                    stageHeight: stageHeight,
+                    center: center
+                )
+                .transition(reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.96)))
+            }
+
+            Button(action: onQuickRecord) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.94))
+                        .frame(width: 54, height: 54)
+                        .overlay(Circle().stroke(Color.black.opacity(0.07), lineWidth: 0.8))
+                        .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 6)
+
+                    Image(systemName: "plus")
+                        .font(.system(size: 23, weight: .medium))
+                        .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                }
+                .frame(width: 74, height: 74)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .position(quickRecordPoint)
+            .accessibilityLabel("快捷记录")
+            .accessibilityIdentifier("today.unifiedOrbit.quickRecord")
+        }
+        .animation(reduceMotion ? nil : .spring(response: 0.34, dampingFraction: 0.82), value: expandedTopic)
+    }
+
+    private func withTopicAnimation(_ updates: @escaping () -> Void) {
+        if reduceMotion {
+            updates()
+        } else {
+            withAnimation(.spring(response: 0.34, dampingFraction: 0.82), updates)
+        }
+    }
+}
+
+private enum TodayOrbitArcGeometry {
+    static let quickRecordAngle: CGFloat = 58
+    private static let trackStartAngle: CGFloat = -108
+    private static let trackEndAngle: CGFloat = 64
+
+    static func angle(for topic: TodayInsightTopic) -> CGFloat {
+        switch topic {
+        case .energy: return -58
+        case .sleep: return -32
+        case .period: return -6
+        case .nutrition: return 20
         }
     }
 
-    private func label(for phase: StripPhase, isCurrent: Bool) -> String {
-        switch phase {
-        case .menstrual:
-            return isCurrent ? "月经期 D\(cycleDay)" : "月经期"
-        case .follicular:
-            return isCurrent ? "卵泡期 D\(cycleDay)" : "卵泡期"
-        case .ovulation:
-            return isCurrent ? "排卵期 D\(cycleDay)" : "排卵期"
-        case .luteal:
-            return isCurrent ? "黄体期 D\(cycleDay)" : "黄体期"
+    static func segment(for topic: TodayInsightTopic) -> (start: CGFloat, end: CGFloat) {
+        switch topic {
+        case .energy: return (-108, -46)
+        case .sleep: return (-50, -14)
+        case .period: return (-24, 18)
+        case .nutrition: return (0, 36)
         }
     }
 
-    private func symbol(for phase: StripPhase) -> String {
-        switch phase {
-        case .menstrual:
-            return "drop.fill"
-        case .follicular:
-            return "leaf.fill"
-        case .ovulation:
-            return "sparkle"
-        case .luteal:
-            return "heart.fill"
-        }
+    static func fullTrackPath(stageWidth: CGFloat, stageHeight: CGFloat, center: CGPoint) -> Path {
+        arcPath(
+            stageWidth: stageWidth,
+            stageHeight: stageHeight,
+            center: center,
+            startAngle: trackStartAngle,
+            endAngle: trackEndAngle,
+            steps: 72
+        )
     }
 
-    private func phaseColor(_ phase: StripPhase) -> Color {
-        switch phase {
-        case .menstrual:
-            return DynamicAuraVariant.menstrual.softTint.opacity(0.94)
-        case .follicular:
-            return DynamicAuraVariant.follicular.softTint.opacity(0.94)
-        case .ovulation:
-            return DynamicAuraVariant.ovulation.softTint.opacity(0.98)
-        case .luteal:
-            return VitoraTheme.ColorToken.lutealGold.opacity(0.98)
-        }
+    static func selectedPath(for topic: TodayInsightTopic, stageWidth: CGFloat, stageHeight: CGFloat, center: CGPoint) -> Path {
+        let segment = segment(for: topic)
+        return arcPath(
+            stageWidth: stageWidth,
+            stageHeight: stageHeight,
+            center: center,
+            startAngle: segment.start,
+            endAngle: segment.end,
+            steps: 36
+        )
     }
 
-    private func cycleArcPath(width: CGFloat) -> Path {
+    static func point(stageWidth: CGFloat, stageHeight: CGFloat, center: CGPoint, angle: CGFloat) -> CGPoint {
+        let ellipse = ellipse(stageWidth: stageWidth, stageHeight: stageHeight, center: center)
+        let radians = angle * .pi / 180
+        return CGPoint(
+            x: ellipse.center.x + ellipse.radiusX * cos(radians),
+            y: ellipse.center.y + ellipse.radiusY * sin(radians)
+        )
+    }
+
+    static func tangentDegrees(stageWidth: CGFloat, stageHeight: CGFloat, center: CGPoint, angle: CGFloat) -> Double {
+        let ellipse = ellipse(stageWidth: stageWidth, stageHeight: stageHeight, center: center)
+        let radians = angle * .pi / 180
+        let dx = -ellipse.radiusX * sin(radians)
+        let dy = ellipse.radiusY * cos(radians)
+        return Double(atan2(dy, dx) * 180 / .pi)
+    }
+
+    private static func arcPath(
+        stageWidth: CGFloat,
+        stageHeight: CGFloat,
+        center: CGPoint,
+        startAngle: CGFloat,
+        endAngle: CGFloat,
+        steps: Int
+    ) -> Path {
         var path = Path()
-        let start = arcPoint(t: 0, width: width)
-        let first = arcPoint(t: 0.5, width: width)
-        let end = arcPoint(t: 1, width: width)
-        path.move(to: start)
-        path.addQuadCurve(
-            to: first,
-            control: CGPoint(x: width * 0.30, y: 40)
-        )
-        path.addQuadCurve(
-            to: end,
-            control: CGPoint(x: width * 0.70, y: 40)
-        )
+        for index in 0...steps {
+            let progress = CGFloat(index) / CGFloat(max(steps, 1))
+            let angle = startAngle + (endAngle - startAngle) * progress
+            let point = point(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: angle)
+            if index == 0 {
+                path.move(to: point)
+            } else {
+                path.addLine(to: point)
+            }
+        }
         return path
     }
 
-    private func arcPoint(t: CGFloat, width: CGFloat) -> CGPoint {
-        let clamped = min(max(t, 0), 1)
-        let x = 24 + clamped * max(width - 48, 1)
-        let y = 18 + sin(clamped * .pi) * 19
-        return CGPoint(x: x, y: y)
-    }
-
-    private func phaseMarker(systemName: String, color: Color, selected: Bool) -> some View {
-        Image(systemName: systemName)
-            .font(.system(size: selected ? 14 : 10, weight: .bold))
-            .foregroundStyle(color)
-            .frame(width: selected ? 27 : 20, height: selected ? 27 : 20)
-            .background(selected ? Color.white.opacity(0.66) : Color.white.opacity(0.16), in: Circle())
-            .overlay(Circle().stroke(Color.white.opacity(selected ? 0.76 : 0.30), lineWidth: selected ? 1.0 : 0.7))
-            .shadow(color: color.opacity(selected ? 0.28 : 0.12), radius: selected ? 7 : 3, x: 0, y: 3)
-    }
-
-    private func phaseLabel(_ text: String, selected: Bool) -> some View {
-        Text(text)
-            .font(.system(size: selected ? 14 : 12, weight: selected ? .bold : .semibold))
-            .foregroundStyle(selected ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.secondaryText.opacity(0.78))
-            .lineLimit(1)
-            .minimumScaleFactor(0.72)
+    private static func ellipse(stageWidth: CGFloat, stageHeight: CGFloat, center: CGPoint) -> (center: CGPoint, radiusX: CGFloat, radiusY: CGFloat) {
+        let radiusX = min(124, max(104, stageWidth * 0.33))
+        let radiusY = min(156, max(142, stageHeight * 0.37))
+        let ellipseX = min(stageWidth - radiusX - 30, center.x + 22)
+        return (
+            center: CGPoint(x: max(center.x + 8, ellipseX), y: center.y + 32),
+            radiusX: radiusX,
+            radiusY: radiusY
+        )
     }
 }
 
-struct EnergyBowlView: View {
-    let mode: TodayMetricMode
-    let trigger: Int
+private struct TodayUnifiedOrbitTrack: View {
+    let stageWidth: CGFloat
+    let stageHeight: CGFloat
+    let center: CGPoint
+    let expandedTopic: TodayInsightTopic?
     let cycleDay: Int
-    let cyclePhase: String
-    let onOpenData: () -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var fillLevel: CGFloat = 0.16
 
     var body: some View {
-        GeometryReader { proxy in
-            let width = proxy.size.width
-            let height = proxy.size.height
-            let bowlWidth = min(width * 0.92, 334)
-            let bowlHeight: CGFloat = 146
-            let centerX = width / 2
-            let bowlCenterY = height * 0.55
-            let bowlTopY = bowlCenterY - bowlHeight * 0.45
-            let bowlBottomY = bowlCenterY + bowlHeight * 0.48
-            let waterSurfaceY = bowlBottomY - (bowlBottomY - bowlTopY) * min(max(fillLevel, 0.12), 0.86)
-
-            ZStack(alignment: .topLeading) {
-                EnergyBowlRainIntakeLayer(
-                    mode: mode,
-                    trigger: trigger,
-                    reduceMotion: reduceMotion,
-                    impactPoint: CGPoint(x: centerX, y: max(104, bowlTopY + 14)),
-                    waterSurfaceY: waterSurfaceY
-                )
-                    .frame(width: width, height: height)
-                    .allowsHitTesting(false)
-
-                FrostedEnergyBowlView(mode: mode, fillLevel: fillLevel)
-                    .frame(width: bowlWidth, height: bowlHeight)
-                    .position(x: centerX, y: bowlCenterY)
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("能量碗")
-                    .accessibilityIdentifier("today.energy.bowl")
-
-                EnergyBowlMetricCluster(mode: mode, onOpenData: onOpenData)
-                    .frame(width: min(width - 8, 348))
-                    .position(x: centerX, y: 67)
-
-                CyclePhaseStrip(cycleDay: cycleDay, phaseLabel: cyclePhase)
-                    .frame(width: min(width - 34, 310), height: 72)
-                    .position(x: centerX, y: min(height - 20, bowlBottomY + 30))
+        ZStack(alignment: .topLeading) {
+            Canvas { context, _ in
+                drawBaseRail(in: &context)
+                drawExpandedRail(in: &context)
             }
         }
-        .frame(maxWidth: .infinity)
-        .onAppear {
-            fillLevel = 0.18
-            animateFill(to: mode.fillLevel, delay: reduceMotion ? 0.02 : 0.16)
-        }
-        .onChange(of: mode) { _, newMode in
-            if reduceMotion {
-                fillLevel = newMode.fillLevel
-            } else {
-                withAnimation(.easeOut(duration: 0.18)) {
-                    fillLevel = 0.25
-                }
-                animateFill(to: newMode.fillLevel, delay: 0.22)
-            }
-        }
-        .onChange(of: trigger) { _, _ in
-            guard !reduceMotion else {
-                fillLevel = mode.fillLevel
-                return
-            }
-            let lifted = min(mode.fillLevel + 0.045, 0.86)
-            withAnimation(.easeOut(duration: 0.28)) {
-                fillLevel = lifted
-            }
-            animateFill(to: mode.fillLevel, delay: 0.62)
-        }
-    }
-
-    private func animateFill(to target: CGFloat, delay: Double) {
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
-            withAnimation(.spring(response: 0.72, dampingFraction: 0.86)) {
-                fillLevel = target
-            }
-        }
-    }
-}
-
-private struct FrostedEnergyBowlView: View {
-    let mode: TodayMetricMode
-    let fillLevel: CGFloat
-
-    var body: some View {
-        ZStack {
-            supportShadow
-            bowlBase
-            bowlFill
-            innerWallHighlight
-            waterRefraction
-            waterSurface
-            rimUnderShadow
-            rimHighlight
-            topLightWash
-            outerWallStroke
-            innerGlassStroke
-            bottomInnerGlow
-            contactShadow
-            accessibilityProbe
-        }
-    }
-
-    private var supportShadow: some View {
-        Color.clear.frame(width: 1, height: 1)
-    }
-
-    private var bowlBase: some View {
-        BowlShape()
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.22),
-                        Color(red: 255 / 255, green: 251 / 255, blue: 246 / 255).opacity(0.30),
-                        Color(red: 239 / 255, green: 247 / 255, blue: 255 / 255).opacity(0.38),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-    }
-
-    private var bowlFill: some View {
-        BowlFillLayer(level: fillLevel)
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.20),
-                        mode.secondaryAccent.opacity(0.42),
-                        mode.accent.opacity(0.32),
-                        Color(red: 232 / 255, green: 246 / 255, blue: 255 / 255).opacity(0.24),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .blur(radius: 2.6)
-            .clipShape(BowlShape())
-    }
-
-    private var innerWallHighlight: some View {
-        BowlShape()
-            .inset(by: 4)
-            .stroke(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.60),
-                        Color(red: 198 / 255, green: 213 / 255, blue: 226 / 255).opacity(0.32),
-                        Color.white.opacity(0.46),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                ),
-                lineWidth: 2.2
-            )
-            .blur(radius: 0.25)
-            .blendMode(.screen)
-    }
-
-    private var waterRefraction: some View {
-        BowlWaterSurface(level: fillLevel)
-            .stroke(Color(red: 121 / 255, green: 155 / 255, blue: 191 / 255).opacity(0.20), lineWidth: 5.0)
-            .blur(radius: 3.0)
-            .clipShape(BowlShape())
-    }
-
-    private var waterSurface: some View {
-        BowlWaterSurface(level: fillLevel)
-            .stroke(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.82),
-                        mode.secondaryAccent.opacity(0.62),
-                        Color.white.opacity(0.46),
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ),
-                style: StrokeStyle(lineWidth: 1.7, lineCap: .round, lineJoin: .round)
-            )
-            .blur(radius: 0.35)
-            .clipShape(BowlShape())
-    }
-
-    private var rimUnderShadow: some View {
-        BowlRimShape()
-            .stroke(Color(red: 155 / 255, green: 172 / 255, blue: 190 / 255).opacity(0.24), lineWidth: 2.2)
-            .offset(y: 4)
-            .blur(radius: 1.1)
-    }
-
-    private var rimHighlight: some View {
-        BowlRimShape()
-            .stroke(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.96),
-                        mode.secondaryAccent.opacity(0.58),
-                        Color(red: 190 / 255, green: 204 / 255, blue: 218 / 255).opacity(0.58),
-                        Color.white.opacity(0.82),
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ),
-                style: StrokeStyle(lineWidth: 3.0, lineCap: .round, lineJoin: .round)
-            )
-            .blur(radius: 0.15)
-    }
-
-    private var topLightWash: some View {
-        VStack {
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.88),
-                            Color.white.opacity(0.52),
-                            Color.white.opacity(0.14),
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
-                .frame(height: 10)
-                .blur(radius: 5)
-                .offset(y: -2)
-                .blendMode(.screen)
-            Spacer(minLength: 0)
-        }
-    }
-
-    private var outerWallStroke: some View {
-        BowlShape()
-            .stroke(
-                LinearGradient(
-                    colors: [
-                        Color.white.opacity(0.98),
-                        Color(red: 197 / 255, green: 212 / 255, blue: 226 / 255).opacity(0.70),
-                        Color(red: 235 / 255, green: 226 / 255, blue: 216 / 255).opacity(0.44),
-                        Color.white.opacity(0.84),
-                    ],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                ),
-                lineWidth: 2.1
-            )
-    }
-
-    private var innerGlassStroke: some View {
-        BowlShape()
-            .inset(by: 7)
-            .stroke(Color.white.opacity(0.36), lineWidth: 1.2)
-            .blur(radius: 1.3)
-            .blendMode(.screen)
-    }
-
-    private var bottomInnerGlow: some View {
-        VStack {
-            Spacer(minLength: 0)
-            ZStack {
-                Ellipse()
-                    .fill(mode.accent.opacity(0.07 + fillLevel * 0.14))
-                    .frame(width: 226, height: 42)
-                    .blur(radius: 18)
-                    .blendMode(.screen)
-
-                Ellipse()
-                    .stroke(Color.white.opacity(0.18 + fillLevel * 0.20), lineWidth: 1)
-                    .frame(width: 184, height: 24)
-                    .blur(radius: 1.5)
-                    .offset(y: -7)
-            }
-            .offset(y: 7)
-        }
-    }
-
-    private var contactShadow: some View {
-        Color.clear.frame(width: 1, height: 1)
-    }
-
-    private var accessibilityProbe: some View {
-        Color.clear
-            .frame(width: 1, height: 1)
-            .accessibilityElement()
-            .accessibilityLabel("能量碗水位")
-            .accessibilityValue(waterLevelDescription)
-            .accessibilityIdentifier("today.energy.water.level")
-    }
-
-    private var waterLevelDescription: String {
-        let percent = Int((fillLevel * 100).rounded())
-        let band: String
-        switch fillLevel {
-        case ..<0.34:
-            band = "偏浅"
-        case ..<0.68:
-            band = "半碗"
-        default:
-            band = "接近满碗"
-        }
-        return "\(percent)%，\(band)"
-    }
-}
-
-private struct EnergyBowlMetricCluster: View {
-    let mode: TodayMetricMode
-    let onOpenData: () -> Void
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var searchIconOffset: CGFloat = 0
-    @State private var bounceTask: Task<Void, Never>?
-
-    var body: some View {
-        ZStack {
-            metricNumber
-                .frame(maxWidth: .infinity, alignment: .center)
-
-            HStack(spacing: 12) {
-                Text("/")
-                    .font(.system(size: 38, weight: .black, design: .rounded))
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText.opacity(0.48))
-                    .frame(width: 22, height: 58)
-                    .offset(y: 1)
-
-                statusDataButton
-            }
-            .offset(x: 122, y: 7)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 96)
-        .accessibilityElement(children: .contain)
-        .onAppear(perform: startSearchBounce)
-        .onDisappear {
-            bounceTask?.cancel()
-            bounceTask = nil
-            searchIconOffset = 0
-        }
-    }
-
-    private var metricNumber: some View {
-        HStack(alignment: .lastTextBaseline, spacing: 1) {
-            if mode == .cycle {
-                Text(mode.unit)
-                    .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundStyle(mode.secondaryAccent.opacity(0.90))
-                    .padding(.trailing, 2)
-            }
-
-            PixelMetricNumber(text: mode.number, mode: mode)
-                .frame(width: mode.number.count > 2 ? 112 : 108, height: 76)
-                .accessibilityIdentifier("today.energy.score")
-
-            if mode != .cycle && mode != .energy {
-                Text(mode.unit)
-                    .font(.system(size: 15, weight: .heavy, design: .rounded))
-                    .foregroundStyle(EnergyNumberStyle.unitGradient)
-                    .offset(y: -4)
-            }
-        }
+        .frame(width: stageWidth, height: stageHeight)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("\(mode.number)\(mode.unit)")
+        .accessibilityLabel("右侧统一半圆弧轨道，黄体期第 \(cycleDay) 天")
+        .accessibilityIdentifier("today.unifiedOrbit.cycleArc")
     }
 
-    private var statusDataButton: some View {
-        Button(action: onOpenData) {
-            VStack(spacing: 2) {
-                HStack(spacing: 5) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 11.5, weight: .bold))
-                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                        .offset(y: searchIconOffset)
-                        .accessibilityHidden(true)
+    private func drawBaseRail(in context: inout GraphicsContext) {
+        let path = TodayOrbitArcGeometry.fullTrackPath(stageWidth: stageWidth, stageHeight: stageHeight, center: center)
+        context.stroke(
+            path,
+            with: .color(Color.black.opacity(0.065)),
+            style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round)
+        )
+    }
 
-                    Text(mode.statusText)
-                        .font(.system(size: 13.5, weight: .heavy))
-                        .foregroundStyle(VitoraTheme.ColorToken.actionPrimaryDeep)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.82)
-                        .accessibilityIdentifier("today.energy.status")
-                }
-                .padding(.horizontal, 9)
-                .frame(height: 27)
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color.white.opacity(0.72),
-                            VitoraTheme.ColorToken.actionPrimarySoft.opacity(0.50),
-                            Color(red: 229 / 255, green: 245 / 255, blue: 248 / 255).opacity(0.42),
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    in: Capsule()
-                )
-                .overlay(Capsule().stroke(Color.white.opacity(0.74), lineWidth: 0.75))
-                .shadow(color: VitoraTheme.ColorToken.actionPrimaryDeep.opacity(0.10), radius: 7, x: 0, y: 4)
+    private func drawExpandedRail(in context: inout GraphicsContext) {
+        guard let expandedTopic else { return }
 
-                Text("查看数据")
-                    .font(.system(size: 9.5, weight: .semibold))
-                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText.opacity(0.76))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.82)
+        let path = TodayOrbitArcGeometry.selectedPath(
+            for: expandedTopic,
+            stageWidth: stageWidth,
+            stageHeight: stageHeight,
+            center: center
+        )
+        let segment = TodayOrbitArcGeometry.segment(for: expandedTopic)
+        let start = TodayOrbitArcGeometry.point(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: segment.start)
+        let end = TodayOrbitArcGeometry.point(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: segment.end)
+
+        var shadowContext = context
+        shadowContext.addFilter(.shadow(color: expandedTopic.accent.opacity(0.18), radius: 14, x: 0, y: 8))
+        shadowContext.stroke(
+            path,
+            with: .color(Color.white.opacity(0.92)),
+            style: StrokeStyle(lineWidth: 54, lineCap: .round, lineJoin: .round)
+        )
+
+        context.stroke(
+            path,
+            with: .linearGradient(
+                Gradient(colors: [
+                    Color.white.opacity(0.98),
+                    expandedTopic.softAccent.opacity(0.72),
+                    Color.white.opacity(0.88),
+                ]),
+                startPoint: start,
+                endPoint: end
+            ),
+            style: StrokeStyle(lineWidth: 48, lineCap: .round, lineJoin: .round)
+        )
+    }
+}
+
+private struct TodayUnifiedOrbitArcInfoOverlay: View {
+    let topic: TodayInsightTopic
+    let stageWidth: CGFloat
+    let stageHeight: CGFloat
+    let center: CGPoint
+
+    var body: some View {
+        let segment = TodayOrbitArcGeometry.segment(for: topic)
+        let iconAngle = segment.start + 6
+        let valueAngle: CGFloat = {
+            switch topic {
+            case .nutrition:
+                return segment.start + 27
+            default:
+                return segment.end - 12
             }
-            .frame(minWidth: 74)
+        }()
+        let iconPoint = TodayOrbitArcGeometry.point(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: iconAngle)
+        let valuePoint = TodayOrbitArcGeometry.point(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: valueAngle)
+        let valueRotation = TodayOrbitArcGeometry.tangentDegrees(stageWidth: stageWidth, stageHeight: stageHeight, center: center, angle: valueAngle)
+
+        ZStack {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.96))
+                    .frame(width: 42, height: 42)
+                    .overlay(Circle().stroke(Color.white.opacity(0.9), lineWidth: 1))
+                    .shadow(color: topic.accent.opacity(0.16), radius: 8, x: 0, y: 5)
+
+                Image(systemName: topic.icon)
+                    .font(.system(size: 17, weight: .heavy))
+                    .foregroundStyle(topic.accent)
+            }
+            .position(iconPoint)
+
+            Text(topic.metric)
+                .font(.system(size: 17, weight: .heavy, design: .rounded))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.88))
+                .monospacedDigit()
+                .lineLimit(1)
+                .minimumScaleFactor(0.62)
+                .fixedSize(horizontal: true, vertical: false)
+                .rotationEffect(.degrees(valueRotation))
+                .shadow(color: Color.white.opacity(0.84), radius: 5, x: 0, y: 1)
+                .position(valuePoint)
+        }
+        .frame(width: stageWidth, height: stageHeight)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+private struct TodayUnifiedOrbitTopicButton: View {
+    let topic: TodayInsightTopic
+    let isExpanded: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                if isExpanded {
+                    Color.clear
+                        .frame(width: 60, height: 60)
+                } else {
+                    Circle()
+                        .fill(Color.white.opacity(0.92))
+                        .frame(width: 52, height: 52)
+                        .overlay(
+                            Circle()
+                                .stroke(Color.black.opacity(0.07), lineWidth: 0.7)
+                        )
+                        .shadow(color: topic.accent.opacity(0.08), radius: 6, x: 0, y: 5)
+
+                    Image(systemName: topic.icon)
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                }
+            }
+            .frame(width: 70, height: 70)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(mode.statusText)，查看数据")
-        .accessibilityIdentifier("today.evidence.open")
-    }
-
-    private func startSearchBounce() {
-        guard !reduceMotion, bounceTask == nil else { return }
-
-        bounceTask = Task { @MainActor in
-            while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 700_000_000)
-                await quickSearchHop()
-                try? await Task.sleep(nanoseconds: 100_000_000)
-                await quickSearchHop()
-                try? await Task.sleep(nanoseconds: 1_550_000_000)
-            }
-        }
-    }
-
-    @MainActor
-    private func quickSearchHop() async {
-        guard !Task.isCancelled else { return }
-
-        withAnimation(.easeOut(duration: 0.10)) {
-            searchIconOffset = -3.5
-        }
-        try? await Task.sleep(nanoseconds: 95_000_000)
-
-        guard !Task.isCancelled else { return }
-
-        withAnimation(.spring(response: 0.22, dampingFraction: 0.46)) {
-            searchIconOffset = 0
-        }
-        try? await Task.sleep(nanoseconds: 150_000_000)
+        .accessibilityLabel("\(topic.title) \(topic.metric)")
+        .accessibilityValue(isExpanded ? "已展开" : "未展开")
+        .accessibilityIdentifier("today.unifiedOrbit.\(topic.rawValue)")
     }
 }
+
 
 struct TodayAnalysisSignalChips: View {
     let mode: TodayMetricMode
@@ -986,321 +949,6 @@ struct TodayAnalysisSignalChips: View {
     }
 }
 
-private struct BowlShape: InsettableShape {
-    var insetAmount: CGFloat = 0
-
-    func path(in rect: CGRect) -> Path {
-        let rect = rect.insetBy(dx: insetAmount, dy: insetAmount)
-        var path = Path()
-        let topY = rect.minY + rect.height * 0.13
-        let leftTop = CGPoint(x: rect.minX + rect.width * 0.04, y: topY)
-        let rightTop = CGPoint(x: rect.maxX - rect.width * 0.04, y: topY)
-        let bottom = CGPoint(x: rect.midX, y: rect.maxY - rect.height * 0.04)
-
-        path.move(to: leftTop)
-        path.addLine(to: rightTop)
-        path.addCurve(
-            to: bottom,
-            control1: CGPoint(x: rect.maxX - rect.width * 0.03, y: rect.minY + rect.height * 0.62),
-            control2: CGPoint(x: rect.maxX - rect.width * 0.27, y: rect.maxY - rect.height * 0.01)
-        )
-        path.addCurve(
-            to: leftTop,
-            control1: CGPoint(x: rect.minX + rect.width * 0.27, y: rect.maxY - rect.height * 0.01),
-            control2: CGPoint(x: rect.minX + rect.width * 0.03, y: rect.minY + rect.height * 0.62)
-        )
-        path.closeSubpath()
-        return path
-    }
-
-    func inset(by amount: CGFloat) -> some InsettableShape {
-        var shape = self
-        shape.insetAmount += amount
-        return shape
-    }
-}
-
-private struct BowlRimShape: Shape {
-    func path(in rect: CGRect) -> Path {
-        let topY = rect.minY + rect.height * 0.13
-        let insetX = rect.width * 0.045
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX + insetX, y: topY))
-        path.addCurve(
-            to: CGPoint(x: rect.maxX - insetX, y: topY + rect.height * 0.002),
-            control1: CGPoint(x: rect.minX + rect.width * 0.30, y: topY - rect.height * 0.020),
-            control2: CGPoint(x: rect.minX + rect.width * 0.70, y: topY + rect.height * 0.026)
-        )
-        return path
-    }
-}
-
-private struct BowlFillLayer: Shape {
-    let level: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let clamped = min(max(level, 0.12), 0.86)
-        let fillTop = rect.maxY - rect.height * clamped
-
-        path.move(to: CGPoint(x: rect.minX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: fillTop + rect.height * 0.04))
-        path.addCurve(
-            to: CGPoint(x: rect.maxX, y: fillTop),
-            control1: CGPoint(x: rect.minX + rect.width * 0.28, y: fillTop - rect.height * 0.03),
-            control2: CGPoint(x: rect.minX + rect.width * 0.66, y: fillTop + rect.height * 0.05)
-                        )
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-        path.closeSubpath()
-        return path
-    }
-}
-
-private struct BowlWaterSurface: Shape {
-    let level: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        let clamped = min(max(level, 0.12), 0.86)
-        let surfaceY = rect.maxY - rect.height * clamped
-        let insetX = rect.width * 0.08
-        var path = Path()
-        path.move(to: CGPoint(x: rect.minX + insetX, y: surfaceY + rect.height * 0.012))
-        path.addCurve(
-            to: CGPoint(x: rect.maxX - insetX, y: surfaceY),
-            control1: CGPoint(x: rect.minX + rect.width * 0.32, y: surfaceY - rect.height * 0.025),
-            control2: CGPoint(x: rect.minX + rect.width * 0.66, y: surfaceY + rect.height * 0.032)
-        )
-        return path
-    }
-}
-
-private struct PixelMetricNumber: View {
-    let text: String
-    let mode: TodayMetricMode
-
-    var body: some View {
-        GeometryReader { proxy in
-            let size = text.count > 2 ? min(86, proxy.size.width * 0.60) : min(96, proxy.size.width * 0.68)
-            Text(text)
-                .font(.system(size: size, weight: .heavy, design: .rounded))
-                .minimumScaleFactor(0.66)
-                .foregroundStyle(EnergyNumberStyle.numberGradient)
-                .shadow(color: EnergyNumberStyle.glow.opacity(0.28), radius: 12, x: 0, y: 4)
-                .shadow(color: Color.white.opacity(0.42), radius: 5, x: -1, y: -1)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-        }
-    }
-}
-
-private enum EnergyNumberStyle {
-    static let glow = Color(red: 75 / 255, green: 142 / 255, blue: 228 / 255)
-    static let numberGradient = LinearGradient(
-        colors: [
-            Color(red: 39 / 255, green: 104 / 255, blue: 203 / 255),
-            Color(red: 92 / 255, green: 157 / 255, blue: 241 / 255),
-            Color(red: 120 / 255, green: 190 / 255, blue: 248 / 255),
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    static let unitGradient = LinearGradient(
-        colors: [
-            Color(red: 75 / 255, green: 139 / 255, blue: 230 / 255),
-            Color(red: 113 / 255, green: 181 / 255, blue: 249 / 255),
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-}
-
-private struct EnergyBowlRainIntakeLayer: View {
-    let mode: TodayMetricMode
-    let trigger: Int
-    let reduceMotion: Bool
-    let impactPoint: CGPoint
-    let waterSurfaceY: CGFloat
-    @State private var isRunning = false
-    @State private var startDate = Date()
-
-    var body: some View {
-        ZStack {
-            if reduceMotion {
-                Canvas { context, size in
-                    drawSettledWaterGlow(context: &context, size: size)
-                }
-            } else if isRunning {
-                TimelineView(.animation) { timeline in
-                    Canvas { context, size in
-                        let elapsed = timeline.date.timeIntervalSince(startDate)
-                        let progress = min(max(elapsed / 1.95, 0), 1)
-                        drawTopSource(context: &context, size: size, progress: progress)
-                        drawFallingDrops(context: &context, size: size, progress: progress, time: elapsed)
-                        drawImpactRipples(context: &context, size: size, progress: progress)
-                    }
-                }
-            }
-
-            Color.clear
-                .frame(width: 1, height: 1)
-                .accessibilityElement()
-                .accessibilityLabel("水滴从屏幕顶端落入能量碗")
-                .accessibilityIdentifier("today.energy.intake.animation")
-        }
-        .onAppear {
-            runAnimation()
-        }
-        .onChange(of: trigger) { _, _ in
-            runAnimation()
-        }
-    }
-
-    private func runAnimation() {
-        guard !reduceMotion else {
-            return
-        }
-        startDate = Date()
-        isRunning = true
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 2_180_000_000)
-            withAnimation(.easeOut(duration: 0.22)) {
-                isRunning = false
-            }
-        }
-    }
-
-    private func drawTopSource(context: inout GraphicsContext, size: CGSize, progress: Double) {
-        let alpha = max(0, 1 - progress * 1.45)
-        let sourceRect = CGRect(x: size.width * 0.30, y: -18, width: size.width * 0.40, height: 38)
-        context.fill(
-            Path(ellipseIn: sourceRect),
-            with: .color(mode.secondaryAccent.opacity(0.14 * alpha))
-        )
-    }
-
-    private func drawFallingDrops(context: inout GraphicsContext, size: CGSize, progress: Double, time: TimeInterval) {
-        let mainLocal = min(max(progress / 0.62, 0), 1)
-        if mainLocal < 1 {
-            let eased = easeInOut(mainLocal)
-            let x = impactPoint.x + CGFloat(sin(time * 4.2)) * 7
-            let y = -32 + (impactPoint.y + 6 + 32) * CGFloat(eased)
-            drawDrop(
-                context: &context,
-                center: CGPoint(x: x, y: y),
-                radius: 7.2,
-                color: Color(red: 114 / 255, green: 202 / 255, blue: 255 / 255).opacity(0.74)
-            )
-        }
-
-        for index in 0..<11 {
-            let seed = Double(index + 1)
-            let stagger = 0.04 + seed * 0.035
-            let local = min(max((progress - stagger) / 0.58, 0), 1)
-            guard local > 0, local < 1 else { continue }
-            let randomX = pseudoRandom(seed)
-            let xOffset = CGFloat((randomX - 0.5) * 118)
-            let drift = CGFloat(sin(time * 3.8 + seed)) * 5
-            let x = impactPoint.x + xOffset + drift
-            let endY = impactPoint.y - CGFloat(index % 3) * 5
-            let y = -24 + (endY + 24) * CGFloat(easeIn(local))
-            let radius = CGFloat(2.3 + (seed.truncatingRemainder(dividingBy: 3)) * 0.75)
-            drawDrop(
-                context: &context,
-                center: CGPoint(x: x, y: y),
-                radius: radius,
-                color: particleColor(index: index).opacity(0.40 + 0.28 * (1 - local))
-            )
-        }
-    }
-
-    private func drawImpactRipples(context: inout GraphicsContext, size: CGSize, progress: Double) {
-        guard progress > 0.45 else { return }
-        let splashLocal = min(max((progress - 0.45) / 0.42, 0), 1)
-        let splashAlpha = max(0, 1 - splashLocal)
-        for index in 0..<5 {
-            let angle = Double(index) / 5.0 * .pi * 2
-            let distance = CGFloat(10 + splashLocal * 22)
-            let center = CGPoint(
-                x: impactPoint.x + CGFloat(cos(angle)) * distance * 0.72,
-                y: impactPoint.y + CGFloat(sin(angle)) * distance * 0.25
-            )
-            context.fill(
-                Path(ellipseIn: CGRect(x: center.x - 1.6, y: center.y - 1.6, width: 3.2, height: 3.2)),
-                with: .color(Color.white.opacity(0.42 * splashAlpha))
-            )
-        }
-
-        for index in 0..<3 {
-            let local = min(max((progress - 0.48 - Double(index) * 0.10) / 0.48, 0), 1)
-            guard local > 0 else { continue }
-            let width = size.width * (0.15 + CGFloat(local) * 0.34)
-            let height = CGFloat(5 + local * 11)
-            let rect = CGRect(
-                x: impactPoint.x - width / 2,
-                y: waterSurfaceY - height / 2 + CGFloat(index) * 2,
-                width: width,
-                height: height
-            )
-            context.stroke(
-                Path(ellipseIn: rect),
-                with: .color(Color.white.opacity(0.36 * (1 - local))),
-                lineWidth: 1.15
-            )
-        }
-    }
-
-    private func drawSettledWaterGlow(context: inout GraphicsContext, size: CGSize) {
-        let rect = CGRect(x: size.width * 0.28, y: waterSurfaceY - 9, width: size.width * 0.44, height: 18)
-        context.fill(Path(ellipseIn: rect), with: .color(mode.secondaryAccent.opacity(0.14)))
-    }
-
-    private func drawDrop(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, color: Color) {
-        var path = Path()
-        path.move(to: CGPoint(x: center.x, y: center.y - radius * 1.42))
-        path.addCurve(
-            to: CGPoint(x: center.x + radius, y: center.y + radius * 0.10),
-            control1: CGPoint(x: center.x + radius * 0.72, y: center.y - radius * 0.70),
-            control2: CGPoint(x: center.x + radius, y: center.y - radius * 0.24)
-        )
-        path.addCurve(
-            to: CGPoint(x: center.x, y: center.y + radius * 1.16),
-            control1: CGPoint(x: center.x + radius, y: center.y + radius * 0.80),
-            control2: CGPoint(x: center.x + radius * 0.46, y: center.y + radius * 1.16)
-        )
-        path.addCurve(
-            to: CGPoint(x: center.x - radius, y: center.y + radius * 0.10),
-            control1: CGPoint(x: center.x - radius * 0.46, y: center.y + radius * 1.16),
-            control2: CGPoint(x: center.x - radius, y: center.y + radius * 0.80)
-        )
-        path.addCurve(
-            to: CGPoint(x: center.x, y: center.y - radius * 1.42),
-            control1: CGPoint(x: center.x - radius, y: center.y - radius * 0.24),
-            control2: CGPoint(x: center.x - radius * 0.72, y: center.y - radius * 0.70)
-        )
-        path.closeSubpath()
-        context.fill(path, with: .color(color))
-
-        context.fill(
-            Path(ellipseIn: CGRect(x: center.x - radius * 0.28, y: center.y - radius * 0.60, width: radius * 0.34, height: radius * 0.52)),
-            with: .color(Color.white.opacity(0.38))
-        )
-    }
-
-    private func particleColor(index: Int) -> Color {
-        index.isMultiple(of: 2) ? mode.secondaryAccent : VitoraTheme.ColorToken.auraCyan
-    }
-
-    private func pseudoRandom(_ seed: Double) -> Double {
-        abs((sin(seed * 12.9898) * 43758.5453).truncatingRemainder(dividingBy: 1))
-    }
-
-    private func easeIn(_ value: Double) -> Double {
-        value * value
-    }
-
-    private func easeInOut(_ value: Double) -> Double {
-        value < 0.5 ? 2 * value * value : 1 - pow(-2 * value + 2, 2) / 2
-    }
-}
 struct RealtimePredictionChart: View {
     let mode: TodayMetricMode
 
@@ -1434,6 +1082,168 @@ struct RealtimePredictionChart: View {
         case 1: return topPadding + chartHeight / 2
         default: return topPadding + chartHeight
         }
+    }
+}
+
+// MARK: - Bezier Orbit Arc (right side of bowl)
+
+struct OrbitCascadeArc: View {
+    @Binding var selectedMode: TodayMetricMode
+    let onTapPlus: () -> Void
+
+    // Amber palette (spec §2)
+    private let amberActive = Color(red: 250/255, green: 199/255, blue: 117/255) // #FAC775
+    private let amberBorder = Color(red: 186/255, green: 117/255, blue: 23/255)  // #BA7517
+    private let darkBg = Color(red: 44/255, green: 44/255, blue: 42/255)         // #2C2C2A
+
+    private struct OrbitItem: Identifiable {
+        let id: TodayMetricMode?
+        let icon: String
+        let label: String
+    }
+
+    private let items: [OrbitItem] = [
+        OrbitItem(id: .energy, icon: "bolt.fill", label: "能量"),
+        OrbitItem(id: .sleep, icon: "moon.fill", label: "睡眠"),
+        OrbitItem(id: .cycle, icon: "drop.fill", label: "经期"),
+        OrbitItem(id: nil, icon: "plus", label: "+"),
+    ]
+
+    // Spec §4.4: Exact positions (right-aligned, from container trailing edge)
+    // Position 1: top=76, right=38; Position 2: top=132, right=12 (apex)
+    // Position 3: top=196, right=12; Position 4: top=250, right=38
+    private func position(index: Int, in size: CGSize) -> CGPoint {
+        let positions: [(top: CGFloat, right: CGFloat)] = [
+            (76, 38), (132, 12), (196, 12), (250, 38)
+        ]
+        let p = positions[min(index, positions.count - 1)]
+        return CGPoint(x: size.width - p.right - 19, y: p.top)
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let size = proxy.size
+
+            // Faint bezier arc path (spec: M268,88 Q312,178 264,270 mapped to frame)
+            Path { path in
+                let p0 = position(index: 0, in: size)
+                let apex = CGPoint(x: size.width - 12 + 10, y: (position(index: 1, in: size).y + position(index: 2, in: size).y) / 2)
+                let p3 = position(index: 3, in: size)
+                path.move(to: p0)
+                path.addQuadCurve(to: p3, control: apex)
+            }
+            .stroke(Color(red: 0, green: 0, blue: 0).opacity(0.06), style: StrokeStyle(lineWidth: 1, dash: [4, 6]))
+
+            // Orbit dots
+            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                let pos = position(index: index, in: size)
+                let isSelected = item.id == selectedMode
+                let isPlus = item.id == nil
+                let dotSize: CGFloat = isSelected ? 42 : 38
+
+                Button {
+                    if let mode = item.id {
+                        withAnimation(.easeOut(duration: 0.2)) { selectedMode = mode }
+                    } else {
+                        onTapPlus()
+                    }
+                } label: {
+                    ZStack {
+                        if isPlus {
+                            Circle()
+                                .fill(darkBg)
+                                .frame(width: dotSize, height: dotSize)
+                        } else {
+                            Circle()
+                                .fill(isSelected ? amberActive : Color.white)
+                                .frame(width: dotSize, height: dotSize)
+                            Circle()
+                                .stroke(
+                                    isSelected ? amberBorder : Color.black.opacity(0.08),
+                                    lineWidth: isSelected ? 1.5 : 0.5
+                                )
+                                .frame(width: dotSize, height: dotSize)
+                        }
+
+                        Image(systemName: isPlus ? "plus" : item.icon)
+                            .font(.system(size: isPlus ? 15 : 14, weight: .medium))
+                            .foregroundStyle(isPlus ? .white : (isSelected ? amberBorder : Color(red: 95/255, green: 94/255, blue: 90/255)))
+                    }
+                }
+                .buttonStyle(.plain)
+                .frame(width: 44, height: 44)
+                .position(pos)
+                .accessibilityLabel(item.label)
+            }
+        }
+        .allowsHitTesting(true)
+    }
+}
+
+// MARK: - Top 3-Cell Mode Selector
+
+// MARK: - Top Banana Pill — 3-cell selector (spec §4.1)
+
+struct TopModeSelector: View {
+    @Binding var selectedMode: TodayMetricMode
+
+    // Spec colors
+    private let pillBg = Color(red: 44/255, green: 44/255, blue: 42/255)       // #2C2C2A
+    private let amberFill = Color(red: 250/255, green: 199/255, blue: 117/255)  // #FAC775
+    private let inactiveStroke = Color.white.opacity(0.55)
+
+    private struct SelectorCell: Identifiable {
+        let id: TodayMetricMode
+        let icon: String
+        let label: String
+    }
+
+    private let cells: [SelectorCell] = [
+        SelectorCell(id: .energy, icon: "bolt.fill", label: "能量"),
+        SelectorCell(id: .sleep, icon: "moon.fill", label: "睡眠"),
+        SelectorCell(id: .cycle, icon: "drop.fill", label: "经期"),
+    ]
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(cells) { cell in
+                let isActive = selectedMode == cell.id
+                let cellSize: CGFloat = isActive ? 28 : 24
+
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        selectedMode = cell.id
+                    }
+                } label: {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 6, style: .continuous)
+                            .fill(isActive ? amberFill : Color.clear)
+                            .frame(width: cellSize, height: cellSize)
+
+                        if !isActive {
+                            RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                .stroke(inactiveStroke, lineWidth: 1.4)
+                                .frame(width: cellSize, height: cellSize)
+                        }
+
+                        if isActive {
+                            Text(cell.icon == "bolt.fill" ? "⚡" : cell.icon == "moon.fill" ? "🌙" : "🩸")
+                                .font(.system(size: 14))
+                        }
+                    }
+                }
+                .buttonStyle(.plain)
+                .frame(width: 44, height: 44)
+                .accessibilityLabel(cell.label)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(
+            Capsule()
+                .fill(pillBg)
+                .shadow(color: Color.black.opacity(0.12), radius: 8, x: 0, y: 4)
+        )
     }
 }
 

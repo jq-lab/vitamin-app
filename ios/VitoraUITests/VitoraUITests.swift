@@ -16,7 +16,7 @@ final class VitoraUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.staticTexts["Vitora"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.staticTexts["先认识 Vitora"].exists)
+        XCTAssertTrue(app.staticTexts["选择一种进入方式，稍后 Vitora 会像聊天一样补充最小上下文。"].exists)
         XCTAssertFalse(app.staticTexts["onboarding.identity.title"].exists)
     }
 }

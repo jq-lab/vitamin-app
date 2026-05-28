@@ -231,7 +231,7 @@ final class VitoraAssistantSurfaceUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["更新后的判断"].waitForExistence(timeout: 3))
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.energyCalendar.card"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.otherElements["vitora.input.dock"].exists)
         XCTAssertFalse(app.textFields["vitora.input.text"].exists)
 

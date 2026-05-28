@@ -12,7 +12,7 @@ final class LegacyLunaTextScanTests: XCTestCase {
         assertNoVisibleLegacyLunaText(in: app)
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.energyCalendar.card"].waitForExistence(timeout: 3))
         assertNoVisibleLegacyLunaText(in: app)
     }
 

@@ -16,7 +16,7 @@ final class VisualLanguageSmokeTests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Vitora 知道"].exists)
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.energyCalendar.card"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.descendants(matching: .any)["premium.aura.background.cycle"].exists)
         XCTAssertTrue(app.descendants(matching: .any)["cycle.review.insights"].exists)
         XCTAssertFalse(app.descendants(matching: .any)["cycle.growth.album"].exists)
@@ -81,7 +81,7 @@ final class VisualLanguageSmokeTests: XCTestCase {
         }
 
         app.buttons["tab.cycle"].tap()
-        XCTAssertTrue(app.descendants(matching: .any)["cycle.flowerMap"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.descendants(matching: .any)["cycle.energyCalendar.card"].waitForExistence(timeout: 5))
         waitForAnimationsToSettle()
         try saveScreenshot(named: "07-premium-aura-cycle", in: screenshotDirectory)
     }

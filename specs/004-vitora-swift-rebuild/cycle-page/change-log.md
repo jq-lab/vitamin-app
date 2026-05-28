@@ -2,6 +2,40 @@
 
 > 后续任何 Cycle 页面相关改动都必须追加到本文件。
 
+## 2026-05-28 · 能量复盘日历 v1.8
+
+**目的**
+
+按用户提供的日历 + `6.5` 参考图，把 Cycle 首屏从花田地图切换为“能量日历折叠/展开 + 指标卡”的信息结构；左侧继续是我的，右侧继续是分享，报告分段入口下移到指标卡下方。
+
+**具体改动**
+
+- `CycleView.swift`：新增 `CycleEnergyDashboardFrame`、`CycleEnergyCalendarCard`、折叠周历 strip、展开月历网格、选中日能量摘要和 `CycleMetricSummaryCard`。
+- `CycleView.swift`：Header 移除报告胶囊，只保留左头像、中间轻标题和右分享；`本周 / 趋势对比 / 近期` 移到 `6.5` 指标卡下方。
+- `CyclePivotUITests.swift` / `AccessibilityUITests.swift` / `VisualLanguageSmokeTests.swift` 等：将旧 `cycle.flowerMap` / `cycle.mapReport.frame` 断言更新为 `cycle.energyCalendar.*` 和 `cycle.energyMetric.card`。
+- `facts.md`、`decision-log.md`、`wireframes.md`、`components.md`、`interaction-acceptance.md`、`cycle-page-spec.md`、`qa-checklist.md`：同步 D-093 / v1.8 规则。
+
+**截图 / 产物**
+
+```text
+ios/QA/Screenshots/CycleEnergyCalendar-20260528/cycle-energy-calendar-collapsed.png
+```
+
+**构建结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd ENABLE_USER_SCRIPT_SANDBOXING=NO build
+Result: BUILD SUCCEEDED
+```
+
+**UI 测试结果**
+
+```text
+xcodebuild -quiet -workspace Vitora.xcworkspace -scheme Vitora -destination id=EE0BC9AB-70C1-40F5-B13E-9C11F748E697 -derivedDataPath /private/tmp/vitora-main-dd -parallel-testing-enabled NO -only-testing:VitoraUITests/CyclePivotUITests ENABLE_USER_SCRIPT_SANDBOXING=NO test
+Result: TEST FAILED before UI execution because VitoraTests cannot compile Expo modules.
+Error: missing required modules: EXConstants, Expo, ExpoAsset, ExpoBlur, ExpoFileSystem, ExpoFont, ExpoHead, ExpoKeepAwake, ExpoLinearGradient, ExpoLinking, ExpoModulesCore, ExpoSQLite, ExpoSecureStore.
+```
+
 ## 2026-05-27 · 花田地图 v1.7 地图与详情统一外框
 
 **目的**

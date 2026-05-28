@@ -104,6 +104,7 @@
 | C-CYCLE-008 | CurrentPhaseDetailSheet | Feature | P0 | IA-031 |
 | C-CYCLE-009 | EnergyDynamicsDetailSheet | Feature | P0 | IA-032 |
 | C-CYCLE-010 | FlowerMapView | Feature | P0 | D-076 |
+| C-CYCLE-011 | CycleEnergyCalendarDashboard | Feature | P0 | D-093 |
 
 ### 2.5 Support / Trust
 
@@ -328,13 +329,13 @@ D-086/D-089/D-091 补充：前景白色聊天卡左右贴近可用宽度，底�
 
 | 字段 | 规格 |
 | --- | --- |
-| Purpose | 在统一地图报告框下半区承接详情内容，解释本周、趋势对比和近期状态。 |
+| Purpose | 在能量日历和 6.5 指标卡下方承接详情内容，解释本周、趋势对比和近期状态。 |
 | Appears In | IA-030 |
 | Linked Specs | REQ-012, UF-008, WF-C-001 |
 | Tokens | `vt.glass.g2.panel`, `vt.color.phase.*`, `vt.motion.tabCrossfade` |
 | 状态 | week、trendComparison、recent、reduceMotion |
-| Interactions | 由 Header 胶囊 `本周 / 趋势对比 / 近期` 驱动内容切换；切换时 220-280ms cross-fade + 内容轻微 fade-up；卡片内详情继承当前 tab accent。 |
-| Acceptance | 地图下方只显示一个嵌入式详情内容区，不再出现第二套文件夹 tab，也不再单独投大阴影；默认本周展示标题、状态摘要、7 日柱状图、三段说明、四格监测摘要和当前周期进度；趋势（对比）展示月度综合对比、4 行蓝色进度条、归因解释和本月总结；近期展示能量折线图、监测到了什么、近期结论 / 下一步和黄色描边按钮；Header 三个胶囊触控不小于 44pt；不制造任务完成或失败感。 |
+| Interactions | D-093 后由指标卡下方的 `本周 / 趋势对比 / 近期` 三段入口驱动内容切换；切换时 220-280ms cross-fade + 内容轻微 fade-up；卡片内详情继承当前 tab accent。 |
+| Acceptance | 详情内容区位于报告入口下方并可继续滚动查看；默认本周展示标题、状态摘要、7 日柱状图、三段说明、四格监测摘要和当前周期进度；趋势（对比）展示月度综合对比、4 行蓝色进度条、归因解释和本月总结；近期展示能量折线图、监测到了什么、近期结论 / 下一步和黄色描边按钮；三个胶囊触控不小于 44pt；不制造任务完成或失败感。 |
 | Do Not | 不重排整个 Cycle 首页；不显示完成率、连续天数、红点、打卡、购买引导或医学诊断。 |
 
 ### C-CYCLE-010 · FlowerMapView
@@ -350,6 +351,20 @@ D-086/D-089/D-091 补充：前景白色聊天卡左右贴近可用宽度，底�
 | Interactions | 点击 `种下今天的花` 或成熟状态下点击空地，把今日花种到下一个空格；点击已种花朵展示日期、能量和状态详情；点击问号展示玩法说明；点击城市路线节点切换查看未来城市阶段。 |
 | Acceptance | 原生 SwiftUI 实现，不使用 RN/Expo、图片素材、地图 SVG 或复杂动画库；地图和下方详情必须位于同一个大圆角描边外框内；种花动效为 0.72→1.0 scale + 淡黄 pulse；种下后透明圆形引导显示 `今日已种下`。 |
 | Do Not | 不做打卡、完成率、连续天数、红点、任务失败；不把花之地图变成第四主 Tab、完整花园系统或成长册；不删除 D-073 报告卡。 |
+
+### C-CYCLE-011 · CycleEnergyCalendarDashboard
+
+| 字段 | 规格 |
+| --- | --- |
+| Purpose | 在 Cycle 首页用折叠/展开能量日历和 `6.5` 指标卡承接周期复盘首屏。 |
+| Appears In | IA-030, WF-C-001 |
+| Linked Specs | D-093 |
+| Tokens | `vt.bg.aura.cycle`, `vt.glass.g1.clearCard`, `vt.motion.tap` |
+| Content Slots | 折叠周历 strip、展开月历网格、选中日能量细进度条、`6.5 mmol/L` 指标、TIR 环、设备状态、底部报告分段入口。 |
+| 状态 | collapsed、expanded、selectedDay、week、trendComparison、recent、reduceMotion |
+| Interactions | 点击 chevron 展开/收起月历；点击日期更新选中日能量摘要；点击 `本周 / 趋势对比 / 近期` 切换滚动后的报告详情；左上我的/右上分享保持原有语义。 |
+| Acceptance | 使用原生 SwiftUI 绘制；折叠态每天有圆环能量进度，展开态所有日期有细进度条；指标卡显示 `6.5 mmol/L`、更新时间、`88.0% TIR` 和设备状态；不显示任务勾选、失败、完成率、连续天数、红点或经期管理 dashboard。 |
+| Do Not | 不使用 RN/Expo、图片素材、SVG；不恢复花园手册、成长册、任务花田地图或额外 Tab；不把 `6.5` 文案写成诊断或治疗建议。 |
 
 ### C-CYCLE-004 · EnergyDynamicsCard
 

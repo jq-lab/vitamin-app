@@ -5,17 +5,26 @@ struct CycleView: View {
     @State private var sheet: CycleSheet?
     @State private var isSidebarOpen = false
     @State private var selectedCycleReportTab: CycleReviewTab = .week
+    @State private var isEnergyCalendarExpanded = false
+
+    init(environment: AppEnvironment) {
+        self.environment = environment
+        _isEnergyCalendarExpanded = State(initialValue: ProcessInfo.processInfo.arguments.contains("-vitoraUITestCycleCalendarExpanded"))
+    }
 
     var body: some View {
         ZStack {
             WaterAuraReferenceBackground(scene: .cycle, intensity: 1.02)
 
             ScrollView(showsIndicators: false) {
-	                VStack(alignment: .leading, spacing: 12) {
-	                    cycleTopBar
+                VStack(alignment: .leading, spacing: 12) {
+                    cycleTopBar
 
-	                    CycleMapReportFrame(selectedTab: selectedCycleReportTab)
-	                }
+                    CycleEnergyDashboardFrame(
+                        selectedTab: $selectedCycleReportTab,
+                        isCalendarExpanded: $isEnergyCalendarExpanded
+                    )
+                }
                 .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
                 .padding(.top, 4)
                 .padding(.bottom, VitoraTheme.Size.tabBarHeight + 42)
@@ -75,43 +84,43 @@ struct CycleView: View {
     }
 
     private var cycleTopBar: some View {
-        GeometryReader { proxy in
-            HStack(spacing: 10) {
+        HStack(spacing: 10) {
             // 我的 / 设置
-                Button { sheet = .settings } label: {
-                    Image(systemName: "person.crop.circle")
-                        .font(.system(size: 23, weight: .medium))
-                        .foregroundStyle(FlowerMapPalette.deepGreen)
-                        .frame(width: 44, height: 44)
-                        .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
-                        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("我的")
-                .accessibilityIdentifier("cycle.settings.open")
-
-                Spacer(minLength: 4)
-
-                CycleReportTopSegmentControl(selectedTab: $selectedCycleReportTab)
-                    .frame(width: min(max(proxy.size.width * 0.60, 210), 258), height: 44)
-
-                Spacer(minLength: 4)
-
-                // 分享
-                Button { sheet = .sharePreview } label: {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 20, weight: .medium))
-                        .foregroundStyle(FlowerMapPalette.deepGreen)
-                        .frame(width: 44, height: 44)
-                        .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
-                        .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("分享周期卡片")
-                .accessibilityIdentifier("cycle.share.open")
+            Button { sheet = .settings } label: {
+                Image(systemName: "person.crop.circle")
+                    .font(.system(size: 23, weight: .medium))
+                    .foregroundStyle(FlowerMapPalette.deepGreen)
+                    .frame(width: 44, height: 44)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
+                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("我的")
+            .accessibilityIdentifier("cycle.settings.open")
+
+            Spacer(minLength: 4)
+
+            Text("周期")
+                .font(.system(size: 18, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.86))
+                .accessibilityHidden(true)
+
+            Spacer(minLength: 4)
+
+            // 分享
+            Button { sheet = .sharePreview } label: {
+                Image(systemName: "square.and.arrow.up")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(FlowerMapPalette.deepGreen)
+                    .frame(width: 44, height: 44)
+                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
+                    .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
+                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("分享周期卡片")
+            .accessibilityIdentifier("cycle.share.open")
         }
         .frame(height: 44)
     }
@@ -126,36 +135,483 @@ struct CycleView: View {
     }
 }
 
-private struct CycleMapReportFrame: View {
-    let selectedTab: CycleReviewTab
+private struct CycleEnergyDashboardFrame: View {
+    @Binding var selectedTab: CycleReviewTab
+    @Binding var isCalendarExpanded: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            FlowerMapView()
-                .padding(.top, 8)
-                .padding(.horizontal, 2)
+        VStack(alignment: .leading, spacing: 12) {
+            CycleEnergyCalendarCard(isExpanded: $isCalendarExpanded)
 
-            CycleReviewInsightCard(selectedTab: selectedTab, presentation: .embedded)
-                .padding(.horizontal, 8)
-                .padding(.top, -4)
-                .padding(.bottom, 16)
+            CycleMetricSummaryCard()
+
+            CycleReportTopSegmentControl(selectedTab: $selectedTab)
+                .frame(height: 44)
+                .padding(.top, 2)
+                .accessibilityIdentifier("cycle.review.bottomSegment")
+
+            CycleReviewInsightCard(selectedTab: selectedTab, presentation: .standalone)
+                .padding(.top, 2)
         }
-        .background(
-            RoundedRectangle(cornerRadius: 34, style: .continuous)
-                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.40))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .stroke(Color(red: 0.64, green: 0.67, blue: 0.64).opacity(0.34), lineWidth: 1.1)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 34, style: .continuous)
-                        .stroke(Color.white.opacity(0.64), lineWidth: 0.7)
-                        .padding(1)
-                )
-                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.06), radius: 14, x: 0, y: 7)
-        )
-        .accessibilityIdentifier("cycle.mapReport.frame")
+        .accessibilityIdentifier("cycle.energyDashboard.frame")
     }
+}
+
+// MARK: - Energy Calendar
+
+private struct CycleEnergyCalendarCard: View {
+    @Binding var isExpanded: Bool
+    @State private var selectedDayID: String = "2026-04-30"
+
+    private let weekDays = CycleEnergyCalendarData.weekStrip
+    private let monthDays = CycleEnergyCalendarData.may2026
+
+    private var selectedDay: CycleEnergyDay {
+        monthDays.first { $0.id == selectedDayID } ?? weekDays[3]
+    }
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Button {
+                withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                    isExpanded.toggle()
+                }
+            } label: {
+                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    .font(.system(size: 14, weight: .heavy))
+                    .foregroundStyle(CycleEnergyPalette.teal)
+                    .frame(width: 44, height: 24)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isExpanded ? "收起能量日历" : "展开能量日历")
+            .accessibilityIdentifier("cycle.energyCalendar.toggle")
+
+            CycleEnergyWeekStrip(
+                days: weekDays,
+                selectedDayID: selectedDayID,
+                onSelect: { selectedDayID = $0.id }
+            )
+
+            if isExpanded {
+                Divider()
+                    .background(Color.black.opacity(0.08))
+                    .padding(.horizontal, 8)
+
+                CycleEnergyMonthGrid(
+                    days: monthDays,
+                    selectedDayID: selectedDayID,
+                    onSelect: { selectedDayID = $0.id }
+                )
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+
+            CycleEnergySelectedDaySummary(day: selectedDay)
+                .padding(.top, isExpanded ? 0 : -2)
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 6)
+        .padding(.bottom, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.88))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .stroke(Color.white.opacity(0.82), lineWidth: 0.9)
+                )
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 18, x: 0, y: 8)
+        )
+        .accessibilityIdentifier("cycle.energyCalendar.card")
+    }
+}
+
+private struct CycleEnergyWeekStrip: View {
+    let days: [CycleEnergyDay]
+    let selectedDayID: String
+    let onSelect: (CycleEnergyDay) -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            ForEach(days) { day in
+                Button {
+                    onSelect(day)
+                } label: {
+                    VStack(spacing: 9) {
+                        Text(day.weekday)
+                            .font(.system(size: 13, weight: .heavy))
+                            .foregroundStyle(day.isSelected(id: selectedDayID) ? Color.white.opacity(0.92) : VitoraTheme.ColorToken.secondaryText)
+
+                        CycleEnergyRing(progress: day.energyProgress, accent: day.accent, lineWidth: 3.2)
+                            .frame(width: 42, height: 42)
+                            .overlay {
+                                Text(day.dayText)
+                                    .font(.system(size: 17, weight: .heavy, design: .rounded))
+                                    .foregroundStyle(day.isSelected(id: selectedDayID) ? Color.white : VitoraTheme.ColorToken.strongText)
+                                    .monospacedDigit()
+                            }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 86)
+                    .background(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .fill(day.isSelected(id: selectedDayID) ? CycleEnergyPalette.cyan : Color.white.opacity(0.56))
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22, style: .continuous)
+                            .stroke(day.isSelected(id: selectedDayID) ? Color.white.opacity(0.46) : Color.white.opacity(0.64), lineWidth: 0.8)
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(day.weekday)，\(day.dayText)日，能量\(day.energy)")
+                .accessibilityIdentifier("cycle.energyCalendar.day.\(day.dayText)")
+            }
+        }
+        .accessibilityIdentifier("cycle.energyCalendar.strip")
+    }
+}
+
+private struct CycleEnergyMonthGrid: View {
+    let days: [CycleEnergyDay]
+    let selectedDayID: String
+    let onSelect: (CycleEnergyDay) -> Void
+
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 7), count: 7)
+    private let weekdayTitles = ["一", "二", "三", "四", "五", "六", "日"]
+
+    var body: some View {
+        VStack(spacing: 10) {
+            HStack(spacing: 12) {
+                Button {} label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 15, weight: .heavy))
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .accessibilityLabel("上个月")
+
+                Spacer()
+
+                Text("2026年5月")
+                    .font(.system(size: 17, weight: .heavy))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText)
+
+                Spacer()
+
+                Button {} label: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 15, weight: .heavy))
+                        .frame(width: 32, height: 32)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .accessibilityLabel("下个月")
+            }
+            .padding(.horizontal, 2)
+
+            LazyVGrid(columns: columns, spacing: 9) {
+                ForEach(weekdayTitles, id: \.self) { title in
+                    Text(title)
+                        .font(.system(size: 11, weight: .heavy))
+                        .foregroundStyle(VitoraTheme.ColorToken.tertiaryText)
+                        .frame(height: 16)
+                }
+
+                ForEach(days) { day in
+                    Button {
+                        onSelect(day)
+                    } label: {
+                        VStack(spacing: 4) {
+                            Text(day.dayText)
+                                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                                .foregroundStyle(day.isCurrentMonth ? VitoraTheme.ColorToken.strongText : VitoraTheme.ColorToken.tertiaryText.opacity(0.42))
+                                .monospacedDigit()
+
+                            CycleMiniEnergyBar(progress: day.energyProgress, accent: day.accent, isMuted: !day.isCurrentMonth)
+                                .frame(height: 9)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 40)
+                        .background(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .fill(day.isSelected(id: selectedDayID) ? CycleEnergyPalette.mint.opacity(0.40) : Color.clear)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!day.isCurrentMonth)
+                    .accessibilityLabel("\(day.dayText)日，能量\(day.energy)")
+                    .accessibilityIdentifier("cycle.energyCalendar.month.day.\(day.dayText)")
+                }
+            }
+        }
+        .accessibilityIdentifier("cycle.energyCalendar.month")
+    }
+}
+
+private struct CycleEnergySelectedDaySummary: View {
+    let day: CycleEnergyDay
+
+    var body: some View {
+        HStack(spacing: 9) {
+            Circle()
+                .fill(day.accent)
+                .frame(width: 8, height: 8)
+
+            Text("\(day.dayText)日能量")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.black.opacity(0.06))
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [day.accent.opacity(0.86), CycleEnergyPalette.cyan.opacity(0.80)],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(width: max(10, proxy.size.width * day.energyProgress))
+                }
+            }
+            .frame(height: 8)
+
+            Text("\(day.energy)/100")
+                .font(.system(size: 12, weight: .heavy))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText)
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(day.dayText)日能量 \(day.energy) 分")
+    }
+}
+
+private struct CycleMetricSummaryCard: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            HStack(alignment: .top) {
+                Text("更新时间：05-30 10:07")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.white.opacity(0.78))
+
+                Spacer()
+            }
+
+            HStack(alignment: .center, spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("6.5")
+                        .font(.system(size: 56, weight: .heavy, design: .rounded))
+                        .foregroundStyle(Color.white)
+                        .monospacedDigit()
+
+                    VStack(alignment: .leading, spacing: 4) {
+                        Image(systemName: "arrow.down.right")
+                            .font(.system(size: 22, weight: .heavy))
+                            .foregroundStyle(Color.white.opacity(0.84))
+                        Text("mmol/L")
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundStyle(Color.white.opacity(0.88))
+                    }
+                    .padding(.bottom, 8)
+                }
+
+                Spacer()
+
+                CycleTIRRing()
+                    .frame(width: 78, height: 78)
+            }
+
+            HStack(spacing: 10) {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .fill(Color.white.opacity(0.92))
+                    .frame(width: 34, height: 34)
+                    .overlay {
+                        Image(systemName: "sensor.tag.radiowaves.forward")
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundStyle(CycleEnergyPalette.teal)
+                    }
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("TIRLYLHM9NMG5Y 已连接")
+                        .font(.system(size: 12, weight: .heavy))
+                        .foregroundStyle(Color.white.opacity(0.95))
+                    Text("探头剩余可用 8 天")
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(Color.white.opacity(0.72))
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 15, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.80))
+            }
+            .padding(.horizontal, 12)
+            .frame(height: 48)
+            .background(Color.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.20, green: 0.71, blue: 0.55),
+                            Color(red: 0.30, green: 0.76, blue: 0.78),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.white.opacity(0.28), lineWidth: 1)
+                )
+                .shadow(color: CycleEnergyPalette.teal.opacity(0.20), radius: 18, x: 0, y: 9)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("周期参考值 6.5 mmol/L，TIR 88%")
+        .accessibilityIdentifier("cycle.energyMetric.card")
+    }
+}
+
+private struct CycleTIRRing: View {
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.white.opacity(0.30), lineWidth: 6)
+            Circle()
+                .trim(from: 0, to: 0.88)
+                .stroke(Color.white.opacity(0.96), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+            VStack(spacing: 1) {
+                Text("88.0%")
+                    .font(.system(size: 16, weight: .heavy, design: .rounded))
+                    .foregroundStyle(Color.white)
+                    .monospacedDigit()
+                Text("TIR")
+                    .font(.system(size: 11, weight: .heavy))
+                    .foregroundStyle(Color.white.opacity(0.82))
+            }
+        }
+    }
+}
+
+private struct CycleEnergyRing: View {
+    let progress: Double
+    let accent: Color
+    let lineWidth: CGFloat
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.black.opacity(0.06), lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: progress)
+                .stroke(accent.opacity(0.88), style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+        }
+    }
+}
+
+private struct CycleMiniEnergyBar: View {
+    let progress: Double
+    let accent: Color
+    let isMuted: Bool
+
+    var body: some View {
+        GeometryReader { proxy in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(Color.black.opacity(isMuted ? 0.025 : 0.06))
+                Capsule()
+                    .fill(accent.opacity(isMuted ? 0.16 : 0.82))
+                    .frame(width: max(4, proxy.size.width * progress))
+            }
+        }
+    }
+}
+
+private enum CycleEnergyPalette {
+    static let teal = Color(red: 0.12, green: 0.55, blue: 0.42)
+    static let cyan = Color(red: 0.16, green: 0.73, blue: 0.86)
+    static let mint = Color(red: 0.62, green: 0.89, blue: 0.80)
+    static let gold = Color(red: 0.95, green: 0.68, blue: 0.18)
+    static let coral = Color(red: 0.93, green: 0.42, blue: 0.42)
+    static let graphite = Color(red: 0.48, green: 0.51, blue: 0.57)
+}
+
+private struct CycleEnergyDay: Identifiable {
+    let id: String
+    let weekday: String
+    let dayText: String
+    let energy: Int
+    let isCurrentMonth: Bool
+    let accent: Color
+
+    var energyProgress: Double {
+        min(1, max(0.04, Double(energy) / 100.0))
+    }
+
+    func isSelected(id selectedID: String) -> Bool {
+        id == selectedID
+    }
+}
+
+private enum CycleEnergyCalendarData {
+    static let weekStrip: [CycleEnergyDay] = [
+        .init(id: "2026-04-27", weekday: "一", dayText: "27", energy: 72, isCurrentMonth: false, accent: CycleEnergyPalette.gold),
+        .init(id: "2026-04-28", weekday: "二", dayText: "28", energy: 66, isCurrentMonth: false, accent: CycleEnergyPalette.gold),
+        .init(id: "2026-04-29", weekday: "三", dayText: "29", energy: 64, isCurrentMonth: false, accent: CycleEnergyPalette.gold),
+        .init(id: "2026-04-30", weekday: "四", dayText: "30", energy: 68, isCurrentMonth: false, accent: CycleEnergyPalette.teal),
+        .init(id: "2026-05-01", weekday: "五", dayText: "1", energy: 58, isCurrentMonth: true, accent: CycleEnergyPalette.graphite),
+        .init(id: "2026-05-02", weekday: "六", dayText: "2", energy: 43, isCurrentMonth: true, accent: CycleEnergyPalette.coral),
+        .init(id: "2026-05-03", weekday: "日", dayText: "3", energy: 74, isCurrentMonth: true, accent: CycleEnergyPalette.gold),
+    ]
+
+    static let may2026: [CycleEnergyDay] = {
+        let previousValues = [
+            27: 38, 28: 42, 29: 47, 30: 68,
+        ]
+        let mayValues = [
+            1: 58, 2: 43, 3: 74, 4: 70, 5: 66, 6: 62, 7: 46,
+            8: 72, 9: 45, 10: 76, 11: 55, 12: 71, 13: 64, 14: 69,
+            15: 82, 16: 58, 17: 61, 18: 52, 19: 50, 20: 54, 21: 57,
+            22: 63, 23: 60, 24: 65, 25: 59, 26: 62, 27: 68, 28: 66,
+            29: 70, 30: 68, 31: 64,
+        ]
+        let accents: (Int) -> Color = { value in
+            if value >= 72 { return CycleEnergyPalette.teal }
+            if value >= 62 { return CycleEnergyPalette.gold }
+            if value >= 52 { return CycleEnergyPalette.graphite }
+            return CycleEnergyPalette.coral
+        }
+
+        let previous = [
+            CycleEnergyDay(id: "2026-04-27", weekday: "一", dayText: "27", energy: previousValues[27] ?? 38, isCurrentMonth: false, accent: accents(previousValues[27] ?? 38)),
+            CycleEnergyDay(id: "2026-04-28", weekday: "二", dayText: "28", energy: previousValues[28] ?? 42, isCurrentMonth: false, accent: accents(previousValues[28] ?? 42)),
+            CycleEnergyDay(id: "2026-04-29", weekday: "三", dayText: "29", energy: previousValues[29] ?? 47, isCurrentMonth: false, accent: accents(previousValues[29] ?? 47)),
+            CycleEnergyDay(id: "2026-04-30", weekday: "四", dayText: "30", energy: previousValues[30] ?? 68, isCurrentMonth: false, accent: CycleEnergyPalette.teal),
+        ]
+
+        let current = (1...31).map { day in
+            let value = mayValues[day] ?? 60
+            let weekday = ["一", "二", "三", "四", "五", "六", "日"][(day + 3) % 7]
+            return CycleEnergyDay(
+                id: "2026-05-\(String(format: "%02d", day))",
+                weekday: weekday,
+                dayText: "\(day)",
+                energy: value,
+                isCurrentMonth: true,
+                accent: accents(value)
+            )
+        }
+
+        return previous + current
+    }()
 }
 
 private struct CycleHeaderIllustration: View {

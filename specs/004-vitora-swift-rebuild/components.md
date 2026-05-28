@@ -360,10 +360,10 @@ D-086/D-089/D-091 补充：前景白色聊天卡左右贴近可用宽度，底�
 | Appears In | IA-030, WF-C-001 |
 | Linked Specs | D-093 |
 | Tokens | `vt.bg.aura.cycle`, `vt.glass.g1.clearCard`, `vt.motion.tap` |
-| Content Slots | 折叠周历 strip、展开月历网格、选中日能量细进度条、`6.5 mmol/L` 指标、TIR 环、设备状态、底部报告分段入口。 |
+| Content Slots | 融合式我的/分享入口、折叠周历 strip、展开月历网格、选中日能量细进度条、今日/本周能量摘要、小号 `6.5` 参考 chip、底部报告分段入口。 |
 | 状态 | collapsed、expanded、selectedDay、week、trendComparison、recent、reduceMotion |
 | Interactions | 点击 chevron 展开/收起月历；点击日期更新选中日能量摘要；点击 `本周 / 趋势对比 / 近期` 切换滚动后的报告详情；左上我的/右上分享保持原有语义。 |
-| Acceptance | 使用原生 SwiftUI 绘制；折叠态每天有圆环能量进度，展开态所有日期有细进度条；指标卡显示 `6.5 mmol/L`、更新时间、`88.0% TIR` 和设备状态；不显示任务勾选、失败、完成率、连续天数、红点或经期管理 dashboard。 |
+| Acceptance | 使用原生 SwiftUI 绘制；左上我的、右上分享和周历 strip 融合在同一张大圆角顶部卡内；折叠态每天是大椭圆 pill + 内部圆环能量进度，展开态所有日期有细进度条；摘要卡主信息为今天能量和本周平均，`6.5` 只作为小参考 chip；不显示任务勾选、失败、完成率、连续天数、红点或经期管理 dashboard。 |
 | Do Not | 不使用 RN/Expo、图片素材、SVG；不恢复花园手册、成长册、任务花田地图或额外 Tab；不把 `6.5` 文案写成诊断或治疗建议。 |
 
 ### C-CYCLE-004 · EnergyDynamicsCard

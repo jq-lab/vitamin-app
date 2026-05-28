@@ -18,15 +18,15 @@ struct CycleView: View {
 
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 12) {
-                    cycleTopBar
-
                     CycleEnergyDashboardFrame(
                         selectedTab: $selectedCycleReportTab,
-                        isCalendarExpanded: $isEnergyCalendarExpanded
+                        isCalendarExpanded: $isEnergyCalendarExpanded,
+                        onOpenSettings: { sheet = .settings },
+                        onShare: { sheet = .sharePreview }
                     )
                 }
                 .padding(.horizontal, VitoraTheme.Spacing.screenMargin)
-                .padding(.top, 4)
+                .padding(.top, -14)
                 .padding(.bottom, VitoraTheme.Size.tabBarHeight + 42)
             }
 
@@ -83,48 +83,6 @@ struct CycleView: View {
         .accessibilityIdentifier("cycle.pivot.surface")
     }
 
-    private var cycleTopBar: some View {
-        HStack(spacing: 10) {
-            // 我的 / 设置
-            Button { sheet = .settings } label: {
-                Image(systemName: "person.crop.circle")
-                    .font(.system(size: 23, weight: .medium))
-                    .foregroundStyle(FlowerMapPalette.deepGreen)
-                    .frame(width: 44, height: 44)
-                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
-                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("我的")
-            .accessibilityIdentifier("cycle.settings.open")
-
-            Spacer(minLength: 4)
-
-            Text("周期")
-                .font(.system(size: 18, weight: .heavy))
-                .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.86))
-                .accessibilityHidden(true)
-
-            Spacer(minLength: 4)
-
-            // 分享
-            Button { sheet = .sharePreview } label: {
-                Image(systemName: "square.and.arrow.up")
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundStyle(FlowerMapPalette.deepGreen)
-                    .frame(width: 44, height: 44)
-                    .background(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.74), in: Circle())
-                    .overlay(Circle().stroke(Color.white.opacity(0.70), lineWidth: 0.8))
-                    .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("分享周期卡片")
-            .accessibilityIdentifier("cycle.share.open")
-        }
-        .frame(height: 44)
-    }
-
     private func openVitora(source: String, summary: String) {
         environment.openVitoraContext(
             sourceTitle: source,
@@ -138,10 +96,16 @@ struct CycleView: View {
 private struct CycleEnergyDashboardFrame: View {
     @Binding var selectedTab: CycleReviewTab
     @Binding var isCalendarExpanded: Bool
+    let onOpenSettings: () -> Void
+    let onShare: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            CycleEnergyCalendarCard(isExpanded: $isCalendarExpanded)
+            CycleEnergyCalendarCard(
+                isExpanded: $isCalendarExpanded,
+                onOpenSettings: onOpenSettings,
+                onShare: onShare
+            )
 
             CycleMetricSummaryCard()
 
@@ -162,6 +126,8 @@ private struct CycleEnergyDashboardFrame: View {
 private struct CycleEnergyCalendarCard: View {
     @Binding var isExpanded: Bool
     @State private var selectedDayID: String = "2026-04-30"
+    let onOpenSettings: () -> Void
+    let onShare: () -> Void
 
     private let weekDays = CycleEnergyCalendarData.weekStrip
     private let monthDays = CycleEnergyCalendarData.may2026
@@ -171,27 +137,49 @@ private struct CycleEnergyCalendarCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 12) {
-            Button {
-                withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
-                    isExpanded.toggle()
+        VStack(spacing: isExpanded ? 12 : 10) {
+            HStack(alignment: .center) {
+                CycleCalendarHeaderActionButton(
+                    systemName: "person.crop.circle",
+                    accessibilityLabel: "我的",
+                    accessibilityID: "cycle.settings.open",
+                    action: onOpenSettings
+                )
+
+                Spacer(minLength: 8)
+
+                Button {
+                    withAnimation(.spring(response: 0.34, dampingFraction: 0.82)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 15, weight: .heavy))
+                        .foregroundStyle(CycleEnergyPalette.teal)
+                        .frame(width: 52, height: 38)
+                        .contentShape(Rectangle())
                 }
-            } label: {
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 14, weight: .heavy))
-                    .foregroundStyle(CycleEnergyPalette.teal)
-                    .frame(width: 44, height: 24)
-                    .contentShape(Rectangle())
+                .buttonStyle(.plain)
+                .accessibilityLabel(isExpanded ? "收起能量日历" : "展开能量日历")
+                .accessibilityIdentifier("cycle.energyCalendar.toggle")
+
+                Spacer(minLength: 8)
+
+                CycleCalendarHeaderActionButton(
+                    systemName: "square.and.arrow.up",
+                    accessibilityLabel: "分享周期卡片",
+                    accessibilityID: "cycle.share.open",
+                    action: onShare
+                )
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(isExpanded ? "收起能量日历" : "展开能量日历")
-            .accessibilityIdentifier("cycle.energyCalendar.toggle")
+            .padding(.horizontal, 2)
 
             CycleEnergyWeekStrip(
                 days: weekDays,
                 selectedDayID: selectedDayID,
                 onSelect: { selectedDayID = $0.id }
             )
+            .padding(.horizontal, -6)
 
             if isExpanded {
                 Divider()
@@ -204,24 +192,46 @@ private struct CycleEnergyCalendarCard: View {
                     onSelect: { selectedDayID = $0.id }
                 )
                 .transition(.opacity.combined(with: .move(edge: .top)))
-            }
 
-            CycleEnergySelectedDaySummary(day: selectedDay)
-                .padding(.top, isExpanded ? 0 : -2)
+                CycleEnergySelectedDaySummary(day: selectedDay)
+                    .padding(.top, -2)
+            }
         }
         .padding(.horizontal, 14)
-        .padding(.top, 6)
-        .padding(.bottom, 14)
+        .padding(.top, 10)
+        .padding(.bottom, isExpanded ? 14 : 12)
         .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.88))
+            RoundedRectangle(cornerRadius: 42, style: .continuous)
+                .fill(VitoraTheme.ColorToken.surfacePearlMain.opacity(0.62))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 28, style: .continuous)
-                        .stroke(Color.white.opacity(0.82), lineWidth: 0.9)
+                    RoundedRectangle(cornerRadius: 42, style: .continuous)
+                        .stroke(Color.white.opacity(0.72), lineWidth: 0.9)
                 )
-                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 18, x: 0, y: 8)
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.07), radius: 18, x: 0, y: 7)
         )
         .accessibilityIdentifier("cycle.energyCalendar.card")
+    }
+}
+
+private struct CycleCalendarHeaderActionButton: View {
+    let systemName: String
+    let accessibilityLabel: String
+    let accessibilityID: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(FlowerMapPalette.deepGreen)
+                .frame(width: 50, height: 50)
+                .background(Color.white.opacity(0.76), in: Circle())
+                .overlay(Circle().stroke(Color.white.opacity(0.72), lineWidth: 0.8))
+                .shadow(color: VitoraTheme.ColorToken.paperLiftShadow.opacity(0.08), radius: 10, x: 0, y: 5)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel)
+        .accessibilityIdentifier(accessibilityID)
     }
 }
 
@@ -266,6 +276,13 @@ private struct CycleEnergyWeekStrip: View {
                 .accessibilityIdentifier("cycle.energyCalendar.day.\(day.dayText)")
             }
         }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Color.white.opacity(0.36), in: RoundedRectangle(cornerRadius: 36, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .stroke(Color.white.opacity(0.42), lineWidth: 0.8)
+        )
         .accessibilityIdentifier("cycle.energyCalendar.strip")
     }
 }
@@ -391,76 +408,41 @@ private struct CycleEnergySelectedDaySummary: View {
 
 private struct CycleMetricSummaryCard: View {
     var body: some View {
-        VStack(spacing: 12) {
-            HStack(alignment: .top) {
-                Text("更新时间：05-30 10:07")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.white.opacity(0.78))
+        HStack(spacing: 18) {
+            CycleEnergyInfoRing(progress: 0.68)
+                .frame(width: 92, height: 92)
 
-                Spacer()
-            }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("今天能量在可用区间")
+                    .font(.system(size: 20, weight: .heavy))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.92))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.76)
 
-            HStack(alignment: .center, spacing: 12) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    Text("6.5")
-                        .font(.system(size: 56, weight: .heavy, design: .rounded))
-                        .foregroundStyle(Color.white)
-                        .monospacedDigit()
+                Text("今天 68/100，本周平均 62。黄体期 D18 先看趋势，不把它变成任务。")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
+                    .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Image(systemName: "arrow.down.right")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundStyle(Color.white.opacity(0.84))
-                        Text("mmol/L")
-                            .font(.system(size: 14, weight: .bold))
-                            .foregroundStyle(Color.white.opacity(0.88))
-                    }
-                    .padding(.bottom, 8)
+                HStack(spacing: 8) {
+                    energyChip(title: "本周", value: "62/100")
+                    energyChip(title: "参考", value: "6.5")
                 }
-
-                Spacer()
-
-                CycleTIRRing()
-                    .frame(width: 78, height: 78)
             }
 
-            HStack(spacing: 10) {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .fill(Color.white.opacity(0.92))
-                    .frame(width: 34, height: 34)
-                    .overlay {
-                        Image(systemName: "sensor.tag.radiowaves.forward")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(CycleEnergyPalette.teal)
-                    }
-
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("TIRLYLHM9NMG5Y 已连接")
-                        .font(.system(size: 12, weight: .heavy))
-                        .foregroundStyle(Color.white.opacity(0.95))
-                    Text("探头剩余可用 8 天")
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(Color.white.opacity(0.72))
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 15, weight: .heavy))
-                    .foregroundStyle(Color.white.opacity(0.80))
-            }
-            .padding(.horizontal, 12)
-            .frame(height: 48)
-            .background(Color.white.opacity(0.13), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            Spacer(minLength: 0)
         }
-        .padding(16)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 18)
+        .frame(minHeight: 130)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color(red: 0.20, green: 0.71, blue: 0.55),
-                            Color(red: 0.30, green: 0.76, blue: 0.78),
+                            Color(red: 0.90, green: 0.97, blue: 0.80),
+                            Color(red: 0.80, green: 0.96, blue: 0.91),
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -470,31 +452,48 @@ private struct CycleMetricSummaryCard: View {
                     RoundedRectangle(cornerRadius: 24, style: .continuous)
                         .stroke(Color.white.opacity(0.28), lineWidth: 1)
                 )
-                .shadow(color: CycleEnergyPalette.teal.opacity(0.20), radius: 18, x: 0, y: 9)
+                .shadow(color: CycleEnergyPalette.teal.opacity(0.10), radius: 16, x: 0, y: 8)
         )
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("周期参考值 6.5 mmol/L，TIR 88%")
+        .accessibilityLabel("今天能量 68 分，本周平均 62 分，参考值 6.5")
         .accessibilityIdentifier("cycle.energyMetric.card")
+    }
+
+    private func energyChip(title: String, value: String) -> some View {
+        HStack(spacing: 5) {
+            Text(title)
+                .font(.system(size: 11, weight: .heavy))
+                .foregroundStyle(CycleEnergyPalette.teal.opacity(0.82))
+            Text(value)
+                .font(.system(size: 12, weight: .heavy, design: .rounded))
+                .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.78))
+                .monospacedDigit()
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 26)
+        .background(Color.white.opacity(0.34), in: Capsule())
     }
 }
 
-private struct CycleTIRRing: View {
+private struct CycleEnergyInfoRing: View {
+    let progress: Double
+
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Color.white.opacity(0.30), lineWidth: 6)
+                .stroke(CycleEnergyPalette.teal.opacity(0.16), lineWidth: 8)
             Circle()
-                .trim(from: 0, to: 0.88)
-                .stroke(Color.white.opacity(0.96), style: StrokeStyle(lineWidth: 6, lineCap: .round))
+                .trim(from: 0, to: progress)
+                .stroke(CycleEnergyPalette.teal.opacity(0.82), style: StrokeStyle(lineWidth: 8, lineCap: .round))
                 .rotationEffect(.degrees(-90))
             VStack(spacing: 1) {
-                Text("88.0%")
-                    .font(.system(size: 16, weight: .heavy, design: .rounded))
-                    .foregroundStyle(Color.white)
+                Text("68")
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .foregroundStyle(VitoraTheme.ColorToken.strongText.opacity(0.88))
                     .monospacedDigit()
-                Text("TIR")
-                    .font(.system(size: 11, weight: .heavy))
-                    .foregroundStyle(Color.white.opacity(0.82))
+                Text("今日")
+                    .font(.system(size: 13, weight: .heavy))
+                    .foregroundStyle(VitoraTheme.ColorToken.secondaryText)
             }
         }
     }

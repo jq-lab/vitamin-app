@@ -2,6 +2,19 @@
 
 > 后续任何 Cycle 页面相关改动都必须追加到本文件。
 
+## 2026-05-28 · 顶部日历融合与能量摘要卡微调
+
+**目的**
+
+按用户对 D-093 截图的反馈，去掉顶部独立 `周期` 标题，让“我的/分享”和周历融合为同一张顶部日历头卡；同时把 `6.5` 从大号设备读数改为小参考 chip，主信息改为今天能量和本周能量。
+
+**具体改动**
+
+- `CycleView.swift`：移除独立 `cycleTopBar`，把我的入口、展开 chevron、分享入口放入 `CycleEnergyCalendarCard`。
+- `CycleView.swift`：周历 strip 增加大椭圆底，日期 pill 内保留小圆环能量进度，整体顶距上移。
+- `CycleView.swift`：`CycleMetricSummaryCard` 改为左侧 `68 今日` 圆环 + 右侧今日/本周能量文案，小号 `参考 6.5` chip；删除大号 `6.5 mmol/L`、TIR 环和设备状态。
+- `facts.md`、`decision-log.md`、`spec.md`、`wireframes.md`、`components.md`、`interaction-acceptance.md`、`cycle-page-spec.md`、`qa-checklist.md`：同步 D-094 / D-095 规则。
+
 ## 2026-05-28 · 能量复盘日历 v1.8
 
 **目的**

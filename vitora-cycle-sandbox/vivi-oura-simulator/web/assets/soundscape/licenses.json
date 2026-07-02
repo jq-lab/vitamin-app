@@ -1,0 +1,110 @@
+[
+  {
+    "id": "generated-web-audio-soundscape-v2",
+    "title": "Vitora generated musical noise, 3D soundscape, and Solfeggio tones",
+    "author": "Vitora",
+    "source": "In-app Web Audio synthesis",
+    "sourceUrl": "local://SoundscapeEngineV2",
+    "license": "First-party generated audio",
+    "licenseUrl": "",
+    "commercialUseAllowed": true,
+    "appUse": "runtime-core-audio",
+    "notes": "Primary shipped audio source. White/pink/brown noise, low drone, soft chord pads, bells, 3D panning, and Solfeggio sine tones are synthesized locally; no third-party audio binary is required for the commercial prototype."
+  },
+  {
+    "id": "fs-white-shawnyboy-165395",
+    "title": "White Noise.wav",
+    "author": "ShawnyBoy",
+    "source": "Freesound",
+    "sourceUrl": "https://freesound.org/people/ShawnyBoy/sounds/165395/",
+    "license": "Creative Commons 0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "commercialUseAllowed": true,
+    "appUse": "reference-license-source",
+    "notes": "Verified CC0 white-noise source. Runtime audio is generated locally with Web Audio so the app does not depend on a remote file download."
+  },
+  {
+    "id": "fs-white-mutantra-571175",
+    "title": "NOISE-WHITE-0dBFS.wav",
+    "author": "mutantra",
+    "source": "Freesound",
+    "sourceUrl": "https://freesound.org/people/mutantra/sounds/571175/",
+    "license": "Creative Commons 0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "commercialUseAllowed": true,
+    "appUse": "candidate-license-source",
+    "notes": "Candidate CC0 white-noise source; keep manifest entry for future asset download/review."
+  },
+  {
+    "id": "fs-white-vrlmrtnz-361849",
+    "title": "White Noise 10m 30s.wav",
+    "author": "vrlmrtnz",
+    "source": "Freesound",
+    "sourceUrl": "https://freesound.org/people/vrlmrtnz/sounds/361849/",
+    "license": "Creative Commons 0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "commercialUseAllowed": true,
+    "appUse": "candidate-license-source",
+    "notes": "Candidate CC0 white-noise source; keep manifest entry for future asset download/review."
+  },
+  {
+    "id": "generated-web-audio-noise-v1",
+    "title": "Vitora generated white/pink/brown noise",
+    "author": "Vitora",
+    "source": "In-app Web Audio synthesis",
+    "sourceUrl": "local://SoundscapeEngineV1",
+    "license": "First-party generated audio",
+    "licenseUrl": "",
+    "commercialUseAllowed": true,
+    "appUse": "runtime-core-audio",
+    "notes": "Legacy manifest entry retained for compatibility. The v2 runtime expands this into musical soundscapes instead of playing raw noise alone."
+  },
+  {
+    "id": "platform-pixabay-sound-effects",
+    "title": "Pixabay Sound Effects",
+    "author": "Pixabay contributors",
+    "source": "Pixabay",
+    "sourceUrl": "https://pixabay.com/sound-effects/",
+    "license": "Pixabay Content License",
+    "licenseUrl": "https://pixabay.com/service/license-summary/",
+    "commercialUseAllowed": true,
+    "appUse": "approved-sourcing-platform",
+    "notes": "Use only item pages with their own manifest row. Do not redistribute downloaded audio as a standalone stock library; embed only as part of the Vitora experience."
+  },
+  {
+    "id": "platform-mixkit-sound-effects",
+    "title": "Mixkit Sound Effects",
+    "author": "Mixkit contributors",
+    "source": "Mixkit",
+    "sourceUrl": "https://mixkit.co/free-sound-effects/",
+    "license": "Mixkit Free License, item-specific terms",
+    "licenseUrl": "https://mixkit.co/license/",
+    "commercialUseAllowed": true,
+    "appUse": "approved-sourcing-platform",
+    "notes": "Use only assets that are under the free sound-effects license and record exact asset page, author/source, and downloadedAt before bundling."
+  },
+  {
+    "id": "platform-freesound-cc0",
+    "title": "Freesound CC0 sound effects",
+    "author": "Freesound contributors",
+    "source": "Freesound",
+    "sourceUrl": "https://freesound.org/",
+    "license": "Creative Commons 0 or item-specific Creative Commons license",
+    "licenseUrl": "https://freesound.org/help/faq/",
+    "commercialUseAllowed": true,
+    "appUse": "approved-sourcing-platform-cc0-first",
+    "notes": "Only CC0 items can be bundled without attribution obligations. CC BY items require visible attribution and per-item manifest records."
+  },
+  {
+    "id": "platform-youtube-research-only",
+    "title": "YouTube white-noise and meditation videos",
+    "author": "Various creators",
+    "source": "YouTube",
+    "sourceUrl": "https://www.youtube.com/",
+    "license": "Research reference only unless an individual asset has explicit reusable commercial license",
+    "licenseUrl": "https://www.youtube.com/howyoutubeworks/policies/copyright/",
+    "commercialUseAllowed": false,
+    "appUse": "research-only",
+    "notes": "Do not download or bundle YouTube audio for Vitora unless a specific creator license permits commercial app distribution and the exact terms are recorded."
+  }
+]

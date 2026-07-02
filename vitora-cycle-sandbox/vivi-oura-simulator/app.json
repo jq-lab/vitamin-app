@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "VIVI Oura",
+    "slug": "vivi-oura-simulator",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "scheme": "vivi-oura",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.local.vivi.oura",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Vitora uses your approximate location to estimate the direction of sunlight for the morning plan."
+      }
+    },
+    "splash": {
+      "backgroundColor": "#05090b"
+    },
+    "assetBundlePatterns": [
+      "web/**/*"
+    ]
+  }
+}

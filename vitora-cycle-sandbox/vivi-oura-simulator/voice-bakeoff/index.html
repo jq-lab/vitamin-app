@@ -1,0 +1,2708 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VIVI TTS 试听评测</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d1113;--panel:rgba(255,255,255,.075);--line:rgba(255,255,255,.12);--text:#f4f1e9;--muted:rgba(244,241,233,.62);--good:#89e6cc;--bad:#ffb199;--warn:#ffd26d}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 22% 8%,rgba(129,199,196,.22),transparent 34%),radial-gradient(circle at 80% 12%,rgba(226,158,188,.16),transparent 32%),linear-gradient(180deg,#162126,#090c0e);color:var(--text);font-family:PingFang SC,Noto Sans SC,system-ui,sans-serif;line-height:1.5}
+    .shell{max-width:1180px;margin:0 auto;padding:40px 24px 72px}.hero{display:grid;grid-template-columns:1.25fr .75fr;gap:24px;align-items:end;margin-bottom:24px}.eyebrow{color:var(--good);font-size:13px;font-weight:800;letter-spacing:.08em}.title{font-family:Songti SC,Noto Serif SC,serif;font-size:44px;line-height:1.12;margin:10px 0 12px}.desc{max-width:760px;color:var(--muted);font-size:16px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:16px;backdrop-filter:blur(18px)}.stat strong{display:block;font-size:28px}.stat span{font-size:12px;color:var(--muted)}
+    .recommend{display:grid;grid-template-columns:1fr 1.4fr;gap:14px;margin:0 0 22px}.decision{border:1px solid rgba(137,230,204,.22);background:linear-gradient(145deg,rgba(137,230,204,.14),rgba(255,255,255,.05));border-radius:24px;padding:20px;box-shadow:0 24px 56px rgba(0,0,0,.22)}.decision h2{font-family:Songti SC,Noto Serif SC,serif;font-size:26px;margin:0 0 10px}.decision p{color:rgba(244,241,233,.74);margin:0;font-size:14px}.rec-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.rec-card{border:1px solid var(--line);background:rgba(255,255,255,.065);border-radius:20px;padding:15px}.rec-card p{margin:8px 0 0;color:var(--muted);font-size:13px}.rec-label{display:inline-flex;border-radius:999px;padding:4px 8px;margin-bottom:9px;background:rgba(255,255,255,.10);font-size:11px;font-weight:900}.rec-cinema{border-color:rgba(194,210,255,.34)}.rec-cinema .rec-label{background:rgba(194,210,255,.18);color:#cdd8ff}.rec-best{border-color:rgba(137,230,204,.34)}.rec-best .rec-label{background:rgba(137,230,204,.18);color:var(--good)}.rec-stable{border-color:rgba(255,210,109,.30)}.rec-stable .rec-label{background:rgba(255,210,109,.16);color:var(--warn)}.rec-title{font-size:16px;font-weight:950}.notice{margin:0 0 20px;border:1px solid rgba(255,210,109,.22);background:rgba(255,210,109,.075);border-radius:20px;padding:14px 16px;color:rgba(255,232,169,.88);font-size:14px}
+    .chooser{margin:0 0 24px;border:1px solid rgba(137,230,204,.20);background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035));border-radius:28px;padding:20px;box-shadow:0 26px 70px rgba(0,0,0,.28);backdrop-filter:blur(24px)}.chooser-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:14px}.chooser h2{font-family:Songti SC,Noto Serif SC,serif;font-size:30px;margin:0}.chosen{border:1px solid rgba(137,230,204,.26);background:rgba(137,230,204,.10);border-radius:999px;padding:9px 13px;color:var(--good);font-size:13px;font-weight:900}.select-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.select-card{position:relative;border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.055);border-radius:22px;padding:15px;min-height:382px}.select-card.selected{border-color:rgba(137,230,204,.78);box-shadow:0 0 0 1px rgba(137,230,204,.35),0 20px 44px rgba(0,0,0,.22)}.select-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.select-badge,.select-source{border-radius:999px;padding:4px 8px;font-size:11px;font-weight:900;background:rgba(255,255,255,.10)}.select-badge{color:var(--good);background:rgba(137,230,204,.14)}.select-source{color:rgba(244,241,233,.62)}.select-card h3{font-size:20px;margin:14px 0 4px}.select-role,.select-provider,.select-script{font-size:13px;color:var(--muted);margin:0}.select-provider{margin-top:9px;color:rgba(244,241,233,.86);font-weight:850}.select-script{min-height:82px;margin:12px 0 10px;color:rgba(244,241,233,.72)}.select-tags{display:flex;flex-wrap:wrap;gap:5px;min-height:22px;margin-bottom:10px}.select-tags span{border-radius:999px;background:rgba(194,210,255,.11);color:#cdd8ff;padding:3px 7px;font-size:10px;font-weight:850}.choose-btn{width:100%;height:40px;margin-top:12px;border:0;border-radius:999px;background:rgba(255,255,255,.12);color:var(--text);font-weight:900}.select-card.selected .choose-btn{background:rgba(137,230,204,.92);color:#0d1515}.choose-btn:disabled{cursor:not-allowed;opacity:.48;background:rgba(255,255,255,.07);color:rgba(244,241,233,.52)}
+    .toolbar{position:sticky;top:0;z-index:3;margin:0 -8px 20px;padding:12px 8px;background:linear-gradient(180deg,rgba(13,17,19,.94),rgba(13,17,19,.72));backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06)}.filters{display:flex;gap:8px;overflow:auto;padding-bottom:4px}.filter{border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);height:34px;padding:0 13px;border-radius:999px;white-space:nowrap;font-weight:750}.filter.active{background:rgba(255,255,255,.88);color:#101416}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.card{border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035));border-radius:24px;padding:18px;box-shadow:0 22px 50px rgba(0,0,0,.22);backdrop-filter:blur(22px)}.card.generated{border-color:rgba(137,230,204,.34)}.card.failed{border-color:rgba(255,177,153,.34)}.card-head{display:flex;justify-content:space-between;gap:16px}.provider{font-size:17px;font-weight:900}.voice{font-size:13px;color:var(--muted);margin-top:3px}.status{align-self:start;border-radius:999px;padding:5px 10px;background:rgba(255,255,255,.09);font-size:12px;font-weight:850}.generated .status{background:rgba(137,230,204,.18);color:var(--good)}.failed .status{background:rgba(255,177,153,.16);color:var(--bad)}
+    .meta{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.meta span{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);border-radius:999px;padding:4px 8px;color:var(--muted);font-size:11px}.text{font-size:15px;color:rgba(244,241,233,.86);min-height:68px}.missing{border:1px dashed rgba(255,255,255,.16);border-radius:16px;padding:14px;color:rgba(255,210,109,.86);background:rgba(255,210,109,.055);font-size:13px}audio{width:100%;height:42px}.actions{display:flex;justify-content:flex-end;align-items:center;margin-top:12px}.actions a{border:0;border-radius:999px;background:rgba(255,255,255,.10);padding:9px 12px;text-decoration:none;font-size:12px;font-weight:850;color:var(--good)}
+    .source-catalog{margin:0 0 24px;border:1px solid rgba(194,210,255,.18);background:linear-gradient(145deg,rgba(194,210,255,.08),rgba(255,255,255,.035));border-radius:28px;padding:20px;box-shadow:0 24px 58px rgba(0,0,0,.22);backdrop-filter:blur(22px)}.source-intro{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px}.source-intro h2{font-family:Songti SC,Noto Serif SC,serif;font-size:30px;line-height:1.16;margin:6px 0 6px}.source-intro p{max-width:760px;margin:0;color:var(--muted);font-size:14px}.source-doc{flex:0 0 auto;border-radius:999px;padding:10px 13px;background:rgba(255,255,255,.10);color:var(--good);font-size:12px;font-weight:900;text-decoration:none}.source-tabs{display:flex;gap:8px;overflow:auto;margin:0 -2px 14px;padding:0 2px 2px}.source-tab{height:32px;border:1px solid var(--line);background:rgba(255,255,255,.055);color:var(--text);border-radius:999px;padding:0 12px;white-space:nowrap;font-weight:850}.source-tab.active{background:rgba(194,210,255,.18);color:#d7e1ff}.source-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.source-card{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.052);border-radius:22px;padding:15px;min-height:330px}.source-card.hidden{display:none}.source-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.source-head span,.source-head strong{border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.09);font-size:10px;font-weight:900;color:rgba(244,241,233,.64)}.source-head strong{color:var(--warn);background:rgba(255,210,109,.12)}.source-card h3{font-size:18px;line-height:1.25;margin:14px 0 8px}.source-persona{min-height:66px;margin:0;color:rgba(244,241,233,.72);font-size:13px}.source-meta{display:flex;flex-wrap:wrap;gap:5px;margin:12px 0}.source-meta span{border-radius:999px;background:rgba(137,230,204,.09);color:rgba(137,230,204,.86);padding:3px 7px;font-size:10px;font-weight:850}.source-query{border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);border-radius:15px;padding:10px 11px;margin:10px 0;color:rgba(244,241,233,.68);font-size:12px}.source-query b{display:block;color:rgba(244,241,233,.9);font-size:11px;margin-bottom:4px}.source-query span{word-break:break-word}.source-missing{border:1px dashed rgba(255,255,255,.14);background:rgba(255,210,109,.055);border-radius:15px;padding:11px;color:rgba(255,210,109,.86);font-size:12px}.source-missing code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#ffe8a9}.source-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.source-actions a,.source-actions button{border:0;border-radius:999px;background:rgba(255,255,255,.09);color:var(--good);padding:8px 10px;text-decoration:none;font-size:11px;font-weight:900}.source-actions button{color:var(--text)}.source-actions button:disabled{opacity:.48;cursor:not-allowed;color:rgba(244,241,233,.54)}
+    .empty{display:none;margin-top:24px;border:1px solid var(--line);border-radius:22px;padding:24px;background:var(--panel);color:var(--muted)}@media(max-width:980px){.select-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.source-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:760px){.hero,.recommend{grid-template-columns:1fr}.rec-grid,.grid,.select-grid,.source-grid{grid-template-columns:1fr}.chooser-head,.source-intro{display:block}.chosen{display:inline-flex;margin-top:12px}.source-doc{display:inline-flex;margin-top:12px}.title{font-size:34px}.shell{padding:28px 14px 48px}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">VIVI VOICE BAKEOFF</div>
+        <h1 class="title">声优式真实样音评测</h1>
+        <p class="desc">这页不再用系统 TTS 冒充声线。先用 Codex 语气导演改写台词，再调用真实 TTS 生成 MP3，并做轻后期处理；顶部优先比较视频 NOIR 参考、小云朵主声线、中文恢复声线和稳定兜底。</p>
+      </div>
+      <div class="stats">
+        <div class="stat"><strong>28</strong><span>已生成</span></div>
+        <div class="stat"><strong>72</strong><span>未生成</span></div>
+        <div class="stat"><strong>0</strong><span>失败</span></div>
+      </div>
+    </section>
+    <section class="recommend">
+      <div class="decision">
+        <h2>我的建议：双轨选声线</h2>
+        <p>视频同款质感优先跑 ElevenLabs v3，但必须有合法 voice_id；VIVI 中文主声线同时跑 MiniMax/CosyVoice。Edge 只保留为无 Key 流程兜底，不作为最终声线。</p>
+      </div>
+      <div class="rec-grid"><div class="rec-card rec-cinema">
+        <div class="rec-label">视频质感</div>
+        <div class="rec-title">ElevenLabs v3</div>
+        <p>主攻视频里的 NOIR / Vessel 电影感和强表演 TTS。若没有合法 voice_id，只能做相似气质，不能保证同款声线。</p>
+      </div><div class="rec-card rec-base">
+        <div class="rec-label">备选</div>
+        <div class="rec-title">Microsoft Edge Neural TTS</div>
+        <p>即时真实样音：不需要 API Key，适合先试听不同中文神经网络声线；生产主声线仍建议用 MiniMax 或 CosyVoice 复核。</p>
+      </div><div class="rec-card rec-best">
+        <div class="rec-label">最好听</div>
+        <div class="rec-title">MiniMax Speech</div>
+        <p>主推荐：中文自然度、情绪和角色感优先时选它，适合 VIVI 云朵人格。</p>
+      </div><div class="rec-card rec-stable">
+        <div class="rec-label">最稳兜底</div>
+        <div class="rec-title">DashScope / CosyVoice</div>
+        <p>稳定兜底：国内链路、成本和稳定性更适合作为生产 fallback。</p>
+      </div><div class="rec-card rec-base">
+        <div class="rec-label">稳定 baseline</div>
+        <div class="rec-title">Azure Neural TTS</div>
+        <p>企业 baseline：稳定，但人格感通常不如新一代中文大模型 TTS。</p>
+      </div><div class="rec-card rec-base">
+        <div class="rec-label">备选</div>
+        <div class="rec-title">OpenAI TTS</div>
+        <p>备选参考：可做横向参考，不作为第一梯队中文人格声线。</p>
+      </div></div>
+    </section>
+    <div class="notice">声优调音方向：图像/剧照先判断人设和情绪，再改成短句、停顿和语气词。小云朵要聪明、轻软、贴近，不幼稚；NOIR 要冷白、克制、电影感。没有真实 Key 或 voice_id 时，卡片会禁用，不用 Edge 冒充。</div>
+    <section class="source-catalog">
+      <div class="source-intro">
+        <div>
+          <div class="eyebrow">PUBLIC VOICE SOURCES</div>
+          <h2>公开声线来源库</h2>
+          <p>这里不是系统 TTS，也不是声音克隆。每张卡都是一个可继续搜索、补 voiceId、生成真实 MP3 的公开来源候选；只有授权状态可用且已有真实样音时才允许选择。</p>
+        </div>
+        <a class="source-doc" href="./docs/voice-source-catalog.md" target="_blank" rel="noreferrer">查看声线来源文档</a>
+      </div>
+      <div class="source-tabs"><button class="source-tab active" data-source-target="all">全部来源</button><button class="source-tab" data-source-target="noir_low_male">NOIR 男低音</button><button class="source-tab" data-source-target="young_mid_male">青涩男中音</button><button class="source-tab" data-source-target="confidante_sister">知心姐姐</button><button class="source-tab" data-source-target="stable_fallback">稳定兜底</button></div>
+      <div class="source-grid"><article class="source-card" data-source-role="noir_low_male" data-source-provider="elevenlabs_v3">
+        <div class="source-head">
+          <span>ElevenLabs Voice Library</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>NOIR 男低音 01 · 冷白旁白</h3>
+        <p class="source-persona">低沉、贴耳、克制、冷白，有电影旁白感；参考视频气质但不做未授权克隆。</p>
+        <div class="source-meta">
+          <span>public_voice_library</span>
+          <span>noir_low_male</span>
+          <span>NOIR 男声优先从这里找。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>male narrator, noir, cinematic, deep, calm, intimate</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>ELEVENLABS_NOIR_LOW_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://elevenlabs.io/docs/eleven-creative/voices/voice-library" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="el_library_noir_low_01" data-choose-name="NOIR 男低音 01 · 冷白旁白" data-choose-provider="elevenlabs_v3" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="noir_low_male" data-source-provider="elevenlabs_v3">
+        <div class="source-head">
+          <span>ElevenLabs Voice Library</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>NOIR 男低音 02 · 英文参考</h3>
+        <p class="source-persona">英文更强，疏离、干净、低情绪，适合做视频同感参考线。</p>
+        <div class="source-meta">
+          <span>public_voice_library</span>
+          <span>noir_low_male</span>
+          <span>如果要接近视频英文声线，先找这一类。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>english male, noir, vessel, calm, cinematic, documentary</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>ELEVENLABS_NOIR_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://elevenlabs.io/docs/eleven-creative/voices/voice-library" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="el_library_noir_low_02" data-choose-name="NOIR 男低音 02 · 英文参考" data-choose-provider="elevenlabs_v3" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="noir_low_male" data-source-provider="elevenlabs_v3">
+        <div class="source-head">
+          <span>ElevenLabs Voice Design</span>
+          <strong>待生成并复核</strong>
+        </div>
+        <h3>NOIR 男低音 03 · Prompt 生成</h3>
+        <p class="source-persona">用 prompt 生成低沉男声：近讲、少气泡音、不过度戏剧化。</p>
+        <div class="source-meta">
+          <span>prompted_voice_design</span>
+          <span>noir_low_male</span>
+          <span>Library 找不到时的平替路线。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>A low, calm, cinematic Chinese male voice, intimate but restrained, soft breath, no announcer tone.</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>ELEVENLABS_NOIR_LOW_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://elevenlabs.io/docs/eleven-creative/voices/voice-design" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="el_design_noir_low_03" data-choose-name="NOIR 男低音 03 · Prompt 生成" data-choose-provider="elevenlabs_v3" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="noir_low_male" data-source-provider="hume_octave">
+        <div class="source-head">
+          <span>Hume Octave</span>
+          <strong>待 Key 与复核</strong>
+        </div>
+        <h3>NOIR 男低音 04 · 英文表演感</h3>
+        <p class="source-persona">英文电影感、表演感和冷感参考，不作为中文主线。</p>
+        <div class="source-meta">
+          <span>prompted_expressive_voice</span>
+          <span>noir_low_male</span>
+          <span>用来判断英文参考质感上限。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>low male noir narrator, intimate, cinematic, restrained, softly spoken</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>HUME_NOIR_LOW_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://dev.hume.ai/docs/text-to-speech-tts/overview" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="hume_noir_low_04" data-choose-name="NOIR 男低音 04 · 英文表演感" data-choose-provider="hume_octave" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="young_mid_male" data-source-provider="minimax">
+        <div class="source-head">
+          <span>MiniMax Speech</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>青涩男中音 01 · 清爽陪伴</h3>
+        <p class="source-persona">年轻、干净、轻陪伴，不卖萌，不油腻，像认真帮你看状态的年轻助理。</p>
+        <div class="source-meta">
+          <span>model_voice_catalog</span>
+          <span>young_mid_male</span>
+          <span>中文年轻男声优先找这里。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>青涩 男中音 清爽 陪伴 自然 不油腻</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>MINIMAX_YOUNG_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="minimax_young_male_01" data-choose-name="青涩男中音 01 · 清爽陪伴" data-choose-provider="minimax" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="young_mid_male" data-source-provider="fish_audio">
+        <div class="source-head">
+          <span>Fish Audio</span>
+          <strong>待授权复核</strong>
+        </div>
+        <h3>青涩男中音 02 · 公共库候选</h3>
+        <p class="source-persona">年轻男中音、自然、语义弹性好，适合健康助手陪伴。</p>
+        <div class="source-meta">
+          <span>public_voice_library_and_voice_design</span>
+          <span>young_mid_male</span>
+          <span>MiniMax 不贴时的中文男声备选。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>Chinese young male, friendly, natural, soft, assistant</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>FISH_YOUNG_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://docs.fish.audio/" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="fish_young_male_02" data-choose-name="青涩男中音 02 · 公共库候选" data-choose-provider="fish_audio" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="young_mid_male" data-source-provider="elevenlabs_v3">
+        <div class="source-head">
+          <span>ElevenLabs Voice Library</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>青涩男中音 03 · Library 候选</h3>
+        <p class="source-persona">更国际化、更干净，但中文自然度需实测。</p>
+        <div class="source-meta">
+          <span>public_voice_library</span>
+          <span>young_mid_male</span>
+          <span>用于找更有真人质感的男中音。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>young male, gentle, conversational, clear, assistant</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>ELEVENLABS_YOUNG_MALE_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://elevenlabs.io/docs/eleven-creative/voices/voice-library" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="el_library_young_male_03" data-choose-name="青涩男中音 03 · Library 候选" data-choose-provider="elevenlabs_v3" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="confidante_sister" data-source-provider="minimax">
+        <div class="source-head">
+          <span>MiniMax Speech</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>知心姐姐 01 · 中文主推</h3>
+        <p class="source-persona">成熟、温柔、可信，像在帮用户慢慢解释身体状态，不客服。</p>
+        <div class="source-meta">
+          <span>model_voice_catalog</span>
+          <span>confidante_sister</span>
+          <span>中文知心姐姐优先从这里找。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>成熟 女声 温柔 知心姐姐 健康建议 可信</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>MINIMAX_CONFIDANTE_SISTER_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="minimax_sister_01" data-choose-name="知心姐姐 01 · 中文主推" data-choose-provider="minimax" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="confidante_sister" data-source-provider="fish_audio">
+        <div class="source-head">
+          <span>Fish Audio</span>
+          <strong>待授权复核</strong>
+        </div>
+        <h3>知心姐姐 02 · 公共库候选</h3>
+        <p class="source-persona">温柔、慢一点、像真实姐姐解释，不要客服播报。</p>
+        <div class="source-meta">
+          <span>public_voice_library_and_voice_design</span>
+          <span>confidante_sister</span>
+          <span>用作 MiniMax 女声之外的备选。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>Chinese warm female, mature, caring, natural, health advisor</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>FISH_CONFIDANTE_SISTER_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://docs.fish.audio/" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="fish_sister_02" data-choose-name="知心姐姐 02 · 公共库候选" data-choose-provider="fish_audio" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="confidante_sister" data-source-provider="elevenlabs_v3">
+        <div class="source-head">
+          <span>ElevenLabs Voice Library</span>
+          <strong>待补 voiceId</strong>
+        </div>
+        <h3>知心姐姐 03 · 高质感候选</h3>
+        <p class="source-persona">更有表演感和贴近感，但中文断句必须实测。</p>
+        <div class="source-meta">
+          <span>public_voice_library</span>
+          <span>confidante_sister</span>
+          <span>用于找更高质感女声。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>warm female, caring, mature, natural, soft, conversational</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>ELEVENLABS_CONFIDANTE_SISTER_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://elevenlabs.io/docs/eleven-creative/voices/voice-library" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="el_library_sister_03" data-choose-name="知心姐姐 03 · 高质感候选" data-choose-provider="elevenlabs_v3" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="stable_fallback" data-source-provider="azure">
+        <div class="source-head">
+          <span>Azure Neural TTS</span>
+          <strong>按平台条款可用</strong>
+        </div>
+        <h3>稳定兜底 01 · Azure 中文</h3>
+        <p class="source-persona">稳定清晰，少人格化，用于生成失败时兜底。</p>
+        <div class="source-meta">
+          <span>stable_voice_catalog</span>
+          <span>stable_fallback</span>
+          <span>生产兜底。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>zh-CN Xiaoxiao / Yunxi neural voices, assistant style</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>AZURE_SISTER_WARM_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts" target="_blank" rel="noreferrer">平台文档</a>
+          
+          <button data-choose-source="azure_baseline_01" data-choose-name="稳定兜底 01 · Azure 中文" data-choose-provider="azure" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article><article class="source-card" data-source-role="stable_fallback" data-source-provider="google_tts_or_amazon_polly">
+        <div class="source-head">
+          <span>Google Chirp / Amazon Polly</span>
+          <strong>按平台条款可用</strong>
+        </div>
+        <h3>稳定兜底 02 · Google/Amazon</h3>
+        <p class="source-persona">稳定、国际云厂商兜底，不追求云朵人格。</p>
+        <div class="source-meta">
+          <span>stable_voice_catalog</span>
+          <span>stable_fallback</span>
+          <span>用于跨云容灾。</span>
+        </div>
+        <div class="source-query"><b>搜索词</b><span>Mandarin Chinese neural voice, calm assistant, female/male baseline</span></div>
+        <div class="source-missing">待生成真实样音。先在平台里按搜索词找声线，确认授权后把 voiceId 填到 <code>GOOGLE_TTS_VOICE_ID / AMAZON_POLLY_VOICE_ID</code>。</div>
+        <div class="source-actions">
+          <a href="https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types" target="_blank" rel="noreferrer">平台文档</a>
+          <a href="https://docs.aws.amazon.com/polly/latest/dg/available-voices.html" target="_blank" rel="noreferrer">备用文档</a>
+          <button data-choose-source="google_amazon_baseline_02" data-choose-name="稳定兜底 02 · Google/Amazon" data-choose-provider="google_tts_or_amazon_polly" data-choose-audio="" disabled>待授权/样音</button>
+        </div>
+      </article></div>
+    </section>
+    <section class="chooser">
+      <div class="chooser-head">
+        <div>
+          <div class="eyebrow">VOICE SELECTOR</div>
+        <h2>先听，再选一个声音</h2>
+        </div>
+        <div class="chosen" id="chosenVoice">当前未选择</div>
+      </div>
+      <div class="select-grid"><article class="select-card" data-select-card="elevenlabs_noir_reference">
+        <div class="select-top">
+          <span class="select-badge">视频质感</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>NOIR Vessel 参考声线</h3>
+        <p class="select-role">冷白、疏离、电影旁白感；需要合法授权 voice_id 才可能接近视频同款。</p>
+        <div class="select-provider">ElevenLabs v3</div>
+        <p class="select-script">[softly] But I know you. [pause] You move faster when the room gets quiet. [long pause] So today, take the first step before the noise comes back.</p>
+        
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <button class="choose-btn" data-choose-voice="elevenlabs_noir_reference" data-choose-name="NOIR Vessel 参考声线" data-choose-provider="elevenlabs_v3" data-choose-model="eleven_v3" data-choose-audio="" data-choose-preset="noir_reference" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="elevenlabs_cloud_smart">
+        <div class="select-top">
+          <span class="select-badge">主推荐</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>小云朵 · 聪明软萌</h3>
+        <p class="select-role">聪明、轻软、好奇，像云朵探头提醒；不幼态，不客服。</p>
+        <div class="select-provider">ElevenLabs v3</div>
+        <p class="select-script">[softly] 嗯，我在这儿。[pause] 今天状态不错，昨晚的恢复托住了你。[teasing] 重要的事，我们先放在上午，慢慢往前推。</p>
+        
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <button class="choose-btn" data-choose-voice="elevenlabs_cloud_smart" data-choose-name="小云朵 · 聪明软萌" data-choose-provider="elevenlabs_v3" data-choose-model="eleven_v3" data-choose-audio="" data-choose-preset="cloud_smart_soft" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="elevenlabs_noir_low_male">
+        <div class="select-top">
+          <span class="select-badge">视频平替</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>正式候选 · NOIR 男低音</h3>
+        <p class="select-role">优先用于接近视频里的冷白、低沉、贴耳、电影旁白气质；需要合法 voiceId。</p>
+        <div class="select-provider">ElevenLabs v3</div>
+        <p class="select-script">[softly] 嗯。今天的底子还不错。[pause] 恢复托住了你。重要的事，放在上午。[long pause] 别急着证明什么。</p>
+        
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <button class="choose-btn" data-choose-voice="elevenlabs_noir_low_male" data-choose-name="正式候选 · NOIR 男低音" data-choose-provider="elevenlabs_v3" data-choose-model="eleven_v3" data-choose-audio="" data-choose-preset="noir_low_male" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="minimax_noir_low_male">
+        <div class="select-top">
+          <span class="select-badge">中文优先</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>中文候选 · NOIR 男低音</h3>
+        <p class="select-role">中文低沉男声平替：克制、近讲、少播报感，适合 VIVI 中文场景。</p>
+        <div class="select-provider">MiniMax Speech-02 HD</div>
+        <p class="select-script">嗯。今天的底子还不错。恢复托住了你。重要的事，放在上午。别急着证明什么。</p>
+        
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <button class="choose-btn" data-choose-voice="minimax_noir_low_male" data-choose-name="中文候选 · NOIR 男低音" data-choose-provider="minimax" data-choose-model="speech-02-hd" data-choose-audio="" data-choose-preset="noir_low_male" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="minimax_young_mid_male">
+        <div class="select-top">
+          <span class="select-badge">男中音</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>中文候选 · 青涩男中音</h3>
+        <p class="select-role">中文年轻男中音：清亮、自然、轻陪伴，不油腻，不卖萌。</p>
+        <div class="select-provider">MiniMax Speech-02 HD</div>
+        <p class="select-script">嗯，我看了一下。今天状态还不错。上午可以先推重要的事，别一下子排太满就好。</p>
+        
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <button class="choose-btn" data-choose-voice="minimax_young_mid_male" data-choose-name="中文候选 · 青涩男中音" data-choose-provider="minimax" data-choose-model="speech-02-hd" data-choose-audio="" data-choose-preset="young_mid_male" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="minimax_confidante_sister">
+        <div class="select-top">
+          <span class="select-badge">女声主推</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>中文候选 · 知心大姐姐</h3>
+        <p class="select-role">中文成熟女声：温柔、可信、解释身体信号时不客服。</p>
+        <div class="select-provider">MiniMax Speech-02 HD</div>
+        <p class="select-script">今天状态是稳的。你可以把重要的事放在上午慢慢推进，晚上记得给自己留一点恢复时间。</p>
+        
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <button class="choose-btn" data-choose-voice="minimax_confidante_sister" data-choose-name="中文候选 · 知心大姐姐" data-choose-provider="minimax" data-choose-model="speech-02-hd" data-choose-audio="" data-choose-preset="confidante_sister" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="minimax_cloud_recovery">
+        <div class="select-top">
+          <span class="select-badge">中文备选</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>小云朵 · 安抚恢复</h3>
+        <p class="select-role">更慢、更温柔，适合睡眠恢复、压力提醒和经前窗口。</p>
+        <div class="select-provider">MiniMax Speech-02 HD</div>
+        <p class="select-script">先慢一点。身体还没完全修好，不是你做得不好。今天我们把强度放轻，状态会更稳。</p>
+        
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <button class="choose-btn" data-choose-voice="minimax_cloud_recovery" data-choose-name="小云朵 · 安抚恢复" data-choose-provider="minimax" data-choose-model="speech-02-hd" data-choose-audio="" data-choose-preset="cloud_soft_c" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="azure_stable_fallback">
+        <div class="select-top">
+          <span class="select-badge">生产兜底</span>
+          <span class="select-source">待生成真实模型音频</span>
+        </div>
+        <h3>稳定兜底</h3>
+        <p class="select-role">稳定、可信、低故障率；不是最有角色感，但适合兜底播放。</p>
+        <div class="select-provider">Azure Neural TTS</div>
+        <p class="select-script">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <button class="choose-btn" data-choose-voice="azure_stable_fallback" data-choose-name="稳定兜底" data-choose-provider="azure" data-choose-model="azure-neural-tts" data-choose-audio="" data-choose-preset="sister_warm" disabled>先生成真实样音</button>
+      </article><article class="select-card" data-select-card="local_edge_cloud_preview">
+        <div class="select-top">
+          <span class="select-badge">现在可听</span>
+          <span class="select-source">真实模型样音</span>
+        </div>
+        <h3>本地可听 · 小云朵调配版</h3>
+        <p class="select-role">当前可直接试听的兜底样音，经过语气导演和轻后期；用于看效果，不作为最终主模型承诺。</p>
+        <div class="select-provider">Edge Neural TTS · 本地可听调配</div>
+        <p class="select-script">嗯，我在这儿。今天状态不错，昨晚的恢复托住了你。重要的事，我们先放在上午，慢慢往前推。</p>
+        
+        <audio controls preload="metadata" src="./audio/edge_neural_ghost_soft_today_ready.mp3"></audio>
+        <button class="choose-btn" data-choose-voice="local_edge_cloud_preview" data-choose-name="本地可听 · 小云朵调配版" data-choose-provider="edge_neural" data-choose-model="edge-neural-tts" data-choose-audio="audio/edge_neural_ghost_soft_today_ready.mp3" data-choose-preset="ghost_soft">选择这个声音</button>
+      </article><article class="select-card" data-select-card="local_edge_male_noir_preview">
+        <div class="select-top">
+          <span class="select-badge">失败对照</span>
+          <span class="select-source">真实模型样音</span>
+        </div>
+        <h3>男声 A · NOIR 低冷旁白</h3>
+        <p class="select-role">已判定不适合正式使用：降调后会闷、顶、系统播报感强。保留给对比，不再推荐选择。</p>
+        <div class="select-provider">Edge Neural TTS · 本地可听调配</div>
+        <p class="select-script">嗯。今天的底子还不错。恢复托住了你。重要的事，放在上午。别急着证明什么。</p>
+        
+        <audio controls preload="metadata" src="./audio/edge_neural_male_noir_preview_today_ready.mp3"></audio>
+        <button class="choose-btn" data-choose-voice="local_edge_male_noir_preview" data-choose-name="男声 A · NOIR 低冷旁白" data-choose-provider="edge_neural" data-choose-model="edge-neural-tts" data-choose-audio="audio/edge_neural_male_noir_preview_today_ready.mp3" data-choose-preset="male_noir_preview" disabled>仅作对照，不推荐选择</button>
+      </article><article class="select-card" data-select-card="local_edge_male_youth_preview">
+        <div class="select-top">
+          <span class="select-badge">失败对照</span>
+          <span class="select-source">真实模型样音</span>
+        </div>
+        <h3>男声 B · 青涩陪伴</h3>
+        <p class="select-role">已判定不适合正式使用：虽然是年轻男声，但真人感和语义弹性不足。保留给对比，不再推荐选择。</p>
+        <div class="select-provider">Edge Neural TTS · 本地可听调配</div>
+        <p class="select-script">嗯，我看了一下。今天状态还不错。上午可以先推重要的事，别一下子排太满就好。</p>
+        
+        <audio controls preload="metadata" src="./audio/edge_neural_male_youth_preview_today_ready.mp3"></audio>
+        <button class="choose-btn" data-choose-voice="local_edge_male_youth_preview" data-choose-name="男声 B · 青涩陪伴" data-choose-provider="edge_neural" data-choose-model="edge-neural-tts" data-choose-audio="audio/edge_neural_male_youth_preview_today_ready.mp3" data-choose-preset="male_youth_preview" disabled>仅作对照，不推荐选择</button>
+      </article><article class="select-card" data-select-card="local_edge_confidante_sister_preview">
+        <div class="select-top">
+          <span class="select-badge">知心感</span>
+          <span class="select-source">真实模型样音</span>
+        </div>
+        <h3>女声 · 知心大姐姐</h3>
+        <p class="select-role">成熟、温柔、可信，像知心姐姐慢慢解释身体状态；不做客服播报。</p>
+        <div class="select-provider">Edge Neural TTS · 本地可听调配</div>
+        <p class="select-script">今天状态是稳的。你可以把重要的事放在上午慢慢推进，晚上记得给自己留一点恢复时间。</p>
+        
+        <audio controls preload="metadata" src="./audio/edge_neural_confidante_sister_preview_today_ready.mp3"></audio>
+        <button class="choose-btn" data-choose-voice="local_edge_confidante_sister_preview" data-choose-name="女声 · 知心大姐姐" data-choose-provider="edge_neural" data-choose-model="edge-neural-tts" data-choose-audio="audio/edge_neural_confidante_sister_preview_today_ready.mp3" data-choose-preset="confidante_sister_preview">选择这个声音</button>
+      </article></div>
+    </section>
+    <section class="toolbar">
+      <div class="filters">
+        <button class="filter active" data-filter-provider="all">全部模型</button>
+        <button class="filter" data-filter-provider="elevenlabs_v3">ElevenLabs v3</button><button class="filter" data-filter-provider="edge_neural">Microsoft Edge Neural TTS</button><button class="filter" data-filter-provider="minimax">MiniMax Speech</button><button class="filter" data-filter-provider="dashscope_cosyvoice">DashScope / CosyVoice</button><button class="filter" data-filter-provider="azure">Azure Neural TTS</button><button class="filter" data-filter-provider="openai">OpenAI TTS</button>
+      </div>
+      <div class="filters">
+        <button class="filter active" data-filter-text="all">全部文案</button>
+        <button class="filter" data-filter-text="today_ready">今日状态</button><button class="filter" data-filter-text="sleep_recovery_weak">睡眠恢复</button><button class="filter" data-filter-text="stress_attention">压力提醒</button><button class="filter" data-filter-text="ai_reply_short">AI 回复短句</button>
+      </div>
+    </section>
+    <section class="grid" id="grid"><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">NOIR Vessel 参考声线 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>noir_cinematic</span>
+          <span>导演 noir_en</span>
+          <span>speed 1.18</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] But I know you. [pause] You move faster when the room gets quiet. [long pause] So today, take the first step before the noise comes back.</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">NOIR Vessel 参考声线 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>noir_cinematic</span>
+          <span>导演 noir_en</span>
+          <span>speed 1.18</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] Tired is not a verdict. [pause] It is a message. [long pause] Listen before you answer.</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">NOIR Vessel 参考声线 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>noir_cinematic</span>
+          <span>导演 noir_en</span>
+          <span>speed 1.18</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] Pressure does not always arrive loudly. [pause] Sometimes it waits under the skin.</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">NOIR Vessel 参考声线 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>noir_cinematic</span>
+          <span>导演 noir_en</span>
+          <span>speed 1.18</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] Move, yes. [pause] But softer. [long pause] Let the body answer without force.</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 1.1</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 嗯。今天的底子还不错。[pause] 恢复托住了你。重要的事，放在上午。别急着证明什么。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 1.1</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 累，不是失败。[pause] 是身体还没修完。今天别硬扛。把声音调低一点。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 1.1</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 压力已经在皮肤下面了。[pause] 今天别把日程塞满。留八分钟，让身体先松开。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 1.1</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 可以动。[pause] 但轻一点。今天不要用力证明，二十分钟快走就够。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 B · 青涩陪伴 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 1.06</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">嗯，我看了一下。今天状态还不错。上午可以先推重要的事，别一下子排太满就好。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 B · 青涩陪伴 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 1.06</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天醒来还是累，对吧。不是你不行，是恢复还没跟上。我们先换轻一点的节奏。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 B · 青涩陪伴 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 1.06</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">压力有点往上走了。今天少塞一件事，下午做八分钟呼吸，状态会好很多。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">男声 B · 青涩陪伴 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 1.06</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以动，但别硬练。今天快走二十分钟，聪明一点，也轻一点。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">女声 · 知心大姐姐 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 1.02</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天状态是稳的。你可以把重要的事放在上午慢慢推进，晚上记得给自己留一点恢复时间。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">女声 · 知心大姐姐 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 1.02</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天先别急着责怪自己。身体还没完全修好，所以你会觉得累。把强度降下来，会更稳。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">女声 · 知心大姐姐 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 1.02</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">压力这块需要被照顾一下。今天少一点赶，下午留八分钟呼吸恢复，你会舒服很多。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">女声 · 知心大姐姐 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 1.02</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以运动，只是强度要轻一点。今天快走二十分钟，会比硬练更适合你。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 聪明软萌 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cloud_smart_soft</span>
+          <span>导演 cloud_performance</span>
+          <span>speed 1.12</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[teasing]</span></div>
+        <p class="text">[softly] 嗯，我在这儿。[pause] 今天状态不错，昨晚的恢复托住了你。[teasing] 重要的事，我们先放在上午，慢慢往前推。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 聪明软萌 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cloud_smart_soft</span>
+          <span>导演 cloud_performance</span>
+          <span>speed 1.12</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] 今天先别急。[pause] 醒来觉得累，不是你懒。是身体还没完全修好。[long pause] 我们把节奏放轻一点。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 聪明软萌 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cloud_smart_soft</span>
+          <span>导演 cloud_performance</span>
+          <span>speed 1.12</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 压力这里，我想稍微看一下。[pause] 今天别把事情排太满。下午留八分钟呼吸恢复，会舒服很多。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 聪明软萌 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cloud_smart_soft</span>
+          <span>导演 cloud_performance</span>
+          <span>speed 1.12</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 可以动，但换轻一点。[pause] 今天快走二十分钟，比硬练更适合。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 安抚恢复 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cloud_recovery_soft</span>
+          <span>导演 cloud_soft_recovery</span>
+          <span>speed 1.08</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] 先别急。[pause] 昨晚的恢复托住了你一点。今天可以推进，[long pause] 但我们把节奏放轻一点。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 安抚恢复 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cloud_recovery_soft</span>
+          <span>导演 cloud_soft_recovery</span>
+          <span>speed 1.08</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] 先慢一点。[pause] 身体还没完全修好，不是你做得不好。[long pause] 今天把强度放轻，状态会更稳。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 安抚恢复 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cloud_recovery_soft</span>
+          <span>导演 cloud_soft_recovery</span>
+          <span>speed 1.08</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span><span>[long pause]</span></div>
+        <p class="text">[softly] 压力这里需要被照顾一下。[pause] 今天少一点刺激，少一点赶。[long pause] 下午给身体八分钟，它会松下来。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="elevenlabs_v3" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">ElevenLabs v3</div>
+            <div class="voice">小云朵 · 安抚恢复 · eleven_v3</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cloud_recovery_soft</span>
+          <span>导演 cloud_soft_recovery</span>
+          <span>speed 1.08</span>
+          <span>pitch 1</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">[softly] 可以动，但先轻一点。[pause] 今天快走二十分钟，身体会更舒服。</p>
+        <div class="missing">missing env: ELEVENLABS_API_KEY</div>
+        <div class="actions">
+          <a href="https://elevenlabs.io/docs/capabilities/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">软萌小云朵 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.12</span>
+        </div>
+        
+        <p class="text">嗯，我在这儿。今天状态不错，昨晚的恢复托住了你。重要的事，我们先放在上午，慢慢往前推。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_ghost_soft_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">软萌小云朵 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.12</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒。是身体还没完全修好。我们把节奏放轻一点。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_ghost_soft_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">软萌小云朵 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.12</span>
+        </div>
+        
+        <p class="text">压力这里，我想稍微看一下。今天别把事情排太满。下午留八分钟呼吸恢复，会舒服很多。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_ghost_soft_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">软萌小云朵 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.12</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_ghost_soft_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.8</span>
+          <span>pitch 0.62</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">嗯。今天的底子还不错。 恢复托住了你。重要的事，放在上午。别急着证明什么。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_noir_preview_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.8</span>
+          <span>pitch 0.62</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">累，不是失败。 是身体还没修完。今天别硬扛。把声音调低一点。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_noir_preview_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.8</span>
+          <span>pitch 0.62</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">压力已经在皮肤下面了。 今天别把日程塞满。留八分钟，让身体先松开。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_noir_preview_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.8</span>
+          <span>pitch 0.62</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">可以动。 但轻一点。今天不要用力证明，二十分钟快走就够。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_noir_preview_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 B · 青涩陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.96</span>
+          <span>pitch 0.9</span>
+        </div>
+        
+        <p class="text">嗯，我看了一下。今天状态还不错。上午可以先推重要的事，别一下子排太满就好。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_youth_preview_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 B · 青涩陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.96</span>
+          <span>pitch 0.9</span>
+        </div>
+        
+        <p class="text">今天醒来还是累，对吧。不是你不行，是恢复还没跟上。我们先换轻一点的节奏。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_youth_preview_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 B · 青涩陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.96</span>
+          <span>pitch 0.9</span>
+        </div>
+        
+        <p class="text">压力有点往上走了。今天少塞一件事，下午做八分钟呼吸，状态会好很多。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_youth_preview_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">男声 B · 青涩陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.96</span>
+          <span>pitch 0.9</span>
+        </div>
+        
+        <p class="text">可以动，但别硬练。今天快走二十分钟，聪明一点，也轻一点。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_male_youth_preview_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">女声 · 知心大姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.88</span>
+        </div>
+        
+        <p class="text">今天状态是稳的。你可以把重要的事放在上午慢慢推进，晚上记得给自己留一点恢复时间。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_confidante_sister_preview_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">女声 · 知心大姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.88</span>
+        </div>
+        
+        <p class="text">今天先别急着责怪自己。身体还没完全修好，所以你会觉得累。把强度降下来，会更稳。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_confidante_sister_preview_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">女声 · 知心大姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.88</span>
+        </div>
+        
+        <p class="text">压力这块需要被照顾一下。今天少一点赶，下午留八分钟呼吸恢复，你会舒服很多。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_confidante_sister_preview_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">女声 · 知心大姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.88</span>
+        </div>
+        
+        <p class="text">可以运动，只是强度要轻一点。今天快走二十分钟，会比硬练更适合你。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_confidante_sister_preview_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">温柔姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        
+        <p class="text">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sister_warm_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">温柔姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        
+        <p class="text">今天恢复偏弱。疲惫感更可能来自睡眠修复不足，建议降低训练强度并提前休息。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sister_warm_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">温柔姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        
+        <p class="text">今天压力信号偏高。建议减少连续高强度任务，下午安排一次八分钟呼吸恢复。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sister_warm_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">温柔姐姐 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        
+        <p class="text">可以运动，但建议降低强度。今天快走二十分钟更适合当前恢复状态。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sister_warm_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">阳光陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>sunshine</span>
+          <span>导演 clean</span>
+          <span>speed 0.98</span>
+          <span>pitch 0.94</span>
+        </div>
+        
+        <p class="text">我在这儿。今天状态不错，昨晚的恢复托住了你。重要事情，可以先放在上午推进。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sunshine_friend_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">阳光陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>sunshine</span>
+          <span>导演 clean</span>
+          <span>speed 0.98</span>
+          <span>pitch 0.94</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒，是身体还没完全修好。我们把节奏放轻一点。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sunshine_friend_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">阳光陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>sunshine</span>
+          <span>导演 clean</span>
+          <span>speed 0.98</span>
+          <span>pitch 0.94</span>
+        </div>
+        
+        <p class="text">压力这里，需要稍微看一下。今天别把事情排太满，下午留八分钟呼吸恢复，会舒服很多。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sunshine_friend_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">阳光陪伴 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>sunshine</span>
+          <span>导演 clean</span>
+          <span>speed 0.98</span>
+          <span>pitch 0.94</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_sunshine_friend_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">冷静管家 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.72</span>
+        </div>
+        
+        <p class="text">我在这儿。今天状态不错，昨晚的恢复托住了你。重要事情，可以先放在上午推进。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_calm_keeper_today_ready.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">冷静管家 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.72</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒，是身体还没完全修好。我们把节奏放轻一点。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_calm_keeper_sleep_recovery_weak.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">冷静管家 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.72</span>
+        </div>
+        
+        <p class="text">压力这里，需要稍微看一下。今天别把事情排太满，下午留八分钟呼吸恢复，会舒服很多。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_calm_keeper_stress_attention.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card generated" data-provider="edge_neural" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Microsoft Edge Neural TTS</div>
+            <div class="voice">冷静管家 · edge-neural-tts</div>
+          </div>
+          <span class="status">已生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.84</span>
+          <span>pitch 0.72</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <audio controls preload="metadata" src="./audio/edge_neural_calm_keeper_ai_reply_short.mp3"></audio>
+        <div class="actions">
+          <a href="https://github.com/rany2/edge-tts" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 A · 轻软陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cloud_soft_a</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.04</span>
+        </div>
+        
+        <p class="text">嗯，我在这儿。今天状态不错，昨晚的恢复托住了你。重要的事，我们先放在上午，慢慢往前推。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 A · 轻软陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cloud_soft_a</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.04</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒。是身体还没完全修好。我们把节奏放轻一点。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 A · 轻软陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cloud_soft_a</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.04</span>
+        </div>
+        
+        <p class="text">压力这里，我想稍微看一下。今天别把事情排太满。下午留八分钟呼吸恢复，会舒服很多。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 A · 轻软陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cloud_soft_a</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.9</span>
+          <span>pitch 1.04</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 B · 好奇灵动 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cloud_soft_b</span>
+          <span>导演 cloud_curious</span>
+          <span>speed 0.94</span>
+          <span>pitch 1.06</span>
+        </div>
+        
+        <p class="text">诶，我刚刚看了一眼。你今天状态还可以。别一下子冲太猛，我们先把上午这一小步走稳。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 B · 好奇灵动 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cloud_soft_b</span>
+          <span>导演 cloud_curious</span>
+          <span>speed 0.94</span>
+          <span>pitch 1.06</span>
+        </div>
+        
+        <p class="text">嗯？今天醒来还是累，对吧。不是你不行，是身体还在修补。我们先换一个轻一点的版本。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 B · 好奇灵动 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cloud_soft_b</span>
+          <span>导演 cloud_curious</span>
+          <span>speed 0.94</span>
+          <span>pitch 1.06</span>
+        </div>
+        
+        <p class="text">我发现压力有点往上冒。别担心，不是坏掉了。今天少塞一件事，下午呼吸八分钟。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 B · 好奇灵动 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cloud_soft_b</span>
+          <span>导演 cloud_curious</span>
+          <span>speed 0.94</span>
+          <span>pitch 1.06</span>
+        </div>
+        
+        <p class="text">可以动。只是别硬练。我们换成快走二十分钟，聪明一点，也轻一点。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 C · 安抚恢复 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cloud_soft_c</span>
+          <span>导演 cloud_recovery</span>
+          <span>speed 0.88</span>
+          <span>pitch 1.02</span>
+        </div>
+        
+        <p class="text">先别急。昨晚的恢复托住了你一点。今天可以推进，但我们把节奏放轻一点。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 C · 安抚恢复 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cloud_soft_c</span>
+          <span>导演 cloud_recovery</span>
+          <span>speed 0.88</span>
+          <span>pitch 1.02</span>
+        </div>
+        
+        <p class="text">先慢一点。身体还没完全修好，不是你做得不好。今天把强度放轻，状态会更稳。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 C · 安抚恢复 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cloud_soft_c</span>
+          <span>导演 cloud_recovery</span>
+          <span>speed 0.88</span>
+          <span>pitch 1.02</span>
+        </div>
+        
+        <p class="text">压力这里需要被照顾一下。今天少一点刺激，少一点赶。下午给身体八分钟，它会松下来。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">云朵 C · 安抚恢复 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cloud_soft_c</span>
+          <span>导演 cloud_recovery</span>
+          <span>speed 0.88</span>
+          <span>pitch 1.02</span>
+        </div>
+        
+        <p class="text">可以动，但先轻一点。今天快走二十分钟，身体会更舒服。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">温柔姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">温柔姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天恢复偏弱。疲惫感更可能来自睡眠修复不足，建议降低训练强度并提前休息。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">温柔姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天压力信号偏高。建议减少连续高强度任务，下午安排一次八分钟呼吸恢复。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">温柔姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以运动，但建议降低强度。今天快走二十分钟更适合当前恢复状态。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">嗯。今天的底子还不错。 恢复托住了你。重要的事，放在上午。别急着证明什么。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">累，不是失败。 是身体还没修完。今天别硬扛。把声音调低一点。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">压力已经在皮肤下面了。 今天别把日程塞满。留八分钟，让身体先松开。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 A · NOIR 低冷旁白 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>noir_low_male</span>
+          <span>导演 noir_low_male</span>
+          <span>speed 0.86</span>
+          <span>pitch 0.92</span>
+        </div>
+        <div class="meta"><span>[softly]</span><span>[pause]</span></div>
+        <p class="text">可以动。 但轻一点。今天不要用力证明，二十分钟快走就够。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 B · 青涩陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.94</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">嗯，我看了一下。今天状态还不错。上午可以先推重要的事，别一下子排太满就好。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 B · 青涩陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.94</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">今天醒来还是累，对吧。不是你不行，是恢复还没跟上。我们先换轻一点的节奏。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 B · 青涩陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.94</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">压力有点往上走了。今天少塞一件事，下午做八分钟呼吸，状态会好很多。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">男声 B · 青涩陪伴 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>young_mid_male</span>
+          <span>导演 young_male_support</span>
+          <span>speed 0.94</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">可以动，但别硬练。今天快走二十分钟，聪明一点，也轻一点。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">女声 · 知心大姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">今天状态是稳的。你可以把重要的事放在上午慢慢推进，晚上记得给自己留一点恢复时间。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">女声 · 知心大姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">今天先别急着责怪自己。身体还没完全修好，所以你会觉得累。把强度降下来，会更稳。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">女声 · 知心大姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">压力这块需要被照顾一下。今天少一点赶，下午留八分钟呼吸恢复，你会舒服很多。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="minimax" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">MiniMax Speech</div>
+            <div class="voice">女声 · 知心大姐姐 · speech-02-hd</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>confidante_sister</span>
+          <span>导演 confidante_sister</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.98</span>
+        </div>
+        
+        <p class="text">可以运动，只是强度要轻一点。今天快走二十分钟，会比硬练更适合你。</p>
+        <div class="missing">missing env: MINIMAX_API_KEY, MINIMAX_GROUP_ID</div>
+        <div class="actions">
+          <a href="https://minimax-ai.github.io/tts_tech_report/" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">软萌小云朵 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.95</span>
+          <span>pitch 1.08</span>
+        </div>
+        
+        <p class="text">嗯，我在这儿。今天状态不错，昨晚的恢复托住了你。重要的事，我们先放在上午，慢慢往前推。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">软萌小云朵 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.95</span>
+          <span>pitch 1.08</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒。是身体还没完全修好。我们把节奏放轻一点。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">软萌小云朵 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.95</span>
+          <span>pitch 1.08</span>
+        </div>
+        
+        <p class="text">压力这里，我想稍微看一下。今天别把事情排太满。下午留八分钟呼吸恢复，会舒服很多。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">软萌小云朵 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>cute</span>
+          <span>导演 cloud_natural</span>
+          <span>speed 0.95</span>
+          <span>pitch 1.08</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">温柔姐姐 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">温柔姐姐 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天恢复偏弱。疲惫感更可能来自睡眠修复不足，建议降低训练强度并提前休息。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">温柔姐姐 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天压力信号偏高。建议减少连续高强度任务，下午安排一次八分钟呼吸恢复。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="dashscope_cosyvoice" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">DashScope / CosyVoice</div>
+            <div class="voice">温柔姐姐 · cosyvoice-v2</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以运动，但建议降低强度。今天快走二十分钟更适合当前恢复状态。</p>
+        <div class="missing">missing env: DASHSCOPE_API_KEY</div>
+        <div class="actions">
+          <a href="https://github.com/FunAudioLLM/CosyVoice" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">温柔姐姐 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">温柔姐姐 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天恢复偏弱。疲惫感更可能来自睡眠修复不足，建议降低训练强度并提前休息。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">温柔姐姐 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天压力信号偏高。建议减少连续高强度任务，下午安排一次八分钟呼吸恢复。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">温柔姐姐 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>warm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以运动，但建议降低强度。今天快走二十分钟更适合当前恢复状态。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">冷静管家 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.95</span>
+        </div>
+        
+        <p class="text">我在这儿。今天状态不错，昨晚的恢复托住了你。重要事情，可以先放在上午推进。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">冷静管家 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.95</span>
+        </div>
+        
+        <p class="text">今天先别急。醒来觉得累，不是你懒，是身体还没完全修好。我们把节奏放轻一点。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">冷静管家 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.95</span>
+        </div>
+        
+        <p class="text">压力这里，需要稍微看一下。今天别把事情排太满，下午留八分钟呼吸恢复，会舒服很多。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="azure" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">Azure Neural TTS</div>
+            <div class="voice">冷静管家 · azure-neural-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>calm</span>
+          <span>导演 clean</span>
+          <span>speed 0.9</span>
+          <span>pitch 0.95</span>
+        </div>
+        
+        <p class="text">可以动，但换轻一点。今天快走二十分钟，比硬练更适合。</p>
+        <div class="missing">missing env: AZURE_SPEECH_KEY, AZURE_SPEECH_REGION</div>
+        <div class="actions">
+          <a href="https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="openai" data-text="today_ready">
+        <div class="card-head">
+          <div>
+            <div class="provider">OpenAI TTS</div>
+            <div class="voice">冷静管家 · gpt-4o-mini-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>今日状态</span>
+          <span>today_ready</span>
+          <span>calm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天状态不错，恢复条件比较稳。重要任务可以放在上午，但晚上仍然要留出恢复时间。</p>
+        <div class="missing">missing env: OPENAI_API_KEY</div>
+        <div class="actions">
+          <a href="https://platform.openai.com/docs/guides/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="openai" data-text="sleep_recovery_weak">
+        <div class="card-head">
+          <div>
+            <div class="provider">OpenAI TTS</div>
+            <div class="voice">冷静管家 · gpt-4o-mini-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>睡眠恢复</span>
+          <span>sleep_recovery_weak</span>
+          <span>calm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天恢复偏弱。疲惫感更可能来自睡眠修复不足，建议降低训练强度并提前休息。</p>
+        <div class="missing">missing env: OPENAI_API_KEY</div>
+        <div class="actions">
+          <a href="https://platform.openai.com/docs/guides/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="openai" data-text="stress_attention">
+        <div class="card-head">
+          <div>
+            <div class="provider">OpenAI TTS</div>
+            <div class="voice">冷静管家 · gpt-4o-mini-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>压力提醒</span>
+          <span>stress_attention</span>
+          <span>calm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">今天压力信号偏高。建议减少连续高强度任务，下午安排一次八分钟呼吸恢复。</p>
+        <div class="missing">missing env: OPENAI_API_KEY</div>
+        <div class="actions">
+          <a href="https://platform.openai.com/docs/guides/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article><article class="card skipped" data-provider="openai" data-text="ai_reply_short">
+        <div class="card-head">
+          <div>
+            <div class="provider">OpenAI TTS</div>
+            <div class="voice">冷静管家 · gpt-4o-mini-tts</div>
+          </div>
+          <span class="status">未生成</span>
+        </div>
+        <div class="meta">
+          <span>AI 回复短句</span>
+          <span>ai_reply_short</span>
+          <span>calm</span>
+          <span>导演 health_trust</span>
+          <span>speed 0.92</span>
+          <span>pitch 1</span>
+        </div>
+        
+        <p class="text">可以运动，但建议降低强度。今天快走二十分钟更适合当前恢复状态。</p>
+        <div class="missing">missing env: OPENAI_API_KEY</div>
+        <div class="actions">
+          <a href="https://platform.openai.com/docs/guides/text-to-speech" target="_blank" rel="noreferrer">Provider 文档</a>
+        </div>
+      </article></section>
+    <section class="empty" id="empty">当前筛选没有结果。</section>
+  </main>
+  <script>
+    var activeProvider='all',activeText='all';
+    var selectedVoice=localStorage.getItem('viviSelectedVoice')||'';
+    function applySelection(){
+      document.querySelectorAll('[data-select-card]').forEach(function(card){
+        card.classList.toggle('selected',card.dataset.selectCard===selectedVoice);
+      });
+      var chosen=document.getElementById('chosenVoice');
+      var card=document.querySelector('[data-select-card="'+selectedVoice+'"]');
+      chosen.textContent=card?'已选择：'+card.querySelector('h3').textContent:'当前未选择';
+    }
+    function applyFilters(){
+      var visible=0;
+      document.querySelectorAll('.card').forEach(function(card){
+        var ok=(activeProvider==='all'||card.dataset.provider===activeProvider)&&(activeText==='all'||card.dataset.text===activeText);
+        card.style.display=ok?'block':'none';
+        if(ok)visible++;
+      });
+      document.getElementById('empty').style.display=visible?'none':'block';
+    }
+    document.addEventListener('click',function(e){
+      var provider=e.target.closest('[data-filter-provider]');
+      if(provider){activeProvider=provider.dataset.filterProvider;document.querySelectorAll('[data-filter-provider]').forEach(function(n){n.classList.toggle('active',n===provider)});applyFilters();return}
+      var text=e.target.closest('[data-filter-text]');
+      if(text){activeText=text.dataset.filterText;document.querySelectorAll('[data-filter-text]').forEach(function(n){n.classList.toggle('active',n===text)});applyFilters();return}
+      var choose=e.target.closest('[data-choose-voice]');
+      if(choose && !choose.disabled){selectedVoice=choose.dataset.chooseVoice;localStorage.setItem('viviSelectedVoice',selectedVoice);localStorage.setItem('viviSelectedVoicePayload',JSON.stringify({id:selectedVoice,name:choose.dataset.chooseName,provider:choose.dataset.chooseProvider,model:choose.dataset.chooseModel,audioFile:choose.dataset.chooseAudio,preset:choose.dataset.choosePreset}));localStorage.setItem('viviVoiceSettings',JSON.stringify({voiceId:choose.dataset.chooseVoice,provider:choose.dataset.chooseProvider,model:choose.dataset.chooseModel,audioFile:choose.dataset.chooseAudio,preset:choose.dataset.choosePreset}));applySelection();return}
+      var sourceTab=e.target.closest('[data-source-target]');
+      if(sourceTab){var target=sourceTab.dataset.sourceTarget;document.querySelectorAll('[data-source-target]').forEach(function(n){n.classList.toggle('active',n===sourceTab)});document.querySelectorAll('[data-source-role]').forEach(function(card){card.classList.toggle('hidden',target!=='all'&&card.dataset.sourceRole!==target)});return}
+      var sourceChoose=e.target.closest('[data-choose-source]');
+      if(sourceChoose && !sourceChoose.disabled){selectedVoice=sourceChoose.dataset.chooseSource;localStorage.setItem('viviSelectedVoice',selectedVoice);localStorage.setItem('viviSelectedVoicePayload',JSON.stringify({id:selectedVoice,name:sourceChoose.dataset.chooseName,provider:sourceChoose.dataset.chooseProvider,audioFile:sourceChoose.dataset.chooseAudio,sourceType:'public_voice_source'}));localStorage.setItem('viviVoiceSettings',JSON.stringify({voiceId:sourceChoose.dataset.chooseSource,provider:sourceChoose.dataset.chooseProvider,audioFile:sourceChoose.dataset.chooseAudio,sourceType:'public_voice_source'}));applySelection();return}
+    });
+    applySelection();
+  </script>
+</body>
+</html>

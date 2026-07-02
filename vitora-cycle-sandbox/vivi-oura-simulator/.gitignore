@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+.env*.local
+.env.tts-bakeoff
+!.env.tts-bakeoff.example
+ios/Pods/
+ios/build/
+android/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+DerivedData/

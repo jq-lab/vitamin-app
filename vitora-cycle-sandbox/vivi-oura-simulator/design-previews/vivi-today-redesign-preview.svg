@@ -1,0 +1,146 @@
+<svg width="430" height="932" viewBox="0 0 430 932" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="215" y1="0" x2="215" y2="932" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#53687A"/>
+      <stop offset="0.34" stop-color="#6C5B66"/>
+      <stop offset="0.66" stop-color="#4C414A"/>
+      <stop offset="1" stop-color="#211E23"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.13"/>
+    </linearGradient>
+    <linearGradient id="darkGlass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2A2B30" stop-opacity="0.74"/>
+      <stop offset="1" stop-color="#1C1B1F" stop-opacity="0.62"/>
+    </linearGradient>
+    <linearGradient id="fadeBottom" x1="215" y1="578" x2="215" y2="932" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2B2630" stop-opacity="0"/>
+      <stop offset="0.54" stop-color="#201D22" stop-opacity="0.78"/>
+      <stop offset="1" stop-color="#141315" stop-opacity="0.96"/>
+    </linearGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.24"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#000000" flood-opacity="0.18"/>
+    </filter>
+    <clipPath id="screen">
+      <rect width="430" height="932" rx="0"/>
+    </clipPath>
+    <style>
+      .font { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", Arial, sans-serif; }
+      .title { font-size: 25px; font-weight: 850; fill: #fff; letter-spacing: 0; }
+      .sub { font-size: 13px; font-weight: 720; fill: rgba(255,255,255,.66); }
+      .small { font-size: 11px; font-weight: 760; fill: rgba(255,255,255,.58); }
+      .label { font-size: 14px; font-weight: 820; fill: rgba(255,255,255,.78); }
+      .value { font-size: 33px; font-weight: 820; fill: #fff; }
+    </style>
+  </defs>
+
+  <g clip-path="url(#screen)">
+    <rect width="430" height="932" fill="url(#sky)"/>
+    <path d="M-30 386C58 320 116 347 199 315C278 285 343 251 465 274V932H-30V386Z" fill="#332B33" opacity=".45"/>
+    <path d="M-42 493C57 423 149 455 233 417C302 386 352 363 474 401V932H-42V493Z" fill="#161A1F" opacity=".32"/>
+    <path d="M-20 566C80 538 165 562 259 531C333 507 388 510 454 534V932H-20V566Z" fill="#8C8792" opacity=".18"/>
+    <circle cx="337" cy="181" r="110" fill="#87B7CA" opacity=".14" filter="url(#blur)"/>
+    <circle cx="112" cy="550" r="150" fill="#F0A0AC" opacity=".08" filter="url(#blur)"/>
+    <rect width="430" height="932" fill="#111116" opacity=".26"/>
+
+    <!-- top chrome -->
+    <circle cx="56" cy="70" r="30" fill="#FFFFFF" opacity=".15"/>
+    <path d="M43 61H68M43 70H68M43 79H68" stroke="#fff" stroke-opacity=".82" stroke-width="3.2" stroke-linecap="round"/>
+    <rect x="247" y="45" width="108" height="52" rx="26" fill="#FFFFFF" opacity=".18"/>
+    <path d="M278 64L266 73H258V83H266L278 92V64Z" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M284 72C287 76 287 80 284 84" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+    <rect x="313" y="61" width="12" height="12" rx="3" stroke="#fff" stroke-width="3"/>
+    <rect x="333" y="61" width="12" height="12" rx="3" stroke="#fff" stroke-width="3"/>
+    <rect x="313" y="80" width="12" height="12" rx="3" stroke="#fff" stroke-width="3"/>
+    <rect x="333" y="80" width="12" height="12" rx="3" stroke="#fff" stroke-width="3"/>
+    <circle cx="387" cy="71" r="26" fill="#CDAE9D"/>
+    <circle cx="402" cy="52" r="8" fill="#FF4D45"/>
+
+    <!-- readiness moved up, no greeting -->
+    <g filter="url(#shadow)">
+      <rect x="28" y="116" width="374" height="116" rx="27" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity=".18"/>
+      <rect x="48" y="139" width="58" height="58" rx="18" fill="url(#glass)"/>
+      <text class="font title" x="126" y="158">今日恢复 88 分</text>
+      <text class="font sub" x="126" y="184">上午推进重点，下午保留恢复窗口</text>
+      <rect x="126" y="202" width="202" height="7" rx="3.5" fill="#fff" opacity=".18"/>
+      <rect x="126" y="202" width="178" height="7" rx="3.5" fill="#fff" opacity=".72"/>
+      <text class="font small" x="339" y="210">88%</text>
+      <path d="M77 153L82 164L93 169L82 174L77 185L72 174L61 169L72 164L77 153Z" fill="#fff" opacity=".92"/>
+      <path d="M369 152L350 171M350 152L369 171" stroke="#fff" stroke-opacity=".72" stroke-width="3.2" stroke-linecap="round"/>
+    </g>
+
+    <!-- activity goal card under readiness -->
+    <g filter="url(#softShadow)">
+      <rect x="28" y="250" width="374" height="185" rx="30" fill="#111318" fill-opacity=".48" stroke="#FFFFFF" stroke-opacity=".11"/>
+      <text class="font label" x="52" y="286">今日目标</text>
+      <text class="font small" x="52" y="308">主动卡路里消耗</text>
+      <path d="M345 278H375M364 267L376 278L364 289" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M72 382C112 318 174 292 242 305C292 315 330 345 363 384" stroke="#fff" stroke-opacity=".18" stroke-width="8" stroke-linecap="round"/>
+      <path d="M72 382C113 319 177 294 244 307C280 314 310 333 335 359" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+      <text class="font small" x="62" y="388" transform="rotate(-43 62 388)">0</text>
+      <text class="font small" x="352" y="367" transform="rotate(42 352 367)">400</text>
+      <circle cx="215" cy="345" r="30" fill="#1F2428" opacity=".86"/>
+      <path d="M216 328C207 339 227 343 213 359C226 353 230 338 216 328Z" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
+      <text class="font" x="160" y="394" font-size="48" font-weight="820" fill="#fff">669</text>
+      <text class="font" x="246" y="394" font-size="19" font-weight="760" fill="rgba(255,255,255,.68)">kcal</text>
+      <text class="font sub" x="121" y="421">已超出活动目标 60%</text>
+    </g>
+
+    <!-- now suggestions -->
+    <text class="font" x="29" y="481" font-size="22" font-weight="850" fill="#fff">✦ 此刻建议</text>
+    <g filter="url(#softShadow)">
+      <rect x="28" y="504" width="116" height="128" rx="24" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <path d="M67 535A19 19 0 1 1 87 559A26 26 0 0 0 67 535Z" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <text class="font small" x="50" y="586">睡眠状态</text>
+      <text class="font value" x="50" y="619">84</text>
+      <text class="font small" x="91" y="619">分</text>
+    </g>
+    <g filter="url(#softShadow)">
+      <rect x="157" y="504" width="116" height="128" rx="24" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <circle cx="215" cy="546" r="20" stroke="#fff" stroke-width="3" stroke-opacity=".9"/>
+      <circle cx="225" cy="539" r="5" fill="#fff"/>
+      <text class="font small" x="179" y="586">周期窗口</text>
+      <text class="font value" x="179" y="619">D6</text>
+      <text class="font small" x="222" y="619">卵泡期</text>
+    </g>
+    <g filter="url(#softShadow)">
+      <rect x="286" y="504" width="116" height="128" rx="24" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <path d="M322 548C332 538 342 538 352 548M322 562C332 552 342 552 352 562" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      <text class="font small" x="308" y="586">压力水平</text>
+      <text class="font value" x="308" y="619">中</text>
+      <text class="font small" x="342" y="619">恢复 12m</text>
+    </g>
+
+    <!-- deeper content hinted by pull-down/up -->
+    <g opacity=".62">
+      <rect x="28" y="654" width="374" height="116" rx="28" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity=".10"/>
+      <text class="font label" x="52" y="690">下拉后更多细节</text>
+      <text class="font sub" x="52" y="718">睡眠阶段、压力曲线、周期能量和任务安排会在这里展开。</text>
+    </g>
+
+    <!-- bottom depth fade and tab -->
+    <rect x="0" y="604" width="430" height="328" fill="url(#fadeBottom)"/>
+    <rect x="0" y="730" width="430" height="202" fill="#0E0E10" opacity=".22"/>
+    <g filter="url(#shadow)">
+      <rect x="42" y="798" width="288" height="66" rx="33" fill="url(#darkGlass)" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <circle cx="92" cy="831" r="21" fill="#FFFFFF" opacity=".10"/>
+      <path d="M92 812V820M92 842V850M73 831H81M103 831H111M78 817L84 823M100 839L106 845M106 817L100 823M84 839L78 845" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
+      <text class="font small" x="79" y="856" fill="#fff">今日</text>
+      <path d="M181 844V818C192 822 197 817 204 810M181 824C170 820 166 815 161 808" stroke="#fff" stroke-opacity=".62" stroke-width="3" stroke-linecap="round"/>
+      <text class="font small" x="144" y="856">健康核心数据</text>
+      <path d="M274 844V819C263 814 263 799 278 799C294 799 296 817 283 822V844" stroke="#fff" stroke-opacity=".62" stroke-width="3" stroke-linecap="round"/>
+      <text class="font small" x="255" y="856">我的健康</text>
+    </g>
+    <g filter="url(#shadow)">
+      <circle cx="370" cy="831" r="36" fill="url(#darkGlass)" stroke="#FFFFFF" stroke-opacity=".12"/>
+      <path d="M370 812V850M351 831H389" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

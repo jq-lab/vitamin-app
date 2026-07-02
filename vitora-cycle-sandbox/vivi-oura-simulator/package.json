@@ -1,0 +1,30 @@
+{
+  "name": "vivi-oura-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo/AppEntry",
+  "scripts": {
+    "prepare:web": "node scripts/prepare-web-assets.mjs",
+    "patch:expo-jsi": "node scripts/patch-expo-modules-jsi.mjs",
+    "postinstall": "pnpm patch:expo-jsi",
+    "start": "pnpm prepare:web && pnpm patch:expo-jsi && expo start",
+    "ios": "pnpm prepare:web && pnpm patch:expo-jsi && expo run:ios",
+    "ios:release": "pnpm prepare:web && pnpm patch:expo-jsi && expo run:ios --configuration Release",
+    "typecheck": "tsc --noEmit",
+    "tts:bakeoff": "node tools/tts-bakeoff/run-bakeoff.mjs"
+  },
+  "dependencies": {
+    "expo": "~56.0.8",
+    "expo-asset": "~56.0.15",
+    "expo-file-system": "~56.0.7",
+    "expo-status-bar": "~56.0.4",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-webview": "13.16.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "babel-preset-expo": "56.0.14",
+    "typescript": "~6.0.3"
+  }
+}

@@ -6,6 +6,8 @@ import {
   AppStateStatus,
   ActivityIndicator,
   Alert,
+  Animated,
+  Easing,
   ImageBackground,
   Linking,
   PanResponder,
@@ -21,8 +23,11 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { WebView } from "react-native-webview";
 import { SIMULATOR_WEB_PATCH } from "./src/simulatorWebPatch";
+import { buildRuntimeStateFromPayload } from "./src/lib/vitora/runtime";
+import type { AchievementStampV1, VitoraRuntimeStateV1 } from "./src/lib/vitora/types";
 
 const CACHE_ROOT = `${FileSystem.cacheDirectory ?? ""}vivi-oura-web/`;
+const RUNTIME_STATE_FILE = `${FileSystem.documentDirectory || FileSystem.cacheDirectory || ""}vitora-runtime-v1.json`;
 const APP_DEMO_QUERY = "openTab=today";
 const REMOTE_WEB_BASE_URI = "http://127.0.0.1:8822/vivi-oura-simulator/web/index.html";
 const FALLBACK_TRANSPARENT_PNG =
@@ -37,9 +42,11 @@ type NativeTab = "today" | "explore" | "health";
 type ExploreRoute = "home" | "detail" | "chat" | "feedback";
 type HealthRoute = "home" | "detail";
 type HealthDetailTab = "summary" | "sleep" | "cycle" | "focus" | "metabolism" | "morning";
-type TodayCardId = "today" | "sleep" | "focus" | "metabolism" | "morning";
-type TodayRoute = "home" | "breathing";
+type TodayCardId = "today" | "sleep" | "cycle" | "focus" | "metabolism" | "morning";
+type TodayRoute = "home" | "breathing" | "focusTimer" | "metabolismTimer" | "morningMap";
 type HealthDetailSource = TodayCardId | "cycle" | "health";
+type ProfilePanel = "inbox" | "info" | "editName" | "stamps" | "archive" | "watch" | "vip" | null;
+type HealthMetricKey = "readiness" | "sleepDebt" | "informationDebt" | "average";
 type ReminderSheetState = {
   source: string;
   time: string;
@@ -52,10 +59,24 @@ type TodayCard = {
   subtitle: string;
   score: string;
   scoreUnit?: string;
-  tone: "energy" | "sleep" | "focus" | "metabolism" | "morning";
+  tone: "energy" | "sleep" | "cycle" | "focus" | "metabolism" | "morning";
   moreTab: HealthDetailTab;
   monitor: string;
   action: string;
+  actionType: "direct_session" | "reminder" | "map_guidance";
+  status: "normal" | "warning";
+};
+type TodayNavCircle = Pick<TodayCard, "id" | "label" | "chipValue" | "tone" | "status">;
+type TodayToneTheme = {
+  base: string;
+  washTop: string;
+  bottomGlow: string;
+  bottomGlowStrong: string;
+  accent: string;
+  text: string;
+  mutedText: string;
+  button: string;
+  buttonText: string;
 };
 type ExploreTheme = {
   id: string;
@@ -71,6 +92,21 @@ type NativeMessage = {
   text: string;
 };
 type HealthStampTone = "amateur" | "sleepers" | "steps" | "gym" | "hours";
+type StampRevealSheetState = {
+  stamp: AchievementStampV1;
+  mode: "award" | "detail";
+  expanded: boolean;
+} | null;
+type VitoraOnboardingBridgePayload = {
+  scope?: string;
+  open?: boolean;
+  completed?: boolean;
+  profile?: unknown;
+  signals?: unknown;
+  prediction?: unknown;
+  content?: unknown;
+  permissionState?: Record<string, boolean | string | number | null>;
+};
 
 const HEALTH_DETAIL_TABS: { id: HealthDetailTab; label: string }[] = [
   { id: "summary", label: "综合" },
@@ -80,6 +116,162 @@ const HEALTH_DETAIL_TABS: { id: HealthDetailTab; label: string }[] = [
   { id: "metabolism", label: "代谢" },
   { id: "morning", label: "晨间" }
 ];
+
+const TODAY_NAV_ORDER: TodayCardId[] = ["today", "sleep", "cycle", "focus", "metabolism", "morning"];
+
+const TODAY_TONE_THEMES: Record<TodayCard["tone"], TodayToneTheme> = {
+  energy: {
+    base: "#f7c160",
+    washTop: "rgba(255,205,196,0.68)",
+    bottomGlow: "rgba(232,224,198,0.90)",
+    bottomGlowStrong: "rgba(255,246,202,0.58)",
+    accent: "#a994ff",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.88)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#171d25"
+  },
+  sleep: {
+    base: "#beddf4",
+    washTop: "rgba(192,231,255,0.92)",
+    bottomGlow: "rgba(232,227,213,0.92)",
+    bottomGlowStrong: "rgba(214,196,241,0.42)",
+    accent: "#eb5bc4",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.86)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#1b2430"
+  },
+  cycle: {
+    base: "#b7eee8",
+    washTop: "rgba(170,232,225,0.92)",
+    bottomGlow: "rgba(231,235,221,0.92)",
+    bottomGlowStrong: "rgba(169,139,255,0.34)",
+    accent: "#f02e91",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.88)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#17212c"
+  },
+  focus: {
+    base: "#dce4f7",
+    washTop: "rgba(244,206,229,0.74)",
+    bottomGlow: "rgba(235,236,232,0.94)",
+    bottomGlowStrong: "rgba(204,216,255,0.46)",
+    accent: "#f0df45",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.88)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#18202b"
+  },
+  metabolism: {
+    base: "#e7b449",
+    washTop: "rgba(118,120,116,0.70)",
+    bottomGlow: "rgba(255,219,152,0.94)",
+    bottomGlowStrong: "rgba(255,188,47,0.38)",
+    accent: "#ffd65b",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.88)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#1a2028"
+  },
+  morning: {
+    base: "#eee3df",
+    washTop: "rgba(214,214,212,0.88)",
+    bottomGlow: "rgba(238,215,211,0.92)",
+    bottomGlowStrong: "rgba(255,239,157,0.42)",
+    accent: "#ecd84c",
+    text: "#ffffff",
+    mutedText: "rgba(255,255,255,0.82)",
+    button: "rgba(255,255,255,0.94)",
+    buttonText: "#171d25"
+  }
+};
+
+const DOT_MATRIX: Record<string, string[]> = {
+  "0": ["111", "101", "101", "101", "111"],
+  "1": ["010", "110", "010", "010", "111"],
+  "2": ["111", "001", "111", "100", "111"],
+  "3": ["111", "001", "111", "001", "111"],
+  "4": ["101", "101", "111", "001", "001"],
+  "5": ["111", "100", "111", "001", "111"],
+  "6": ["111", "100", "111", "101", "111"],
+  "7": ["111", "001", "010", "010", "010"],
+  "8": ["111", "101", "111", "101", "111"],
+  "9": ["111", "101", "111", "001", "111"],
+  ":": ["0", "1", "0", "1", "0"],
+  ".": ["0", "0", "0", "0", "1"],
+  "-": ["0", "0", "1", "0", "0"],
+  "+": ["0", "1", "1", "1", "0"]
+};
+
+const TODAY_REFERENCE_IMAGES: Record<TodayCardId, number> = {
+  today: require("./assets/today-reference/energy.png"),
+  sleep: require("./assets/today-reference/sleep.png"),
+  cycle: require("./assets/today-reference/cycle.png"),
+  focus: require("./assets/today-reference/focus.png"),
+  metabolism: require("./assets/today-reference/metabolism.png"),
+  morning: require("./assets/today-reference/morning.png")
+};
+
+const TODAY_CARD_ART_IMAGES: Record<TodayCardId, number> = {
+  today: require("./assets/today-card-art/today.png"),
+  sleep: require("./assets/today-card-art/sleep.png"),
+  cycle: require("./assets/today-card-art/cycle.png"),
+  focus: require("./assets/today-card-art/focus.png"),
+  metabolism: require("./assets/today-card-art/metabolism.png"),
+  morning: require("./assets/today-card-art/morning.png")
+};
+
+const TODAY_CARD_ART_RATIOS: Record<TodayCardId, number> = {
+  today: 1664 / 1918,
+  sleep: 1652 / 1866,
+  cycle: 1800 / 1758,
+  focus: 1668 / 1902,
+  metabolism: 1636 / 1910,
+  morning: 1700 / 1898
+};
+
+function DotMatrixText({
+  value,
+  dot = 7,
+  gap = 5,
+  color = "#fff",
+  style
+}: {
+  value: string | number;
+  dot?: number;
+  gap?: number;
+  color?: string;
+  style?: object;
+}) {
+  return (
+    <View style={[{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: dot }, style]}>
+      {String(value).split("").map((char, charIndex) => {
+        const matrix = DOT_MATRIX[char] ?? DOT_MATRIX["0"];
+        return (
+          <View key={`${char}-${charIndex}`} style={{ gap }}>
+            {matrix.map((row, rowIndex) => (
+              <View key={`${char}-${charIndex}-${rowIndex}`} style={{ flexDirection: "row", gap }}>
+                {row.split("").map((cell, cellIndex) => (
+                  <View
+                    key={`${char}-${charIndex}-${rowIndex}-${cellIndex}`}
+                    style={{
+                      width: dot,
+                      height: dot,
+                      borderRadius: dot / 2,
+                      backgroundColor: cell === "1" ? color : "transparent"
+                    }}
+                  />
+                ))}
+              </View>
+            ))}
+          </View>
+        );
+      })}
+    </View>
+  );
+}
 
 const REMINDER_QUICK_TIMES = ["09:30", "13:00", "18:30", "21:30"];
 const TODAY_CARDS: TodayCard[] = [
@@ -93,7 +285,9 @@ const TODAY_CARDS: TodayCard[] = [
     tone: "energy",
     moreTab: "summary",
     monitor: "综合今日得分 80%，睡眠拉高恢复窗口，下午适合低刺激推进。",
-    action: "开始 4 分钟呼吸"
+    action: "开始 4 分钟呼吸",
+    actionType: "direct_session",
+    status: "normal"
   },
   {
     id: "sleep",
@@ -106,7 +300,24 @@ const TODAY_CARDS: TodayCard[] = [
     tone: "sleep",
     moreTab: "sleep",
     monitor: "睡眠为今日加分项 +30；建议补足 20 分钟睡眠修复。",
-    action: "开始第 1 级睡眠修复"
+    action: "开始第 1 级睡眠修复",
+    actionType: "reminder",
+    status: "normal"
+  },
+  {
+    id: "cycle",
+    label: "周期",
+    chipValue: "D18",
+    title: "周期 D18 天",
+    subtitle: "当前可能更容易疲惫、轻水肿、食欲波动、情绪敏感。",
+    score: "18",
+    scoreUnit: "天",
+    tone: "cycle",
+    moreTab: "cycle",
+    monitor: "周期进入低刺激窗口；建议用温和恢复替代高强度推进。",
+    action: "开始第 1 级低刺激恢复",
+    actionType: "direct_session",
+    status: "warning"
   },
   {
     id: "focus",
@@ -119,7 +330,9 @@ const TODAY_CARDS: TodayCard[] = [
     tone: "focus",
     moreTab: "focus",
     monitor: "专注为今日减分项 -30；先做单任务专注，再恢复输入信息。",
-    action: "开始第 1 级专注"
+    action: "开始第 1 级专注",
+    actionType: "direct_session",
+    status: "warning"
   },
   {
     id: "metabolism",
@@ -131,7 +344,9 @@ const TODAY_CARDS: TodayCard[] = [
     tone: "metabolism",
     moreTab: "metabolism",
     monitor: "代谢负担 -15；建议下午 3:00 加餐恢复，避免硬扛。",
-    action: "代谢开启"
+    action: "代谢开启",
+    actionType: "direct_session",
+    status: "warning"
   },
   {
     id: "morning",
@@ -144,7 +359,9 @@ const TODAY_CARDS: TodayCard[] = [
     tone: "morning",
     moreTab: "morning",
     monitor: "晨间启动 +10；自然光和轻走会帮助今天更早进入稳态。",
-    action: "打开晨间路线"
+    action: "打开晨间路线",
+    actionType: "map_guidance",
+    status: "normal"
   }
 ];
 
@@ -462,8 +679,29 @@ function remoteUriForQuery(query: string) {
   return withRuntimeQuery(REMOTE_WEB_BASE_URI, query);
 }
 
+function buildRuntimeStorageInjection(state: VitoraRuntimeStateV1) {
+  const runtimeJson = JSON.stringify(state);
+  const storageLines = Object.entries(state.storageKeys)
+    .map(([key, value]) => `localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(JSON.stringify(value))});`)
+    .join("\n");
+  return `
+(function () {
+  try {
+    var runtime = ${runtimeJson};
+    window.VITORA_RUNTIME_STATE_V1 = runtime;
+    localStorage.setItem("vivi:runtime:stateV1", JSON.stringify(runtime));
+    ${storageLines}
+  } catch (_) {}
+})();
+true;
+`;
+}
+
+const DEFAULT_RUNTIME_STATE = buildRuntimeStateFromPayload();
+
 export default function App() {
   const webViewRef = useRef<any>(null);
+  const todayNavScrollRef = useRef<ScrollView>(null);
   const [localWebUri, setLocalWebUri] = useState<string | null>(null);
   const [webSourceUri, setWebSourceUri] = useState<string>("");
   const [runtimeQuery, setRuntimeQuery] = useState<string>("");
@@ -473,18 +711,142 @@ export default function App() {
   const [healthRoute, setHealthRoute] = useState<HealthRoute>("home");
   const [healthDetailTab, setHealthDetailTab] = useState<HealthDetailTab>("summary");
   const [healthDetailSource, setHealthDetailSource] = useState<HealthDetailSource>("health");
+  const [healthDateOffset, setHealthDateOffset] = useState(0);
   const [todayActiveId, setTodayActiveId] = useState<TodayCardId>("today");
   const [todayRoute, setTodayRoute] = useState<TodayRoute>("home");
   const [focusMinutes, setFocusMinutes] = useState(25);
+  const [sleepTargetMinutes, setSleepTargetMinutes] = useState(Math.round(DEFAULT_RUNTIME_STATE.snapshot.sleep.durationMinutes / 15) * 15);
+  const [sleepWindowShift, setSleepWindowShift] = useState(0);
+  const [healthHeatmapRange, setHealthHeatmapRange] = useState<"this_week" | "last_week">("this_week");
   const [reminderSheet, setReminderSheet] = useState<ReminderSheetState>(null);
   const [activeThemeId, setActiveThemeId] = useState(EXPLORE_THEMES[0].id);
   const [nativeMessages, setNativeMessages] = useState<NativeMessage[]>(() => initialNativeMessages(EXPLORE_THEMES[0]));
   const [draft, setDraft] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profilePanel, setProfilePanel] = useState<ProfilePanel>(null);
+  const [profileNameDraft, setProfileNameDraft] = useState(DEFAULT_RUNTIME_STATE.profileSurface.displayName);
   const [toast, setToast] = useState("");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingCompleted, setOnboardingCompleted] = useState(false);
   const [nativeLayerReady, setNativeLayerReady] = useState(false);
+  const [vitoraState, setVitoraState] = useState<VitoraRuntimeStateV1>(DEFAULT_RUNTIME_STATE);
+  const [stampSheet, setStampSheet] = useState<StampRevealSheetState>(null);
+  const [activeCareEventId, setActiveCareEventId] = useState(DEFAULT_RUNTIME_STATE.activeCareEventId);
+  const [seenTodayCards, setSeenTodayCards] = useState<Record<string, boolean>>({});
+  const [referenceOverlayVisible, setReferenceOverlayVisible] = useState(false);
+  const [referenceOverlayOpacity, setReferenceOverlayOpacity] = useState(0.28);
+  const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const [activeSessionTitle, setActiveSessionTitle] = useState("");
+  const [completedTodayActions, setCompletedTodayActions] = useState<string[]>([]);
+  const [nowTick, setNowTick] = useState(() => Date.now());
+  const cardIntroAnim = useRef(new Animated.Value(0)).current;
+  const heartPulseAnim = useRef(new Animated.Value(1)).current;
+  const pinGlowAnim = useRef(new Animated.Value(0)).current;
+
+  const activeCareEvent =
+    vitoraState.careEvents.find((event) => event.careEventId === activeCareEventId) ??
+    vitoraState.careEvents[0] ??
+    DEFAULT_RUNTIME_STATE.careEvents[0]!;
+  const activeToneTheme = TODAY_TONE_THEMES[(vitoraState.content.todayCards.find((card) => card.id === todayActiveId) ?? vitoraState.content.todayCards[0]).tone];
+  const activeSessionElapsed = sessionStartedAt ? Math.max(0, Math.floor((nowTick - sessionStartedAt) / 1000)) : 0;
+  const shiftDate = (isoDate: string, offset: number) => {
+    const base = new Date(`${isoDate}T12:00:00`);
+    if (!Number.isFinite(base.getTime())) return isoDate;
+    base.setDate(base.getDate() + offset);
+    return `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, "0")}-${String(base.getDate()).padStart(2, "0")}`;
+  };
+  const healthDetailDate = shiftDate(vitoraState.snapshot.date, healthDateOffset);
+  const cycleDayForOffset = ((vitoraState.snapshot.cycle.cycleDay + healthDateOffset - 1 + 280) % 28) + 1;
+  const healthDetailState = healthDateOffset === 0
+    ? vitoraState
+    : buildRuntimeStateFromPayload({
+      profile: vitoraState.profile,
+      permissionState: vitoraState.permissionState,
+      signals: {
+        date: healthDetailDate,
+        health: {
+          sleepMinutes: Math.max(360, Math.min(500, vitoraState.snapshot.sleep.durationMinutes + ((healthDateOffset % 3) - 1) * 18)),
+          deepSleepMinutes: Math.max(52, vitoraState.snapshot.sleep.deepMinutes + (healthDateOffset % 2) * 8),
+          awakenings: Math.max(1, Math.round(vitoraState.snapshot.sleep.awakeMinutes / 9) + (healthDateOffset % 2)),
+          hrv: Math.max(24, vitoraState.snapshot.recovery.hrvRmssd + (healthDateOffset % 4) * 3 - 4),
+          restingHeartRate: Math.max(56, vitoraState.snapshot.recovery.restingHeartRate - (healthDateOffset % 3)),
+          skinTempDelta: Math.round((vitoraState.snapshot.recovery.bodyTemperatureDelta + (healthDateOffset % 4) * 0.02) * 100) / 100,
+          steps: Math.max(3200, vitoraState.snapshot.activity.steps + healthDateOffset * 220)
+        },
+        cycle: {
+          cycleDay: cycleDayForOffset,
+          symptoms: { fatigue: cycleDayForOffset > 18 ? 2 : 1, mood: cycleDayForOffset > 20 ? 2 : 1, bloating: cycleDayForOffset > 16 ? 2 : 0 }
+        },
+        selfReport: {
+          goal: vitoraState.snapshot.selfReport.goal,
+          mood: cycleDayForOffset > 18 ? "tense" : "steady",
+          fatigue: cycleDayForOffset > 18 ? 2 : 1
+        }
+      }
+    });
+  const activeHealthState = healthRoute === "detail" ? healthDetailState : vitoraState;
+  const sleepDisplayHours = Math.max(5, Math.min(9, Math.round(sleepTargetMinutes / 60)));
+  const sleepBedTime = shiftClockTime(vitoraState.snapshot.sleep.bedtime, sleepWindowShift * 15);
+  const sleepWakeTime = shiftClockTime(vitoraState.snapshot.sleep.wakeTime, sleepWindowShift * -10);
+  const activeHeatmapWindow = (state: VitoraRuntimeStateV1) =>
+    state.healthInsight.heatmapWindows.find((window) => window.id === healthHeatmapRange) ?? state.healthInsight.heatmapWindows[0];
+
+  useEffect(() => {
+    const timer = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const key = todayActiveId;
+    if (seenTodayCards[key]) {
+      cardIntroAnim.setValue(1);
+      return;
+    }
+    cardIntroAnim.setValue(0);
+    Animated.timing(cardIntroAnim, {
+      toValue: 1,
+      duration: 720,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true
+    }).start(() => {
+      setSeenTodayCards((seen) => ({ ...seen, [key]: true }));
+    });
+  }, [cardIntroAnim, seenTodayCards, todayActiveId]);
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(heartPulseAnim, { toValue: 1.08, duration: 620, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(heartPulseAnim, { toValue: 1, duration: 720, easing: Easing.inOut(Easing.quad), useNativeDriver: true })
+      ])
+    );
+    pulse.start();
+    return () => pulse.stop();
+  }, [heartPulseAnim]);
+
+  useEffect(() => {
+    const glow = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pinGlowAnim, { toValue: 1, duration: 920, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(pinGlowAnim, { toValue: 0, duration: 1100, easing: Easing.inOut(Easing.quad), useNativeDriver: true })
+      ])
+    );
+    glow.start();
+    return () => glow.stop();
+  }, [pinGlowAnim]);
+
+  const syncRuntimeToWebView = (state: VitoraRuntimeStateV1 = vitoraState) => {
+    webViewRef.current?.injectJavaScript(buildRuntimeStorageInjection(state));
+  };
+
+  const applyVitoraRuntimeState = (next: VitoraRuntimeStateV1) => {
+    setVitoraState(next);
+    setActiveCareEventId(next.activeCareEventId);
+    FileSystem.writeAsStringAsync(RUNTIME_STATE_FILE, JSON.stringify(next)).catch((error: unknown) => {
+      console.log(`[VitoraRuntime] persist failed: ${String(error)}`);
+    });
+    syncRuntimeToWebView(next);
+  };
 
   const refreshWebSource = () => {
     const source = localWebUri ? withRuntimeQuery(localWebUri, runtimeQuery) : remoteUriForQuery(runtimeQuery);
@@ -506,6 +868,22 @@ export default function App() {
         }
       });
 
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    FileSystem.readAsStringAsync(RUNTIME_STATE_FILE)
+      .then((raw) => {
+        if (cancelled) return;
+        const parsed = JSON.parse(raw) as VitoraRuntimeStateV1;
+        const next = buildRuntimeStateFromPayload(parsed);
+        setVitoraState(next);
+        setActiveCareEventId(next.activeCareEventId);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -534,11 +912,15 @@ export default function App() {
       } else if (nextTab === "explore" || nextTab === "health") {
         setNativeTab(nextTab);
       }
-      if (nextToday === "today" || nextToday === "sleep" || nextToday === "focus" || nextToday === "metabolism" || nextToday === "morning") {
+      if (nextToday === "today" || nextToday === "sleep" || nextToday === "cycle" || nextToday === "focus" || nextToday === "metabolism" || nextToday === "morning") {
         setNativeTab("today");
         setTodayActiveId(nextToday);
       }
       if (nextTodayRoute === "home" || nextTodayRoute === "breathing") {
+        setNativeTab("today");
+        setTodayRoute(nextTodayRoute);
+      }
+      if (nextTodayRoute === "focusTimer" || nextTodayRoute === "metabolismTimer" || nextTodayRoute === "morningMap") {
         setNativeTab("today");
         setTodayRoute(nextTodayRoute);
       }
@@ -611,6 +993,14 @@ export default function App() {
   }, [toast]);
 
   useEffect(() => {
+    if (!stampSheet || stampSheet.expanded || stampSheet.mode !== "award") return;
+    const timer = setTimeout(() => {
+      setStampSheet((sheet) => sheet ? { ...sheet, expanded: true } : sheet);
+    }, 950);
+    return () => clearTimeout(timer);
+  }, [stampSheet]);
+
+  useEffect(() => {
     if (!webSourceUri) {
       setNativeLayerReady(false);
       return;
@@ -630,20 +1020,23 @@ export default function App() {
 
   const injectSimulatorPatch = () => {
     webViewRef.current?.injectJavaScript(SIMULATOR_WEB_PATCH_WITH_PROBE);
+    setTimeout(() => syncRuntimeToWebView(), 60);
   };
 
   const handleWebViewMessage = (event: { nativeEvent: { data: string } }) => {
     const raw = event.nativeEvent.data;
     try {
-      const payload = JSON.parse(raw) as { scope?: string; open?: boolean; completed?: boolean };
+      const payload = JSON.parse(raw) as VitoraOnboardingBridgePayload;
       if (payload.scope === "vitora-onboarding") {
         setOnboardingOpen(Boolean(payload.open));
         setOnboardingCompleted(Boolean(payload.completed));
         setNativeLayerReady(true);
         if (!payload.open && payload.completed) {
+          const next = buildRuntimeStateFromPayload(payload);
+          applyVitoraRuntimeState(next);
           setNativeTab("today");
           setTodayRoute("home");
-          setTodayActiveId("today");
+          setTodayActiveId(next.careEvents[0]?.targetCard ?? "today");
         }
         return;
       }
@@ -659,25 +1052,135 @@ export default function App() {
   };
 
   const activeTheme = EXPLORE_THEMES.find((theme) => theme.id === activeThemeId) ?? EXPLORE_THEMES[0];
-  const activeToday = TODAY_CARDS.find((card) => card.id === todayActiveId) ?? TODAY_CARDS[0];
+  const runtimeTodayCards = vitoraState.content.todayCards;
+  const activeToday = runtimeTodayCards.find((card) => card.id === todayActiveId) ?? runtimeTodayCards[0];
+  const todayNavItems: TodayNavCircle[] = TODAY_NAV_ORDER
+    .map((id) => runtimeTodayCards.find((card) => card.id === id))
+    .filter((card): card is TodayCard => Boolean(card));
   const focusPanResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => false,
     onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 8,
     onPanResponderMove: (_, gesture) => {
-      const raw = 25 + gesture.dx / 4.6;
+      const raw = focusMinutes + gesture.dx / 8;
       const stepped = Math.round(raw / 5) * 5;
       setFocusMinutes(Math.max(10, Math.min(50, stepped)));
     }
   });
+  const sleepPanResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => false,
+    onMoveShouldSetPanResponder: (_, gesture) => Math.abs(gesture.dx) > 10,
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dx > 18) {
+        setSleepWindowShift((value) => Math.max(-4, value - 1));
+      } else if (gesture.dx < -18) {
+        setSleepWindowShift((value) => Math.min(4, value + 1));
+      }
+    }
+  });
+
+  const formatElapsed = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remaining = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remaining).padStart(2, "0")}`;
+  };
+
+  const sunPosition = () => {
+    const current = new Date(nowTick);
+    const start = 6 * 60 + 14;
+    const end = 17 * 60 + 21;
+    const currentMinutes = current.getHours() * 60 + current.getMinutes();
+    const progress = Math.max(0, Math.min(1, (currentMinutes - start) / (end - start)));
+    return {
+      progress,
+      x: 58 + progress * 232,
+      y: 150 - Math.sin(progress * Math.PI) * 72
+    };
+  };
+
+  const adjustFocusMinutes = (delta: number) => {
+    setFocusMinutes((minutes) => Math.max(10, Math.min(50, minutes + delta)));
+  };
+
+  const adjustSleepTarget = (delta: number) => {
+    setSleepTargetMinutes((minutes) => Math.max(330, Math.min(540, minutes + delta)));
+  };
+
+  const monthLabelForStamp = (month: string) => {
+    const [year, rawMonth] = month.split("-");
+    return `${year} · ${Number(rawMonth || "1")}月`;
+  };
+
+  const storeAchievementStamp = (stamp: AchievementStampV1, mode: "award" | "detail" = "award") => {
+    const nextStamps = [stamp, ...vitoraState.achievementStamps.filter((item) => item.stampId !== stamp.stampId)];
+    applyVitoraRuntimeState({
+      ...vitoraState,
+      updatedAt: new Date().toISOString(),
+      achievementStamps: nextStamps,
+      storageKeys: {
+        ...vitoraState.storageKeys,
+        "vivi:achievement:monthlyStampsV1": nextStamps
+      }
+    });
+    setStampSheet({ stamp, mode, expanded: mode === "detail" });
+  };
+
+  const openStampSheet = (stamp: AchievementStampV1, mode: "award" | "detail" = "detail") => {
+    setStampSheet({ stamp, mode, expanded: mode === "detail" });
+  };
+
+  const collectTodayStamp = (actionId: string, title: string) => {
+    if (completedTodayActions.includes(actionId)) return;
+    setCompletedTodayActions((actions) => [...actions, actionId]);
+    const isFocus = title.includes("专注");
+    const isMetabolism = title.includes("代谢");
+    const isMorning = title.includes("晨间");
+    const isBreath = title.includes("呼吸");
+    const stamp: AchievementStampV1 = {
+      schemaVersion: "AchievementStampV1",
+      stampId: `stamp-${vitoraState.snapshot.date}-${actionId}`,
+      profileId: vitoraState.profile.profileId,
+      snapshotId: vitoraState.snapshot.snapshotId,
+      predictionId: vitoraState.prediction.predictionId,
+      month: vitoraState.snapshot.date.slice(0, 7),
+      title: isFocus ? "专注缪斯" : isMetabolism ? "行动火花" : isMorning ? "晨光邮戳" : "稳定恢复",
+      type: isFocus ? "focus_muse" : isBreath ? "steady_recovery" : isMorning ? "cycle_keeper" : "movement_spark",
+      tone: isFocus ? "sleepers" : isMetabolism ? "hours" : isMorning ? "steps" : "amateur",
+      source: "today_action",
+      sourceLabel: `今日动作 · ${title}`,
+      sourceId: actionId,
+      assetKey: isFocus ? "stamp-focus-athena" : isMetabolism ? "stamp-movement-artemis" : isMorning ? "stamp-cycle-selene" : "stamp-recovery-hygieia",
+      mythicFigure: isMorning ? "塞勒涅" : isFocus ? "雅典娜" : isMetabolism ? "阿尔忒弥斯" : "希吉亚",
+      oilPaintingPrompt: `Oil painting postage stamp for ${title}, soft light, collectible Vitora health achievement stamp.`,
+      awardRule: "完成一次可执行的呼吸、专注、代谢或晨间动作。",
+      evidenceLabel: "今日完成反馈",
+      reason: `你完成了「${title}」，这次完成反馈会进入今日预测和健康邮票。`,
+      evidence: [
+        `actionId=${actionId}`,
+        `predictionId=${vitoraState.prediction.predictionId}`,
+        `snapshotId=${vitoraState.snapshot.snapshotId}`
+      ],
+      awardedAt: new Date().toISOString()
+    };
+    storeAchievementStamp(stamp, "award");
+  };
 
   const openTodayCard = (id: TodayCardId) => {
     setNativeTab("today");
     setTodayRoute("home");
     setTodayActiveId(id);
+    const targetIndex = TODAY_NAV_ORDER.indexOf(id);
+    if (targetIndex >= 0) {
+      setTimeout(() => {
+        todayNavScrollRef.current?.scrollTo({
+          x: Math.max(0, targetIndex * 92 - 112),
+          animated: true
+        });
+      }, 20);
+    }
   };
 
   const openTodayMore = (id: TodayCardId) => {
-    const card = TODAY_CARDS.find((item) => item.id === id) ?? TODAY_CARDS[0];
+    const card = runtimeTodayCards.find((item) => item.id === id) ?? runtimeTodayCards[0];
     setHealthDetailSource(id);
     openHealthDetail(card.moreTab, id);
   };
@@ -685,12 +1188,37 @@ export default function App() {
   const openBreathingPractice = (source: TodayCardId = todayActiveId) => {
     setNativeTab("today");
     setTodayActiveId(source);
+    setActiveSessionTitle("呼吸恢复");
+    setSessionStartedAt(Date.now());
     setTodayRoute("breathing");
   };
 
   const completeBreathingPractice = () => {
     setTodayRoute("home");
-    setToast("已完成一次呼吸恢复");
+    setSessionStartedAt(null);
+    collectTodayStamp("breathing-recovery", "呼吸恢复");
+  };
+
+  const openTimedSession = (route: Extract<TodayRoute, "focusTimer" | "metabolismTimer">, title: string, source: TodayCardId) => {
+    setNativeTab("today");
+    setTodayActiveId(source);
+    setActiveSessionTitle(title);
+    setSessionStartedAt(Date.now());
+    setTodayRoute(route);
+  };
+
+  const completeTimedSession = () => {
+    const actionId = todayRoute === "metabolismTimer" ? "metabolism-timer" : "focus-timer";
+    collectTodayStamp(actionId, activeSessionTitle || (todayRoute === "metabolismTimer" ? "代谢开启" : "专注计时"));
+    setSessionStartedAt(null);
+    setTodayRoute("home");
+  };
+
+  const openMorningMap = () => {
+    setNativeTab("today");
+    setTodayActiveId("morning");
+    setActiveSessionTitle("晨间路线");
+    setTodayRoute("morningMap");
   };
 
   const openThemeDetail = (theme: ExploreTheme) => {
@@ -714,10 +1242,43 @@ export default function App() {
 
   const completeNativeChat = () => {
     const text = draft.trim();
+    const finalMessages = text
+      ? [...nativeMessages, { role: "user" as const, text }, { role: "ai" as const, text: nativeReply(text) }]
+      : nativeMessages;
     if (text) {
-      setNativeMessages((messages) => [...messages, { role: "user", text }, { role: "ai", text: nativeReply(text) }]);
+      setNativeMessages(finalMessages);
       setDraft("");
     }
+    const userText = finalMessages.filter((message) => message.role === "user").map((message) => message.text).join(" ").trim();
+    const stamp: AchievementStampV1 = {
+      schemaVersion: "AchievementStampV1",
+      stampId: `stamp-${vitoraState.snapshot.date}-conversation-${activeTheme.id}-${Date.now()}`,
+      profileId: vitoraState.profile.profileId,
+      snapshotId: vitoraState.snapshot.snapshotId,
+      predictionId: vitoraState.prediction.predictionId,
+      month: vitoraState.snapshot.date.slice(0, 7),
+      title: "对话回忆邮戳",
+      type: "steady_recovery",
+      tone: "sleepers",
+      source: "conversation_stamp",
+      sourceLabel: `探索对话 · ${activeTheme.tag}`,
+      sourceId: activeTheme.id,
+      assetKey: "stamp-conversation-dream",
+      mythicFigure: vitoraState.profile.mythicReference,
+      oilPaintingPrompt: `Oil painting postage stamp for a reflective Vitora conversation about ${activeTheme.tag}, antique paper, soft moonlight, collectible health stamp.`,
+      awardRule: "完成一次探索对话，并保存对话主题与连续记录。",
+      evidenceLabel: "对话完成",
+      reason: userText
+        ? `你完成了「${activeTheme.tag}」探索，对话里提到「${userText.slice(0, 28)}${userText.length > 28 ? "…" : ""}」，这会成为身体状态解释的一条线索。`
+        : `你完成了「${activeTheme.tag}」探索，这次记录会进入你的健康邮戳收藏。`,
+      evidence: [
+        `主题=${activeTheme.tag}`,
+        `消息数=${finalMessages.length}`,
+        `predictionId=${vitoraState.prediction.predictionId}`
+      ],
+      awardedAt: new Date().toISOString()
+    };
+    storeAchievementStamp(stamp, "award");
     setExploreRoute("feedback");
   };
 
@@ -738,6 +1299,7 @@ export default function App() {
 
   const openHealthDetail = (tab: HealthDetailTab = "summary", source: HealthDetailSource = "health") => {
     setHealthDetailSource(source);
+    setHealthDateOffset(0);
     setNativeTab("health");
     setHealthRoute("detail");
     setHealthDetailTab(tab);
@@ -745,6 +1307,7 @@ export default function App() {
 
   const closeHealthDetail = () => {
     setHealthRoute("home");
+    setHealthDateOffset(0);
   };
 
   const openReminderSheet = (source: string, defaultTime: string) => {
@@ -756,7 +1319,9 @@ export default function App() {
   };
 
   const confirmReminder = () => {
-    if (reminderSheet) setToast(`已设置 ${reminderSheet.time} 提醒`);
+    if (reminderSheet) {
+      setToast(`已设置 ${reminderSheet.time} 提醒 · ${activeCareEvent.careEventId}`);
+    }
     setReminderSheet(null);
   };
 
@@ -996,22 +1561,282 @@ export default function App() {
     </>
   );
 
-  const renderHealthStamp = (title: string, tone: HealthStampTone, style: object) => (
-    <View style={[styles.nativeHealthStamp, style]}>
+  const stampGlyphFor = (stamp: VitoraRuntimeStateV1["achievementStamps"][number]) => {
+    if (stamp.type === "perfect_month") return "♀";
+    if (stamp.type === "most_consistent") return "♨";
+    if (stamp.type === "sleep_guardian") return "☾";
+    if (stamp.type === "steady_recovery") return "☤";
+    if (stamp.type === "focus_muse") return "♟";
+    if (stamp.type === "cycle_keeper") return "◐";
+    return "✦";
+  };
+
+  const renderHealthStamp = (stamp: VitoraRuntimeStateV1["achievementStamps"][number], style: object) => (
+    <Pressable
+      style={[styles.nativeHealthStamp, stamp.lockedReason && styles.nativeHealthStampLocked, style]}
+      onPress={() => openStampSheet(stamp, "detail")}
+    >
       {renderStampPerfs()}
-      {renderStampArt(tone)}
-      <Text style={styles.nativeHealthStampTitle}>{title}</Text>
+      {renderStampArt(stamp.tone)}
+      <Text style={styles.nativeStampMyth}>{stampGlyphFor(stamp)}</Text>
+      <Text style={styles.nativeHealthStampTitle}>{stamp.title}</Text>
+      {stamp.lockedReason && <Text style={styles.nativeStampLockedText}>LOCK</Text>}
+    </Pressable>
+  );
+
+  const openStampSource = (stamp: AchievementStampV1) => {
+    setStampSheet(null);
+    if (stamp.source === "conversation_stamp") {
+      setNativeTab("explore");
+      setExploreRoute("feedback");
+      return;
+    }
+    if (stamp.source === "today_action") {
+      const sourceId = stamp.sourceId ?? "";
+      if (sourceId.includes("focus")) openTodayCard("focus");
+      else if (sourceId.includes("metabolism")) openTodayCard("metabolism");
+      else if (sourceId.includes("morning")) openTodayCard("morning");
+      else openTodayCard("today");
+      return;
+    }
+    setNativeTab("health");
+    setHealthRoute("home");
+  };
+
+  const renderStampFrame = (stamp: AchievementStampV1, scale: "large" | "small" = "large") => (
+    <View style={[styles.stampFrame, scale === "small" && styles.stampFrameSmall]}>
+      {renderStampPerfs()}
+      <View style={styles.stampMonthPill}>
+        <Text style={styles.stampMonthText}>{monthLabelForStamp(stamp.month)}</Text>
+      </View>
+      <View style={styles.stampAssetPanel}>
+        {renderStampArt(stamp.tone)}
+        <Text style={styles.stampAssetGlyph}>{stampGlyphFor(stamp)}</Text>
+      </View>
+      <Text style={styles.stampFrameTitle}>{stamp.title}</Text>
+      <Text style={styles.stampFrameFigure}>{stamp.mythicFigure}</Text>
     </View>
   );
 
-  const renderHealthDetailChips = () => {
-    const chips = [
-      { label: "今日", value: "80%", active: healthDetailTab === "summary" },
-      { label: "睡眠", value: "+30", active: healthDetailTab === "sleep" },
-      { label: "专注", value: "-30", active: healthDetailTab === "focus" },
-      { label: "代谢", value: "-15", active: healthDetailTab === "metabolism" },
-      { label: "晨间", value: "+10", active: healthDetailTab === "morning" }
+  const renderStampRevealSheet = () => {
+    if (!stampSheet) return null;
+    const { stamp, mode, expanded } = stampSheet;
+    const reason = stamp.lockedReason ? `未解锁：${stamp.lockedReason}` : stamp.reason;
+    return (
+      <View style={styles.stampSheetLayer}>
+        <Pressable style={styles.stampSheetScrim} onPress={() => setStampSheet(null)} />
+        <View style={styles.stampSheet}>
+          <View style={styles.stampSheetHandle} />
+          <View style={styles.stampSheetTop}>
+            <Pressable style={styles.stampSheetClose} onPress={() => setStampSheet(null)}>
+              <Text style={styles.stampSheetCloseText}>×</Text>
+            </Pressable>
+            <View style={styles.stampSheetDots}>
+              {[0, 1, 2, 3, 4, 5].map((item) => (
+                <View key={item} style={[styles.stampSheetDot, (expanded ? item === 5 : item === 2) && styles.stampSheetDotActive]} />
+              ))}
+            </View>
+          </View>
+          <View style={styles.stampSheetHero}>
+            {renderStampFrame(stamp)}
+          </View>
+          {expanded ? (
+            <View style={styles.stampSheetDetails}>
+              <Text style={styles.stampSheetKicker}>{mode === "award" ? "已获得邮戳" : stamp.lockedReason ? "未解锁邮戳" : "邮戳详情"}</Text>
+              <Text style={styles.stampSheetTitle}>{stamp.title}</Text>
+              <Text style={styles.stampSheetReason}>{reason}</Text>
+              <View style={styles.stampSheetMetaGrid}>
+                <View style={styles.stampSheetMeta}>
+                  <Text style={styles.stampSheetMetaLabel}>来源</Text>
+                  <Text style={styles.stampSheetMetaValue}>{stamp.sourceLabel || "月度规则"}</Text>
+                </View>
+                <View style={styles.stampSheetMeta}>
+                  <Text style={styles.stampSheetMetaLabel}>证据</Text>
+                  <Text style={styles.stampSheetMetaValue}>{stamp.evidenceLabel}</Text>
+                </View>
+              </View>
+              <View style={styles.stampEvidenceList}>
+                {stamp.evidence.slice(0, 3).map((item) => (
+                  <Text key={item} style={styles.stampEvidenceText}>• {item}</Text>
+                ))}
+              </View>
+              <View style={styles.stampSheetActions}>
+                <Pressable style={styles.stampSheetSecondary} onPress={() => setStampSheet(null)}>
+                  <Text style={styles.stampSheetSecondaryText}>{mode === "award" ? "收下邮戳" : "关闭"}</Text>
+                </Pressable>
+                <Pressable style={styles.stampSheetPrimary} onPress={() => openStampSource(stamp)}>
+                  <Text style={styles.stampSheetPrimaryText}>查看来源</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : (
+            <Text style={styles.stampSheetRevealCopy}>正在整理这枚邮戳的来源和证据…</Text>
+          )}
+        </View>
+      </View>
+    );
+  };
+
+  const heatColor = (value: 0 | 1 | 2 | 3) => {
+    if (value === 3) return "#31db55";
+    if (value === 2) return "#45bd5e";
+    if (value === 1) return "#d9d9df";
+    return "rgba(236,236,240,0.52)";
+  };
+
+  const renderHealthHeatmapRangeControl = () => (
+    <View style={styles.heatmapRangeControl}>
+      <Pressable style={styles.heatmapRangeArrow} onPress={() => setHealthHeatmapRange("last_week")}>
+        <Text style={styles.heatmapRangeArrowText}>‹</Text>
+      </Pressable>
+      <Text style={styles.heatmapRangeLabel}>{healthHeatmapRange === "this_week" ? "本周" : "上周"}</Text>
+      <Pressable style={styles.heatmapRangeArrow} onPress={() => setHealthHeatmapRange("this_week")}>
+        <Text style={styles.heatmapRangeArrowText}>›</Text>
+      </Pressable>
+    </View>
+  );
+
+  const renderHeatmapLegend = (state: VitoraRuntimeStateV1, compact = false) => (
+    <View style={compact ? styles.nativeHeatLegend : styles.summaryHeatLegend}>
+      {state.healthInsight.heatmapLegend.map((item) => (
+        <View key={item.label} style={styles.heatLegendItem}>
+          <View style={[styles.heatLegendDot, { backgroundColor: item.color }]} />
+          <Text style={compact ? styles.nativeHeatLegendText : styles.summaryHeatLegendText}>{item.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  const renderHealthHeatmap = (state: VitoraRuntimeStateV1, compact = false) => {
+    const window = activeHeatmapWindow(state);
+    const rows = window?.rows ?? state.healthInsight.heatmapRows;
+    return (
+      <View style={compact ? styles.nativeHeatmap : styles.summaryHeatGridRows}>
+        {rows.map((row) => (
+          <View key={row.id} style={compact ? styles.nativeHeatmapRow : styles.summaryHeatGridRow}>
+            {!compact && <Text style={styles.summaryHeatGridLabel}>{row.label}</Text>}
+            <View style={compact ? styles.nativeHeatmapCells : styles.summaryHeatGridCells}>
+              {row.values.map((value, index) => (
+                <View
+                  key={`${row.id}-${index}`}
+                  style={[
+                    compact ? styles.nativeHeatCell : styles.summaryHeatCell,
+                    { backgroundColor: heatColor(value) },
+                    value === 3 && (compact ? styles.nativeHeatCellHot : styles.summaryHeatCellHot)
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
+        {renderHeatmapLegend(state, compact)}
+      </View>
+    );
+  };
+
+  const renderHealthRadarGraph = (state: VitoraRuntimeStateV1, compact = false) => {
+    const size = compact ? 132 : 242;
+    const center = size / 2;
+    const radius = compact ? 48 : 88;
+    const metrics = [
+      { label: "睡眠", score: state.healthInsight.radarScores.sleep, angle: -90 },
+      { label: "周期", score: state.healthInsight.radarScores.cycle, angle: -18 },
+      { label: "抗压", score: state.healthInsight.radarScores.stress, angle: 54 },
+      { label: "代谢", score: state.healthInsight.radarScores.metabolism, angle: 126 },
+      { label: "专注", score: state.healthInsight.radarScores.focus, angle: 198 }
     ];
+    return (
+      <View style={[styles.healthRadarGraph, compact && styles.healthRadarGraphCompact, { width: size, height: size }]}>
+        {[0.36, 0.66, 1].map((scale) => (
+          <View
+            key={scale}
+            style={[
+              styles.healthRadarRing,
+              {
+                width: radius * 2 * scale,
+                height: radius * 2 * scale,
+                borderRadius: radius * scale,
+                left: center - radius * scale,
+                top: center - radius * scale
+              }
+            ]}
+          />
+        ))}
+        {metrics.map((metric) => (
+          <View
+            key={`axis-${metric.label}`}
+            style={[
+              styles.healthRadarAxis,
+              {
+                width: radius,
+                left: center,
+                top: center,
+                transform: [{ rotate: `${metric.angle}deg` }]
+              }
+            ]}
+          />
+        ))}
+        <View style={[styles.healthRadarBlob, compact && styles.healthRadarBlobCompact]} />
+        {metrics.map((metric) => {
+          const angle = metric.angle * Math.PI / 180;
+          const valueRadius = radius * Math.max(0.36, Math.min(0.96, metric.score / 100));
+          const dotLeft = center + Math.cos(angle) * valueRadius - 5;
+          const dotTop = center + Math.sin(angle) * valueRadius - 5;
+          const labelLeft = center + Math.cos(angle) * (radius + (compact ? 14 : 28)) - 22;
+          const labelTop = center + Math.sin(angle) * (radius + (compact ? 14 : 28)) - 10;
+          return (
+            <View key={metric.label} pointerEvents="none" style={[styles.healthRadarMetricLayer, { width: size, height: size }]}>
+              <View style={[styles.healthRadarDot, compact && styles.healthRadarDotCompact, { left: dotLeft, top: dotTop }]} />
+              {!compact && <Text style={[styles.healthRadarLabel, { left: labelLeft, top: labelTop }]}>{metric.label}</Text>}
+            </View>
+          );
+        })}
+        <Text style={[styles.healthRadarCenterScore, compact && styles.healthRadarCenterScoreCompact]}>{state.prediction.scores.readiness}</Text>
+      </View>
+    );
+  };
+
+  const healthDetailDateLabel = (state: VitoraRuntimeStateV1) => {
+    const parts = state.snapshot.date.split("-");
+    return `${Number(parts[1] ?? 1)}月${Number(parts[2] ?? 1)}日`;
+  };
+
+  const openMetricExplain = (metric: HealthMetricKey) => {
+    const map: Record<HealthMetricKey, { title: string; body: string }> = {
+      readiness: {
+        title: "平均准备度",
+        body: `${vitoraState.content.healthMetrics.readiness} 来自睡眠、周期、抗压、代谢和专注五个维度的综合。`
+      },
+      sleepDebt: {
+        title: "睡眠负债",
+        body: `${vitoraState.content.healthMetrics.sleepDebt} 表示近期睡眠时长和连续性相对身体需求的缺口。`
+      },
+      informationDebt: {
+        title: "信息负债",
+        body: `${vitoraState.content.healthMetrics.informationDebt} 表示今天输入信息和切换任务可能带来的恢复压力。`
+      },
+      average: {
+        title: vitoraState.achievementStamps[0]?.mythicFigure ?? "油画邮戳",
+        body: `${vitoraState.content.healthMetrics.average} 是睡眠、专注、周期三个核心维度的平均状态。`
+      }
+    };
+    Alert.alert(map[metric].title, map[metric].body);
+  };
+
+  const renderHealthMetricCard = (metric: HealthMetricKey, label: string, value: string, copy: string) => (
+    <Pressable style={styles.nativeMetricCard} onPress={() => openMetricExplain(metric)}>
+      <Text style={styles.nativeMetricLabel}>{label}</Text>
+      <Text style={styles.nativeMetricValue}>{value}</Text>
+      <Text style={styles.nativeMetricCopy} numberOfLines={2}>{copy}</Text>
+    </Pressable>
+  );
+
+  const renderHealthDetailChips = () => {
+    const chips = runtimeTodayCards.map((card) => ({
+      label: card.label,
+      value: card.chipValue,
+      active: card.moreTab === healthDetailTab || (card.id === "today" && healthDetailTab === "summary")
+    }));
     return (
       <View style={styles.healthDetailChips}>
         {chips.map((chip) => (
@@ -1043,7 +1868,15 @@ export default function App() {
       <Pressable style={styles.healthBackButton} onPress={closeHealthDetail}>
         <Text style={styles.healthBackText}>‹</Text>
       </Pressable>
-      <Text style={styles.healthDetailDate}>{healthDetailSource === "health" ? "‹ 6月2日 ›" : "今日详情"}</Text>
+      <View style={styles.healthDateSwitcher}>
+        <Pressable style={styles.healthDateArrow} onPress={() => setHealthDateOffset((value) => value - 1)}>
+          <Text style={styles.healthDateArrowText}>‹</Text>
+        </Pressable>
+        <Text style={styles.healthDetailDate}>{healthDetailDateLabel(activeHealthState)}</Text>
+        <Pressable style={styles.healthDateArrow} onPress={() => setHealthDateOffset((value) => value + 1)}>
+          <Text style={styles.healthDateArrowText}>›</Text>
+        </Pressable>
+      </View>
       <View style={styles.healthHeaderSpacer} />
     </View>
   );
@@ -1077,42 +1910,25 @@ export default function App() {
   const renderHealthSummaryDetail = () => (
     <>
       <View style={styles.summaryRadarWrap}>
-        <Text style={styles.summaryRadarLabelTop}>Code Rev.</Text>
-        <Text style={styles.summaryRadarLabelLeft}>Commits</Text>
-        <Text style={styles.summaryRadarLabelRight}>Code Rev.</Text>
-        <Text style={styles.summaryRadarLabelBottomLeft}>Pull Req.</Text>
-        <Text style={styles.summaryRadarLabelBottomRight}>Issues</Text>
-        <View style={styles.summaryRadarCircle}>
-          <Text style={styles.summaryRadarScore}>88</Text>
-          <View style={styles.summaryRadarPolygon} />
-        </View>
+        {renderHealthRadarGraph(activeHealthState)}
       </View>
       <View style={styles.summaryTranslateBlock}>
-        <Text style={styles.summarySectionLabel}>身体翻译</Text>
+        <Text style={styles.summarySectionLabel}>{activeHealthState.content.healthDetails.summary.title}</Text>
         <View style={styles.summaryPercentRow}>
-          <Text style={styles.summaryPercent}>72%</Text>
-          <Text style={styles.summaryPercentCopy}>高于{`\n`}的用户</Text>
+          <Text style={styles.summaryPercent}>{activeHealthState.content.healthDetails.summary.scoreLabel}</Text>
+          <Text style={styles.summaryPercentCopy}>高于的用户{`\n`}本期主题</Text>
         </View>
-        <Text style={styles.summaryBodyCopy}>这周的主要主题：周期适应；行动和表达。你的身体正在进入恢复窗口，建议放缓高消耗任务。</Text>
+        <Text style={styles.summaryBodyCopy}>{activeHealthState.content.healthDetails.summary.body}</Text>
       </View>
       <View style={styles.summaryHeatCard}>
-        <View style={styles.summaryHeatLabels}>
-          <Text>精力</Text>
-          <Text>情绪</Text>
-          <Text>压力</Text>
+        <View style={styles.summaryHeatHeader}>
+          <Text style={styles.summaryHeatTitle}>精力热力图</Text>
+          {renderHealthHeatmapRangeControl()}
         </View>
-        <View style={styles.summaryHeatGrid}>
-          {Array.from({ length: 54 }).map((_, index) => (
-            <View key={index} style={[styles.summaryHeatCell, index % 3 === 0 && styles.summaryHeatCellOn, index % 7 === 0 && styles.summaryHeatCellDark]} />
-          ))}
-        </View>
+        {renderHealthHeatmap(activeHealthState)}
       </View>
-      {renderSuggestionRows([
-        { icon: "☕", time: "09:30", title: "放缓节奏，优先休息", copy: "保证充足睡眠和低强度活动，帮助身体恢复。", action: "提醒我" },
-        { icon: "□", time: "13:00", title: "表达与记录", copy: "通过写作或倾诉，梳理想法，释放情绪压力。", action: "设置" },
-        { icon: "◒", time: "18:30", title: "温和运动", copy: "选择瑜伽、散步等温和运动，促进循环与放松。", action: "提醒我" }
-      ])}
-      <Text style={styles.healthDisclaimer}>AI 翻译基于历史数据与实时状态生成，仅供参考ⓘ</Text>
+      {renderSuggestionRows(activeHealthState.content.healthDetails.summary.suggestions)}
+      <Text style={styles.healthDisclaimer}>{activeCareEvent.careEventId} · {activeCareEvent.evidence.slice(2, 4).join(" · ")}</Text>
     </>
   );
 
@@ -1138,24 +1954,24 @@ export default function App() {
     <>
       <View style={styles.sleepOverviewCard}>
         <View style={styles.sleepTimes}>
-          <Text>23:10  入睡</Text>
-          <Text>07:42☼ 起床</Text>
+          <Text>{activeHealthState.snapshot.sleep.bedtime}  入睡</Text>
+          <Text>{activeHealthState.snapshot.sleep.wakeTime}☼ 起床</Text>
         </View>
         {renderSleepStageBar()}
         <View style={styles.sleepLegend}>
-          <Text>■ 清醒{`\n`}18 分钟</Text>
-          <Text>■ 浅睡{`\n`}2 小时 10 分</Text>
-          <Text>■ 深睡{`\n`}1 小时 32 分</Text>
-          <Text>■ REM{`\n`}1 小时 8 分</Text>
+          <Text>■ 清醒{`\n`}{activeHealthState.snapshot.sleep.awakeMinutes} 分钟</Text>
+          <Text>■ 浅睡{`\n`}{Math.max(1, Math.round((activeHealthState.snapshot.sleep.durationMinutes - activeHealthState.snapshot.sleep.deepMinutes - activeHealthState.snapshot.sleep.remMinutes) / 60 * 10) / 10)} 小时</Text>
+          <Text>■ 深睡{`\n`}{activeHealthState.snapshot.sleep.deepMinutes} 分钟</Text>
+          <Text>■ REM{`\n`}{activeHealthState.snapshot.sleep.remMinutes} 分钟</Text>
         </View>
       </View>
       <View style={styles.sleepDebtBlock}>
         <Text style={styles.sleepDebtLabel}>轻度睡眠负债</Text>
         <View style={styles.sleepDebtRow}>
-          <Text style={styles.sleepDebtValue}>✦+2</Text>
+          <Text style={styles.sleepDebtValue}>✦{activeHealthState.content.healthMetrics.sleepDebt}</Text>
           <Text style={styles.sleepDebtUnit}>小时</Text>
         </View>
-        <Text style={styles.sleepDebtCopy}>你近期睡眠时长略低于身体需求，已产生轻度睡眠负债。继续保持规律作息，很快就能回到最佳状态。</Text>
+        <Text style={styles.sleepDebtCopy}>{activeHealthState.content.healthDetails.sleep.body}</Text>
       </View>
       <View style={styles.sleepTrendCard}>
         <View style={styles.sleepTrendHeader}>
@@ -1171,57 +1987,81 @@ export default function App() {
           <Text style={styles.sleepTrendBadge}>+2</Text>
         </View>
       </View>
-      {renderSuggestionRows([
-        { icon: "◜", time: "21:30", title: "提前放松", copy: "今晚提前 30 分钟休息，减少夜间高刺激内容。", action: "提醒我", tone: "green" },
-        { icon: "◷", time: "22:30", title: "保持规律", copy: "尽量固定入睡时间，帮助更快恢复睡眠节律。", action: "设置" },
-        { icon: "☼", time: "07:30", title: "晨间唤醒", copy: "起床后接触自然光，帮助白天更清醒。", action: "提醒" }
-      ])}
+      {renderSuggestionRows(activeHealthState.content.healthDetails.sleep.suggestions)}
     </>
   );
 
   const renderHealthCycleDetail = () => (
     <>
+      <View style={styles.cycleWheelHeader}>
+        <Text style={styles.cycleWheelPhase}>{activeHealthState.snapshot.cycle.phaseLabel}</Text>
+        <Text style={styles.cycleWheelNext}>{activeHealthState.snapshot.cycle.periodPredictedInDays ? `还有 ${activeHealthState.snapshot.cycle.periodPredictedInDays} 天预计下次月经` : "预计今日进入经期"}</Text>
+      </View>
       <View style={styles.cycleRingCard}>
-        <View style={styles.cycleRing}>
-          <View style={[styles.cycleArc, styles.cycleArcTeal]} />
-          <View style={[styles.cycleArc, styles.cycleArcPurple]} />
-          <View style={[styles.cycleArc, styles.cycleArcPink]} />
-          <View style={[styles.cycleArc, styles.cycleArcAmber]} />
-          <View style={styles.cycleFlower}>
-            <Text style={styles.cycleFlowerText}>✿</Text>
+        <View style={styles.cycleWheel}>
+          {Array.from({ length: 28 }).map((_, index) => {
+            const day = index + 1;
+            const currentDay = Math.max(1, Math.min(28, activeHealthState.snapshot.cycle.cycleDay));
+            const angle = 90 + (day - currentDay) * (360 / 28);
+            const radian = angle * Math.PI / 180;
+            const radius = 130;
+            const isCurrent = day === currentDay;
+            const arrived = day <= currentDay;
+            const phaseStyle = day <= 5
+              ? styles.cycleWheelDayMenstrual
+              : day <= 13
+                ? styles.cycleWheelDayFollicular
+                : day <= 15
+                  ? styles.cycleWheelDayOvulation
+                  : styles.cycleWheelDayLuteal;
+            return (
+              <View
+                key={day}
+                style={[
+                  styles.cycleWheelDay,
+                  {
+                    left: 146 + Math.cos(radian) * radius - (isCurrent ? 22 : 14),
+                    top: 146 + Math.sin(radian) * radius - (isCurrent ? 22 : 14)
+                  },
+                  arrived ? phaseStyle : styles.cycleWheelDayFuture,
+                  isCurrent && styles.cycleWheelDayCurrent
+                ]}
+              >
+                {isCurrent && <View style={styles.cycleWheelCurrentGlow} />}
+                <Text style={[styles.cycleWheelDayText, isCurrent && styles.cycleWheelDayTextCurrent]}>{day}</Text>
+              </View>
+            );
+          })}
+          <View style={styles.cycleWheelInner}>
+            <Text style={styles.cycleWheelInnerIcon}>✿</Text>
           </View>
+          <Text style={[styles.cycleWheelPhaseLabel, styles.cycleWheelPhaseLeft]}>黄体期</Text>
+          <Text style={[styles.cycleWheelPhaseLabel, styles.cycleWheelPhaseRight]}>卵泡期</Text>
+          <Text style={[styles.cycleWheelPhaseLabel, styles.cycleWheelPhaseBottom]}>排卵期</Text>
         </View>
-        <Text style={[styles.cyclePhaseText, styles.cyclePhaseTeal]}>卵泡期</Text>
-        <Text style={[styles.cyclePhaseText, styles.cyclePhasePurple]}>黄体期</Text>
-        <Text style={[styles.cyclePhaseText, styles.cyclePhasePink]}>经期</Text>
-        <Text style={[styles.cyclePhaseText, styles.cyclePhaseAmber]}>排卵期</Text>
       </View>
       <View style={styles.cycleInfoBlock}>
         <View style={styles.cycleDayRow}>
-          <Text style={styles.cycleDay}>D18</Text>
-          <Text style={styles.cycleDayCopy}>天  黄体期</Text>
+          <Text style={styles.cycleDay}>D{activeHealthState.snapshot.cycle.cycleDay}</Text>
+          <Text style={styles.cycleDayCopy}>天  {activeHealthState.snapshot.cycle.phaseLabel}</Text>
         </View>
         <View style={styles.cycleDecodeRow}>
           <Text style={styles.cycleDecodeIcon}>✿</Text>
           <View style={styles.cycleDecodeCopy}>
-            <Text style={styles.cycleDecodeTitle}>周期解读</Text>
-            <Text style={styles.cycleDecodeText}>你目前处于黄体期，身体正在为可能的经期做准备。能量可能有起伏，情绪更敏感，也更容易感到疲惫。</Text>
+            <Text style={styles.cycleDecodeTitle}>{activeHealthState.content.healthDetails.cycle.title}</Text>
+            <Text style={styles.cycleDecodeText}>{activeHealthState.content.healthDetails.cycle.body}</Text>
           </View>
-          <Text style={styles.cycleNextDate}>6月9日{`\n`}还有 10 天</Text>
+          <Text style={styles.cycleNextDate}>预计{`\n`}还有 {activeHealthState.snapshot.cycle.periodPredictedInDays} 天</Text>
         </View>
         <Text style={styles.cycleProgressLabel}>当前周期进度</Text>
         <View style={styles.cycleProgress}>
-          <View style={[styles.cycleProgressPart, { backgroundColor: "#38c9c3", flex: 13 }]} />
-          <View style={[styles.cycleProgressPart, { backgroundColor: "#ffb643", flex: 2 }]} />
-          <View style={[styles.cycleProgressPart, { backgroundColor: "#7d5cf5", flex: 13 }]} />
           <View style={[styles.cycleProgressPart, { backgroundColor: "#ef6b9c", flex: 5 }]} />
+          <View style={[styles.cycleProgressPart, { backgroundColor: "#38c9c3", flex: 8 }]} />
+          <View style={[styles.cycleProgressPart, { backgroundColor: "#7d5cf5", flex: 2 }]} />
+          <View style={[styles.cycleProgressPart, { backgroundColor: "#ffb643", flex: 13 }]} />
         </View>
       </View>
-      {renderSuggestionRows([
-        { icon: "☕", time: "09:00", title: "放缓节奏，优先休息", copy: "上午先安排轻量任务，减少高消耗工作。", action: "提醒我", tone: "green" },
-        { icon: "♙", time: "18:00", title: "温和运动，舒缓身心", copy: "选择瑜伽、散步等低强度运动，促进循环与放松。", action: "设置", tone: "green" },
-        { icon: "□", time: "21:00", title: "记录感受，倾听身体", copy: "记录情绪与身体变化，帮助你更好理解自己的周期。", action: "提醒我" }
-      ])}
+      {renderSuggestionRows(activeHealthState.content.healthDetails.cycle.suggestions)}
       <Text style={styles.healthDisclaimer}>数据仅供参考，不作为医疗建议</Text>
     </>
   );
@@ -1230,8 +2070,8 @@ export default function App() {
     <>
       <View style={[styles.healthModuleHero, styles.healthModuleHeroFocus]}>
         <Text style={styles.healthModuleTitle}>专注</Text>
-        <Text style={styles.healthModuleCopy}>切换成本偏高，今天更适合把任务压成单线程。</Text>
-        <Text style={styles.healthModuleScore}>-{Math.max(10, 55 - focusMinutes)}</Text>
+        <Text style={styles.healthModuleCopy}>{activeHealthState.content.healthDetails.focus.body}</Text>
+        <Text style={styles.healthModuleScore}>{activeHealthState.prediction.scores.focus}</Text>
         <Text style={styles.healthModuleSub}>建议 {focusMinutes} 分钟单任务专注，先降低切换成本。</Text>
         <View style={styles.focusDetailWave}>
           {Array.from({ length: 18 }).map((_, index) => (
@@ -1239,11 +2079,7 @@ export default function App() {
           ))}
         </View>
       </View>
-      {renderSuggestionRows([
-        { icon: "◎", time: "10:30", title: "单任务开始", copy: "只打开当前任务相关窗口，先工作 25 分钟。", action: "提醒我" },
-        { icon: "□", time: "14:00", title: "通知降噪", copy: "下午关闭非必要通知，避免重复切换。", action: "设置" },
-        { icon: "◌", time: "16:30", title: "呼吸复位", copy: "注意力下降时先做 3 分钟呼吸，再继续推进。", action: "提醒我" }
-      ])}
+      {renderSuggestionRows(activeHealthState.content.healthDetails.focus.suggestions)}
     </>
   );
 
@@ -1252,24 +2088,20 @@ export default function App() {
       <View style={[styles.healthModuleHero, styles.healthModuleHeroMetabolism]}>
         <View style={styles.healthModuleHeaderRow}>
           <Text style={styles.healthModuleTitle}>代谢</Text>
-          <Text style={styles.healthModuleBadge}>差</Text>
+          <Text style={styles.healthModuleBadge}>{activeHealthState.prediction.scores.metabolism < 68 ? "偏低" : "稳定"}</Text>
         </View>
-        <Text style={styles.healthModuleCopy}>昨晚睡眠连续性会影响下午专注和恢复速度。</Text>
-        <Text style={styles.metabolismDetailValue}>4,151</Text>
+        <Text style={styles.healthModuleCopy}>{activeHealthState.content.healthDetails.metabolism.body}</Text>
+        <Text style={styles.metabolismDetailValue}>{activeHealthState.snapshot.activity.steps.toLocaleString()}</Text>
         <View style={styles.metabolismDetailBar}>
           <View style={styles.metabolismDetailBarFill} />
         </View>
         <View style={styles.metabolismDetailStats}>
-          <Text>◍ 5.21 km</Text>
-          <Text>◷ 413 min</Text>
-          <Text>⚡1343 kcal</Text>
+          <Text>◍ {activeHealthState.snapshot.activity.distanceKm.toFixed(2)} km</Text>
+          <Text>◷ {activeHealthState.snapshot.sleep.durationMinutes} min</Text>
+          <Text>⚡{activeHealthState.snapshot.activity.activeCalories} kcal</Text>
         </View>
       </View>
-      {renderSuggestionRows([
-        { icon: "☕", time: "15:00", title: "加餐恢复", copy: "补充温和能量，降低下午恢复压力。", action: "提醒我", tone: "green" },
-        { icon: "◒", time: "17:30", title: "轻走 8 分钟", copy: "不做强刺激，只把循环拉回来。", action: "设置" },
-        { icon: "□", time: "20:30", title: "代谢回看", copy: "记录今晚食欲和疲劳感，作为明天预测线索。", action: "提醒我" }
-      ])}
+      {renderSuggestionRows(activeHealthState.content.healthDetails.metabolism.suggestions)}
     </>
   );
 
@@ -1278,9 +2110,9 @@ export default function App() {
       <View style={[styles.healthModuleHero, styles.healthModuleHeroMorning]}>
         <View style={styles.healthModuleHeaderRow}>
           <Text style={styles.healthModuleTitle}>晨间计划</Text>
-          <Text style={styles.healthModuleBadge}>省电模式</Text>
+          <Text style={styles.healthModuleBadge}>{activeHealthState.prediction.scores.morning < 70 ? "省电模式" : "稳定启动"}</Text>
         </View>
-        <Text style={styles.healthModuleCopy}>当前可能更容易疲惫、轻水肿、食欲波动、情绪敏感。</Text>
+        <Text style={styles.healthModuleCopy}>{activeHealthState.content.healthDetails.morning.body}</Text>
         <View style={styles.morningDetailMap}>
           <View style={styles.morningMapShape} />
           <View style={[styles.morningMapRoad, { transform: [{ rotate: "10deg" }] }]} />
@@ -1288,35 +2120,32 @@ export default function App() {
           <View style={styles.morningPin} />
         </View>
         <View style={styles.morningDetailStats}>
-          <Text><Text style={styles.morningDetailBig}>29.60</Text> KM</Text>
-          <Text>141 bpm{`\n`}6:16 / Km</Text>
+          <Text><Text style={styles.morningDetailBig}>{activeHealthState.snapshot.activity.distanceKm.toFixed(2)}</Text> KM</Text>
+          <Text>{activeHealthState.snapshot.recovery.restingHeartRate} bpm{`\n`}{activeHealthState.snapshot.cycle.phaseLabel}</Text>
         </View>
       </View>
-      {renderSuggestionRows([
-        { icon: "☼", time: "07:20", title: "窗边光照", copy: "醒后先接触自然光，降低启动成本。", action: "提醒我", tone: "green" },
-        { icon: "◒", time: "07:40", title: "轻走路线", copy: "用 8 分钟路线完成晨间唤醒。", action: "设置" },
-        { icon: "□", time: "08:10", title: "记录晨间反馈", copy: "记录疲劳、水肿和食欲变化。", action: "提醒我" }
-      ])}
+      {renderSuggestionRows(activeHealthState.content.healthDetails.morning.suggestions)}
     </>
   );
 
   const renderHealthDetail = () => (
-    <ScrollView style={styles.healthDetailPage} contentContainerStyle={styles.healthDetailContent} showsVerticalScrollIndicator={false}>
-      {renderDetailHeader()}
-      {renderHealthDetailChips()}
+    <View style={styles.healthDetailPage}>
+      <ScrollView contentContainerStyle={styles.healthDetailContent} showsVerticalScrollIndicator={false}>
+        {renderDetailHeader()}
+        {healthDetailTab === "sleep"
+          ? renderHealthSleepDetail()
+          : healthDetailTab === "cycle"
+            ? renderHealthCycleDetail()
+            : healthDetailTab === "focus"
+              ? renderHealthFocusDetail()
+              : healthDetailTab === "metabolism"
+                ? renderHealthMetabolismDetail()
+                : healthDetailTab === "morning"
+                  ? renderHealthMorningDetail()
+                  : renderHealthSummaryDetail()}
+      </ScrollView>
       {renderHealthDetailTabs()}
-      {healthDetailTab === "sleep"
-        ? renderHealthSleepDetail()
-        : healthDetailTab === "cycle"
-          ? renderHealthCycleDetail()
-          : healthDetailTab === "focus"
-            ? renderHealthFocusDetail()
-            : healthDetailTab === "metabolism"
-              ? renderHealthMetabolismDetail()
-              : healthDetailTab === "morning"
-                ? renderHealthMorningDetail()
-                : renderHealthSummaryDetail()}
-    </ScrollView>
+    </View>
   );
 
   const renderReminderSheet = () => {
@@ -1357,6 +2186,16 @@ export default function App() {
     );
   };
 
+  const renderHealthTopicChips = (state: VitoraRuntimeStateV1) => (
+    <View style={styles.nativeTopicRail}>
+      {state.healthInsight.periodTopics.map((topic) => (
+        <View key={topic} style={styles.nativeTopicChip}>
+          <Text style={styles.nativeTopicText}>{topic}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
   const renderHealth = () => (
     <ScrollView style={styles.nativeHealth} contentContainerStyle={styles.nativeHealthContent} showsVerticalScrollIndicator={false}>
       <View style={styles.nativeHello}>
@@ -1365,32 +2204,40 @@ export default function App() {
         </Pressable>
         <Text style={styles.nativeHi}>Hi</Text>
       </View>
-      <Text style={styles.nativeHealthTitle}>你知道身体总会回到稳态</Text>
+      <Text style={styles.nativeHealthTitle}>{vitoraState.content.healthTitle}</Text>
+      <Text style={styles.nativeHealthPersona}>{vitoraState.profile.personaName} · {vitoraState.profile.personaType}</Text>
+      {renderHealthTopicChips(vitoraState)}
       <View style={styles.nativeStampStage}>
-        {renderHealthStamp("Amateur", "amateur", styles.nativeStampA)}
-        {renderHealthStamp("Sleepers", "sleepers", styles.nativeStampB)}
-        {renderHealthStamp("75,000 steps", "steps", styles.nativeStampC)}
-        {renderHealthStamp("Gym bros", "gym", styles.nativeStampD)}
-        {renderHealthStamp("40 hours", "hours", styles.nativeStampE)}
+        {vitoraState.achievementStamps.slice(0, 5).map((stamp, index) => renderHealthStamp(
+          stamp,
+          [styles.nativeStampA, styles.nativeStampB, styles.nativeStampC, styles.nativeStampD, styles.nativeStampE][index] ?? styles.nativeStampA
+        ))}
       </View>
       <View style={styles.nativeWeekCard}>
+        <View style={styles.nativeWeekHeader}>
+          <View>
+            <Text style={styles.nativeWeekKicker}>本期能量热力</Text>
+            <Text style={styles.nativeWeekTitle}>{healthHeatmapRange === "this_week" ? "这周" : "上周"}高低精力分布</Text>
+          </View>
+          {renderHealthHeatmapRangeControl()}
+        </View>
         <View style={styles.nativeWeekTop}>
           <View style={styles.nativeWeekLeft}>
             <View style={styles.nativeCountRow}>
-              <Text style={styles.nativeCount}>154</Text>
-              <Text style={styles.nativeCountLabel}>Total</Text>
-              <Text style={styles.nativeCount}>51</Text>
-              <Text style={styles.nativeCountLabel}>Best</Text>
+              <View>
+                <Text style={styles.nativeCount}>{vitoraState.healthInsight.highEnergyDays}</Text>
+                <Text style={styles.nativeCountLabel}>高精力天</Text>
+              </View>
+              <View>
+                <Text style={styles.nativeCount}>{vitoraState.healthInsight.lowEnergyDays}</Text>
+                <Text style={styles.nativeCountLabel}>低精力天</Text>
+              </View>
             </View>
-            <View style={styles.nativeHeatmap}>
-              {Array.from({ length: 60 }).map((_, index) => (
-                <View key={index} style={[styles.nativeHeatCell, index % 3 === 0 && styles.nativeHeatCellOn, index % 7 === 0 && styles.nativeHeatCellDark]} />
-              ))}
-            </View>
+            {renderHealthHeatmap(vitoraState, true)}
           </View>
-          <Text style={styles.nativeRadar}>◎</Text>
+          <View style={styles.nativeRadarWrap}>{renderHealthRadarGraph(vitoraState, true)}</View>
         </View>
-        <Text style={styles.nativeWeekCopy}>本周你早睡5天高精力状态为早上10点至11点，基础代谢率还剩30%未消耗，</Text>
+        <Text style={styles.nativeWeekCopy}>{vitoraState.healthInsight.explanation}</Text>
         <Pressable style={styles.nativeMoreButton} onPress={() => openHealthDetail("summary")}>
           <Text style={styles.nativeMore}>更多</Text>
         </Pressable>
@@ -1402,78 +2249,219 @@ export default function App() {
         </Pressable>
       </View>
       <View style={styles.nativeMetricGrid}>
-        <View style={styles.nativeMetricCard}>
-          <Text style={styles.nativeMetricLabel}>平均准备度</Text>
-          <Text style={styles.nativeMetricValue}>88</Text>
-        </View>
-        <View style={styles.nativeMetricCard}>
-          <Text style={styles.nativeMetricLabel}>睡眠负债</Text>
-          <Text style={styles.nativeMetricValue}>+2</Text>
-        </View>
+        {renderHealthMetricCard("readiness", "平均准备度", vitoraState.content.healthMetrics.readiness, "五维综合状态")}
+        {renderHealthMetricCard("sleepDebt", "睡眠负债", vitoraState.content.healthMetrics.sleepDebt, "连续性缺口")}
       </View>
-      <View style={styles.nativeExtraCard}>
-        <Text style={styles.nativeMetricLabel}>信息负债</Text>
-        <Text style={styles.nativeExtraValue}>+6</Text>
-        <Text style={styles.nativeExtraCopy}>今天未处理的信息积压偏高，适合把重要对话集中到一个时段处理。</Text>
-      </View>
-      <View style={styles.nativeExtraCard}>
-        <Text style={styles.nativeMetricLabel}>平均值</Text>
-        <Text style={styles.nativeExtraValue}>76%</Text>
-        <Text style={styles.nativeExtraCopy}>你的稳定区间仍在恢复，睡眠和早间状态是本周最有价值的线索。</Text>
+      <View style={styles.nativeMetricGrid}>
+        {renderHealthMetricCard("informationDebt", "信息负债", vitoraState.content.healthMetrics.informationDebt, "切换成本")}
+        {renderHealthMetricCard("average", vitoraState.achievementStamps[0]?.mythicFigure ?? "油画邮票", vitoraState.content.healthMetrics.average, "邮戳证据")}
       </View>
     </ScrollView>
   );
 
-  const renderTodayChips = () => (
-    <View style={styles.todayChipRow}>
-      {TODAY_CARDS.map((card) => (
-        <Pressable key={card.id} style={[styles.todayChip, todayActiveId === card.id && styles.todayChipActive]} onPress={() => openTodayCard(card.id)}>
-          <Text style={styles.todayChipLabel}>{card.label}</Text>
-          <Text style={styles.todayChipValue}>{card.chipValue}</Text>
-        </Pressable>
+  const todayPillText = (card: TodayCard) => {
+    if (card.id === "today") return "省电模式";
+    if (card.id === "sleep") return predictionSleepDebtLabel();
+    if (card.id === "cycle") return vitoraState.snapshot.cycle.phaseLabel;
+    if (card.id === "focus") return card.status === "warning" ? "需保护" : "稳定";
+    if (card.id === "metabolism") return card.status === "warning" ? "差" : "正常";
+    return "省电模式";
+  };
+
+  const predictionSleepDebtLabel = () => {
+    const sleepChip = vitoraState.prediction.scoreBreakdown.chips.find((chip) => chip.id === "sleep");
+    return sleepChip?.status === "warning" ? "睡眠债1" : "睡眠债0";
+  };
+
+  const renderTodayCardHeader = (card: TodayCard) => (
+    <View style={styles.todayCardHeader}>
+      <View style={styles.todayCardHeaderCopy}>
+        {card.id === "cycle" ? (
+          <View style={styles.todayCycleTitleRow}>
+            <Text style={styles.todayCardTitle}>周期</Text>
+            <Text style={styles.todayCycleTitleDay}>D{vitoraState.snapshot.cycle.cycleDay}</Text>
+            <Text style={styles.todayCycleTitleUnit}>天</Text>
+          </View>
+        ) : (
+          <Text style={styles.todayCardTitle}>{card.title}</Text>
+        )}
+        <Text style={styles.todayCardSubtitle}>{card.subtitle}</Text>
+      </View>
+      <Pressable style={styles.todayMorePill} onPress={() => openTodayMore(card.id)}>
+        <Text style={styles.todayMoreText}>{todayPillText(card)}</Text>
+      </Pressable>
+    </View>
+  );
+
+  const renderTodayNavFade = (side: "left" | "right") => (
+    <View pointerEvents="none" style={[styles.todayNavFade, side === "left" ? styles.todayNavFadeLeft : styles.todayNavFadeRight]}>
+      {[0.98, 0.72, 0.42, 0.16].map((opacity, index) => (
+        <View
+          key={`${side}-${index}`}
+          style={[
+            styles.todayNavFadeSegment,
+            side === "left" ? { left: index * 9, opacity } : { right: index * 9, opacity }
+          ]}
+        />
       ))}
     </View>
   );
 
-  const renderTodayEnergyVisual = () => (
+  const renderTodayNav = () => (
+    <View style={styles.todayNavRail}>
+      <ScrollView
+        ref={todayNavScrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.todayNavContent}
+      >
+        {todayNavItems.map((item) => {
+          const isActive = todayActiveId === item.id;
+          const tone = TODAY_TONE_THEMES[item.tone];
+          return (
+            <Pressable
+              key={item.id}
+              style={[
+                styles.todayNavCircle,
+                isActive && styles.todayNavCircleActive,
+                isActive && { backgroundColor: `${tone.accent}1F`, shadowColor: tone.accent }
+              ]}
+              onPress={() => openTodayCard(item.id)}
+            >
+              {item.status === "warning" && <View style={styles.todayNavAlertDot} />}
+              <Text style={[styles.todayNavLabel, isActive && styles.todayNavLabelActive]}>{item.label}</Text>
+              <Text style={[styles.todayNavValue, isActive && styles.todayNavValueActive]} numberOfLines={1}>
+                {item.chipValue}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+      {renderTodayNavFade("left")}
+      {renderTodayNavFade("right")}
+    </View>
+  );
+
+  const renderTodayEnergyVisual = () => {
+    const sun = sunPosition();
+    return (
     <View style={styles.todaySunVisual}>
-      <Text style={styles.todayDotScore}>70</Text>
+      <DotMatrixText value={vitoraState.prediction.todayScore} dot={7} gap={5} style={styles.todayDotMatrixScore} />
       <Text style={styles.todayDotSub}>On Track</Text>
       <View style={styles.todaySunArc} />
-      <View style={[styles.todaySunDot, { left: 76, top: 98 }]} />
+      <View style={[styles.todaySunDot, { left: sun.x, top: sun.y, backgroundColor: activeToneTheme.accent }]} />
       <View style={[styles.todaySunDot, { left: 172, top: 98 }]} />
       <View style={[styles.todaySunDot, { left: 268, top: 98 }]} />
+      <View style={styles.todaySunHorizon} />
       <Text style={[styles.todaySunTime, { left: 14 }]}>6:14{`\n`}Sunrise</Text>
       <Text style={[styles.todaySunTime, { left: 134 }]}>Good Sun</Text>
       <Text style={[styles.todaySunTime, { right: 10 }]}>17:21{`\n`}Sunset</Text>
     </View>
-  );
+    );
+  };
 
   const renderTodaySleepVisual = () => (
-    <View style={styles.todaySleepVisual}>
+    <View style={styles.todaySleepVisual} {...sleepPanResponder.panHandlers}>
+      <View style={styles.todaySleepPanel}>
+        <View>
+          <View style={styles.todaySleepTotalRow}>
+            <DotMatrixText value={sleepDisplayHours} dot={8} gap={5} />
+            <Text style={styles.todaySleepHourUnit}>h</Text>
+          </View>
+          <Text style={styles.todaySleepSmallLabel}>修复目标 · {Math.round(sleepTargetMinutes / 6) / 10}h</Text>
+        </View>
+        <View style={styles.todaySleepQuality}>
+          <Text style={styles.todaySleepQualityLabel}>睡眠质量</Text>
+          <Text style={styles.todaySleepQualityValue}>{vitoraState.prediction.scores.sleep >= 76 ? "优秀" : "恢复中"}</Text>
+        </View>
+      </View>
       <View style={styles.todaySleepChart}>
         {[
-          ["#ea66c7", 90],
-          ["#5c96df", 52],
-          ["#bc3dd1", 82],
-          ["#5c96df", 78],
-          ["#bc3dd1", 88],
-          ["#5c96df", 58],
-          ["#bc3dd1", 86],
-          ["#5c96df", 55],
-          ["#ea66c7", 96]
+          ["#ea66c7", 62 + sleepWindowShift],
+          ["#5c96df", 38 - sleepWindowShift * 2],
+          ["#bc3dd1", 56 + sleepWindowShift],
+          ["#5c96df", 52 - sleepWindowShift],
+          ["#bc3dd1", 64],
+          ["#5c96df", 44 + sleepWindowShift],
+          ["#bc3dd1", 60 - sleepWindowShift],
+          ["#5c96df", 42 + sleepWindowShift],
+          ["#ea66c7", 66 - sleepWindowShift]
         ].map(([color, height], index) => (
           <View key={index} style={[styles.todaySleepBar, { backgroundColor: String(color), height: Number(height) }]} />
         ))}
       </View>
-      <Text style={styles.todaySleepTime}>08 : 00{`\n`}····{`\n`}06 : 00</Text>
-      <Text style={styles.todaySleepHint}>建议你补充 20 分钟睡眠</Text>
+      <View style={styles.todaySleepAdjustRow}>
+        <Pressable style={styles.todaySleepAdjust} onPress={() => adjustSleepTarget(15)}>
+          <Text style={styles.todaySleepAdjustText}>+</Text>
+        </Pressable>
+        <Text style={styles.todaySleepWindowText}>左右滑动切换睡眠窗口</Text>
+        <Pressable style={styles.todaySleepAdjust} onPress={() => adjustSleepTarget(-15)}>
+          <Text style={styles.todaySleepAdjustText}>−</Text>
+        </Pressable>
+      </View>
+      <View style={styles.todaySleepTimeRow}>
+        <Text style={styles.todaySleepTimeText}>{sleepBedTime} 入睡</Text>
+        <Text style={styles.todaySleepTimeDots}>···</Text>
+        <Text style={styles.todaySleepTimeText}>{sleepWakeTime} 起床</Text>
+      </View>
+      <Text style={styles.todaySleepHint}>{vitoraState.content.healthDetails.sleep.suggestions[0]?.copy}</Text>
     </View>
   );
 
+  const renderTodayCycleVisual = () => {
+    const day = vitoraState.snapshot.cycle.cycleDay;
+    const currentIndex = Math.max(1, Math.min(day, 28));
+    return (
+      <View style={styles.todayCycleVisual}>
+        <Text style={styles.todayCyclePhaseTop}>{vitoraState.snapshot.cycle.phaseLabel}</Text>
+        <View style={styles.todayCycleDial}>
+          {Array.from({ length: 28 }).map((_, index) => {
+            const dateNumber = index + 1;
+            const angle = -90 + index * (360 / 28);
+            const radian = angle * Math.PI / 180;
+            const radius = 106;
+            const left = 122 + Math.cos(radian) * radius - 11;
+            const top = 122 + Math.sin(radian) * radius - 11;
+            const isActive = dateNumber === currentIndex;
+            const isPeriod = dateNumber <= 7;
+            const isOvulation = dateNumber === 14;
+            return (
+              <View
+                key={dateNumber}
+                style={[
+                  styles.todayCycleDay,
+                  { left, top },
+                  isPeriod && styles.todayCycleDay_period,
+                  isOvulation && styles.todayCycleDay_ovulation,
+                  isActive && styles.todayCycleDay_active
+                ]}
+              >
+                <Text style={[styles.todayCycleDayText, isActive && styles.todayCycleDayText_active]}>{dateNumber}</Text>
+              </View>
+            );
+          })}
+          <View style={styles.todayCycleInner} />
+          <View style={[styles.todayCycleOrb, styles.todayCycleOrb_large]} />
+          <View style={[styles.todayCycleOrb, styles.todayCycleOrb_a]} />
+          <View style={[styles.todayCycleOrb, styles.todayCycleOrb_b]} />
+          <View style={[styles.todayCycleOrb, styles.todayCycleOrb_c]} />
+          <View style={styles.todayCycleCurrentBadge}>
+            <Text style={styles.todayCycleCurrentText}>{currentIndex}</Text>
+          </View>
+        </View>
+        <Text style={[styles.todayCyclePhaseLabel, styles.todayCyclePhaseLeft]}>黄体期</Text>
+        <Text style={[styles.todayCyclePhaseLabel, styles.todayCyclePhaseRight]}>卵泡期</Text>
+        <Text style={[styles.todayCyclePhaseLabel, styles.todayCyclePhaseBottom]}>排卵期</Text>
+      </View>
+    );
+  };
+
   const renderTodayFocusVisual = () => (
     <View style={styles.todayFocusVisual} {...focusPanResponder.panHandlers}>
-      <Text style={styles.todayFocusMinutes}>{focusMinutes}<Text style={styles.todayFocusUnit}> 分钟</Text></Text>
+      <View style={styles.todayFocusDotRow}>
+        <DotMatrixText value={focusMinutes} dot={8} gap={5} />
+        <Text style={styles.todayFocusUnit}>分钟</Text>
+      </View>
       <View style={styles.todayFocusTicks}>
         {Array.from({ length: 19 }).map((_, index) => {
           const active = Math.round((focusMinutes - 10) / 40 * 18) === index;
@@ -1481,8 +2469,12 @@ export default function App() {
         })}
       </View>
       <View style={styles.todayFocusRange}>
-        <Text style={styles.todayFocusRangeText}>25</Text>
-        <Text style={styles.todayFocusRangeText}>50</Text>
+        <Pressable style={styles.todayFocusAdjust} onPress={() => adjustFocusMinutes(5)}>
+          <Text style={styles.todayFocusAdjustText}>+</Text>
+        </Pressable>
+        <Pressable style={styles.todayFocusAdjust} onPress={() => adjustFocusMinutes(-5)}>
+          <Text style={styles.todayFocusAdjustText}>−</Text>
+        </Pressable>
       </View>
       <Text style={styles.todayFocusHint}>建议 {focusMinutes} 分钟单任务专注，先降低切换成本。</Text>
     </View>
@@ -1490,17 +2482,19 @@ export default function App() {
 
   const renderTodayMetabolismVisual = () => (
     <View style={styles.todayMetabolismVisual}>
-      <Text style={styles.todayMetabolismValue}>4,151</Text>
-      <View style={styles.todayHeartBadge}><Text style={styles.todayHeartText}>80</Text></View>
+      <Text style={styles.todayMetabolismValue}>{vitoraState.snapshot.activity.steps.toLocaleString()}</Text>
+      <Animated.View style={[styles.todayHeartBadge, { transform: [{ scale: heartPulseAnim }] }]}>
+        <Text style={styles.todayHeartText}>{vitoraState.snapshot.recovery.restingHeartRate}</Text>
+      </Animated.View>
       <View style={styles.todayMetabolismBar}>
         <View style={styles.todayMetabolismFill}>
           {Array.from({ length: 7 }).map((_, index) => <View key={index} style={styles.todayMetabolismStripe} />)}
         </View>
       </View>
       <View style={styles.todayMetabolismStats}>
-        <Text>◍ 5.21 km</Text>
-        <Text>◷ 413 min</Text>
-        <Text>⚡1343 kcal</Text>
+        <Text>◍ {vitoraState.snapshot.activity.distanceKm.toFixed(2)} km</Text>
+        <Text>◷ {vitoraState.snapshot.sleep.durationMinutes} min</Text>
+        <Text>⚡{vitoraState.snapshot.activity.activeCalories} kcal</Text>
       </View>
     </View>
   );
@@ -1509,20 +2503,31 @@ export default function App() {
     <View style={styles.todayMorningVisual}>
       <View style={styles.todayMorningMap}>
         <View style={styles.todayMorningMapShape} />
+        <Animated.View
+          style={[
+            styles.todayMorningGlow,
+            {
+              opacity: pinGlowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.22, 0.72] }),
+              transform: [{ scale: pinGlowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.84, 1.18] }) }]
+            }
+          ]}
+        />
         <View style={[styles.todayMorningRoad, { transform: [{ rotate: "-24deg" }] }]} />
         <View style={[styles.todayMorningRoad, { left: 98, transform: [{ rotate: "8deg" }] }]} />
+        <View style={styles.todayMorningSunBeam} />
         <View style={styles.todayMorningPin} />
         <Text style={styles.todayMorningPlace}>静安寺</Text>
       </View>
       <View style={styles.todayMorningStats}>
-        <Text style={styles.todayMorningKm}>29.60</Text>
-        <Text style={styles.todayMorningMeta}>KM{`\n`}141 bpm{`\n`}6:16 / Km</Text>
+        <Text style={styles.todayMorningKm}>{vitoraState.snapshot.activity.distanceKm.toFixed(2)}</Text>
+        <Text style={styles.todayMorningMeta}>KM{`\n`}{vitoraState.snapshot.recovery.restingHeartRate} bpm{`\n`}{vitoraState.snapshot.cycle.phaseLabel}</Text>
       </View>
     </View>
   );
 
   const renderTodayCardVisual = (card: TodayCard) => {
     if (card.id === "sleep") return renderTodaySleepVisual();
+    if (card.id === "cycle") return renderTodayCycleVisual();
     if (card.id === "focus") return renderTodayFocusVisual();
     if (card.id === "metabolism") return renderTodayMetabolismVisual();
     if (card.id === "morning") return renderTodayMorningVisual();
@@ -1531,6 +2536,7 @@ export default function App() {
 
   const todayCardToneStyle = (tone: TodayCard["tone"]) => {
     if (tone === "sleep") return styles.todayCard_sleep;
+    if (tone === "cycle") return styles.todayCard_cycle;
     if (tone === "focus") return styles.todayCard_focus;
     if (tone === "metabolism") return styles.todayCard_metabolism;
     if (tone === "morning") return styles.todayCard_morning;
@@ -1538,35 +2544,102 @@ export default function App() {
   };
 
   const handleTodayAction = (card: TodayCard) => {
-    if (card.id === "sleep") {
-      openReminderSheet("睡眠修复", "21:30");
+    if (card.actionType === "reminder") {
+      const time = card.id === "sleep" ? "21:30" : card.id === "metabolism" ? "15:00" : vitoraState.prediction.primaryAction.scheduledTime;
+      openReminderSheet(card.action, time);
+      return;
+    }
+    if (card.actionType === "map_guidance") {
+      openMorningMap();
+      return;
+    }
+    if (card.id === "focus") {
+      openTimedSession("focusTimer", card.action, "focus");
+      return;
+    }
+    if (card.id === "metabolism") {
+      openTimedSession("metabolismTimer", card.action, "metabolism");
       return;
     }
     openBreathingPractice(card.id);
   };
 
-  const renderToday = () => (
-    <ScrollView style={styles.nativeToday} contentContainerStyle={styles.nativeTodayContent} showsVerticalScrollIndicator={false}>
-      {renderTodayChips()}
-      <View style={[styles.todayMainCard, todayCardToneStyle(activeToday.tone)]}>
-        <View style={styles.todayCardHeader}>
-          <View>
-            <Text style={styles.todayCardTitle}>{activeToday.title}</Text>
-            <Text style={styles.todayCardSubtitle}>{activeToday.subtitle}</Text>
-          </View>
-          <Pressable style={styles.todayMorePill} onPress={() => openTodayMore(activeToday.id)}>
-            <Text style={styles.todayMoreText}>更多</Text>
-          </Pressable>
-        </View>
-        {renderTodayCardVisual(activeToday)}
-        <Pressable style={styles.todayCardAction} onPress={() => handleTodayAction(activeToday)}>
-          <Text style={styles.todayCardActionText}>{activeToday.action}</Text>
+  const cycleReferenceOpacity = () => {
+    setReferenceOverlayOpacity((value) => (value >= 0.42 ? 0.18 : value + 0.12));
+  };
+
+  const renderTodayReferenceOverlay = () => {
+    if (!__DEV__ || !referenceOverlayVisible) return null;
+    return (
+      <View pointerEvents="none" style={[styles.todayReferenceOverlay, { opacity: referenceOverlayOpacity }]}>
+        <ImageBackground
+          source={TODAY_REFERENCE_IMAGES[activeToday.id]}
+          resizeMode="stretch"
+          style={styles.todayReferenceOverlayImage}
+          imageStyle={styles.todayReferenceImage}
+        />
+      </View>
+    );
+  };
+
+  const renderTodayReferenceControls = () => {
+    if (!__DEV__) return null;
+    return (
+      <View style={styles.todayReferenceControls}>
+        <Pressable style={[styles.todayReferenceButton, referenceOverlayVisible && styles.todayReferenceButtonActive]} onPress={() => setReferenceOverlayVisible((value) => !value)}>
+          <Text style={styles.todayReferenceButtonText}>Ref</Text>
+        </Pressable>
+        <Pressable style={styles.todayReferenceButton} onPress={cycleReferenceOpacity}>
+          <Text style={styles.todayReferenceButtonText}>{Math.round(referenceOverlayOpacity * 100)}%</Text>
         </Pressable>
       </View>
-      <Pressable style={styles.todayMonitorCard} onPress={() => (activeToday.id === "sleep" ? openReminderSheet("睡眠修复", "21:30") : openBreathingPractice(activeToday.id))}>
-        <Text style={styles.todayMonitorTitle}>监测到</Text>
-        <Text style={styles.todayMonitorCopy}>{activeToday.monitor}</Text>
-      </Pressable>
+    );
+  };
+
+  const renderToday = () => (
+    <ScrollView style={styles.nativeToday} contentContainerStyle={styles.nativeTodayContent} showsVerticalScrollIndicator={false}>
+      {renderTodayReferenceOverlay()}
+      {renderTodayNav()}
+      <Animated.View
+        style={[
+          styles.todayArtworkCard,
+          {
+            opacity: cardIntroAnim,
+            transform: [{ translateY: cardIntroAnim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }]
+          }
+        ]}
+      >
+        <Pressable style={styles.todayArtworkPressable} onPress={() => handleTodayAction(activeToday)}>
+          <ImageBackground
+            source={TODAY_CARD_ART_IMAGES[activeToday.id]}
+            resizeMode="stretch"
+            style={[styles.todayArtworkImage, { aspectRatio: TODAY_CARD_ART_RATIOS[activeToday.id] }]}
+            imageStyle={styles.todayArtworkImageRadius}
+          />
+        </Pressable>
+      </Animated.View>
+      <Animated.View
+        style={styles.todayMonitorCard}
+      >
+        <Pressable
+          onPress={() => {
+            if (activeToday.id === "today") return;
+            setActiveCareEventId(activeCareEvent.careEventId);
+            setTodayActiveId(activeCareEvent.targetCard);
+            openHealthDetail(activeCareEvent.targetHealthTab, activeCareEvent.targetCard);
+          }}
+        >
+          <Text style={styles.todayMonitorTitle}>
+            {activeToday.id === "today" ? `你今日的综合数据是 ${vitoraState.prediction.todayScore}%` : `${activeToday.title} · ${activeToday.status === "warning" ? "需要关注" : "状态稳定"}`}
+          </Text>
+          <Text style={styles.todayMonitorCopy} numberOfLines={2}>
+            {activeToday.id === "today"
+              ? `基础分 ${vitoraState.prediction.scoreBreakdown.baseScore}，睡眠 ${vitoraState.prediction.scoreBreakdown.chips.find((chip) => chip.id === "sleep")?.value}，周期 ${vitoraState.prediction.scoreBreakdown.chips.find((chip) => chip.id === "cycle")?.contribution}，专注 ${vitoraState.prediction.scoreBreakdown.chips.find((chip) => chip.id === "focus")?.value}，抗压 ${vitoraState.prediction.scoreBreakdown.chips.find((chip) => chip.id === "stress")?.value}。`
+              : activeToday.monitor}
+          </Text>
+        </Pressable>
+      </Animated.View>
+      {renderTodayReferenceControls()}
     </ScrollView>
   );
 
@@ -1583,6 +2656,7 @@ export default function App() {
         <View style={styles.breathOrbInner} />
       </View>
       <Text style={styles.breathPhase}>吸气 / 呼气</Text>
+      <DotMatrixText value={formatElapsed(activeSessionElapsed)} dot={6} gap={4} style={styles.sessionDotClock} color="#6f7b75" />
       <Text style={styles.breathCopy}>跟随圆形节奏，把注意力从高刺激任务拉回身体。完成后会回到今日计划。</Text>
       <View style={styles.breathDots}>
         {[0, 1, 2, 3].map((item) => <View key={item} style={[styles.breathDot, item === 1 && styles.breathDotActive]} />)}
@@ -1592,6 +2666,207 @@ export default function App() {
       </Pressable>
     </View>
   );
+
+  const renderTimedSession = (kind: "focus" | "metabolism") => {
+    const theme = kind === "focus" ? TODAY_TONE_THEMES.focus : TODAY_TONE_THEMES.metabolism;
+    return (
+      <View style={[styles.sessionPage, { backgroundColor: theme.base }]}>
+        <View style={[styles.todayToneTopWash, { backgroundColor: theme.washTop }]} />
+        <View style={[styles.todayToneBottomGlow, { backgroundColor: theme.bottomGlow }]} />
+        <View style={styles.breathHeader}>
+          <Pressable style={styles.breathBack} onPress={() => setTodayRoute("home")}>
+            <Text style={styles.breathBackText}>‹</Text>
+          </Pressable>
+          <Text style={styles.breathTitle}>{kind === "focus" ? "专注计时" : "代谢计时"}</Text>
+          <View style={styles.breathBack} />
+        </View>
+        <View style={styles.sessionCenter}>
+          {kind === "metabolism" ? (
+            <Animated.View style={[styles.sessionHeart, { transform: [{ scale: heartPulseAnim }] }]}>
+              <Text style={styles.sessionHeartText}>{vitoraState.snapshot.recovery.restingHeartRate}</Text>
+            </Animated.View>
+          ) : (
+            <View style={styles.sessionFocusOrb}>
+              <Text style={styles.sessionFocusText}>{focusMinutes}</Text>
+            </View>
+          )}
+          <DotMatrixText value={formatElapsed(activeSessionElapsed)} dot={8} gap={5} style={styles.sessionLargeClock} />
+          <Text style={styles.sessionCopy}>
+            {kind === "focus" ? `保持单任务 ${focusMinutes} 分钟，先降低切换成本。` : "让身体进入温和活动状态，完成后会收集一个代谢邮戳。"}
+          </Text>
+        </View>
+        <Pressable style={styles.sessionCompleteButton} onPress={completeTimedSession}>
+          <Text style={styles.sessionCompleteText}>完成并收集邮戳</Text>
+        </Pressable>
+      </View>
+    );
+  };
+
+  const renderMorningMapGuide = () => (
+    <View style={[styles.sessionPage, styles.morningGuidePage]}>
+      <View style={[styles.todayToneTopWash, { backgroundColor: TODAY_TONE_THEMES.morning.washTop }]} />
+      <View style={[styles.todayToneBottomGlow, { backgroundColor: TODAY_TONE_THEMES.morning.bottomGlow }]} />
+      <View style={styles.breathHeader}>
+        <Pressable style={styles.breathBack} onPress={() => setTodayRoute("home")}>
+          <Text style={styles.breathBackText}>‹</Text>
+        </Pressable>
+        <Text style={styles.breathTitle}>晨间找太阳</Text>
+        <View style={styles.breathBack} />
+      </View>
+      <View style={styles.morningGuideMap}>
+        <View style={styles.todayMorningMapShape} />
+        <View style={styles.morningGuideBeam} />
+        <Animated.View
+          style={[
+            styles.todayMorningGlow,
+            {
+              opacity: pinGlowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0.82] }),
+              transform: [{ scale: pinGlowAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] }) }]
+            }
+          ]}
+        />
+        <View style={styles.todayMorningPin} />
+        <Text style={styles.morningGuideLabel}>朝向阳光更强的位置走 8 分钟</Text>
+      </View>
+      <Text style={styles.sessionCopy}>当前为模拟地图。真机接定位后，会根据用户住址和太阳方向生成路线。</Text>
+      <Pressable style={styles.sessionCompleteButton} onPress={() => {
+        collectTodayStamp("morning-map", "晨间路线");
+        setTodayRoute("home");
+      }}>
+        <Text style={styles.sessionCompleteText}>完成晨间路线</Text>
+      </Pressable>
+    </View>
+  );
+
+  const openProfilePanel = (panel: Exclude<ProfilePanel, null>) => {
+    if (panel === "editName") setProfileNameDraft(vitoraState.profileSurface.displayName);
+    setProfilePanel(panel);
+  };
+
+  const saveProfileName = () => {
+    const displayName = profileNameDraft.trim() || vitoraState.profileSurface.displayName;
+    applyVitoraRuntimeState({
+      ...vitoraState,
+      updatedAt: new Date().toISOString(),
+      profileSurface: {
+        ...vitoraState.profileSurface,
+        displayName
+      }
+    });
+    setProfilePanel(null);
+    setToast("昵称已更新");
+  };
+
+  const renderProfilePanelRows = () => {
+    if (profilePanel === "inbox") {
+      return vitoraState.profileSurface.inboxEvents.map((event) => (
+        <View key={event.id} style={styles.profilePanelRow}>
+          <View style={[styles.profilePanelDot, event.unread && styles.profilePanelDotUnread]} />
+          <View style={styles.profilePanelCopy}>
+            <Text style={styles.profilePanelRowTitle}>{event.time} · {event.title}</Text>
+            <Text style={styles.profilePanelRowBody}>{event.body}</Text>
+          </View>
+        </View>
+      ));
+    }
+    if (profilePanel === "stamps") {
+      return (
+        <View style={styles.profileStampGrid}>
+          {vitoraState.achievementStamps.map((stamp) => (
+            <Pressable
+              key={stamp.stampId}
+              style={[styles.profileStampItem, stamp.lockedReason && styles.profileStampItemLocked]}
+              onPress={() => openStampSheet(stamp, "detail")}
+            >
+              {renderStampArt(stamp.tone)}
+              <Text style={styles.profileStampGlyph}>{stampGlyphFor(stamp)}</Text>
+              <Text style={styles.profileStampTitle}>{stamp.title}</Text>
+              <Text style={styles.profileStampRule} numberOfLines={3}>{stamp.lockedReason ?? stamp.reason}</Text>
+            </Pressable>
+          ))}
+        </View>
+      );
+    }
+    const rows =
+      profilePanel === "archive"
+        ? [
+          ["身体人格", `${vitoraState.profile.personaName} · ${vitoraState.profile.personaType}`],
+          ["人格码", vitoraState.profile.rawCode],
+          ["建档时间", vitoraState.profile.createdAt.slice(0, 10)],
+          ["预测模型", "规则预测模型 v1"]
+        ]
+        : profilePanel === "watch"
+          ? [
+            ["连接状态", vitoraState.profileSurface.watchStatus.title],
+            ["同步说明", vitoraState.profileSurface.watchStatus.body],
+            ["最近同步", vitoraState.profileSurface.watchStatus.lastSync],
+            ["读取字段", "睡眠、步数、HRV、静息心率、体温变化、周期"]
+          ]
+          : profilePanel === "vip"
+            ? [
+              ["TIDE Plus", `新用户 ${vitoraState.profileSurface.membershipStatus.trialDays} 天免费试用`],
+              ["权益", vitoraState.profileSurface.membershipStatus.benefits.join(" / ")],
+              ["状态", vitoraState.profileSurface.membershipStatus.tier === "plus" ? "已开通" : "未开通"],
+              ["说明", "当前为模拟会员页，不接真实支付。"]
+            ]
+            : [
+              ["数据源", vitoraState.profileSurface.watchStatus.title],
+              ["非医疗建议", "AI 翻译基于历史数据与实时状态生成，仅供参考。"],
+              ["运行 ID", `${vitoraState.prediction.predictionId}`],
+              ["主动关心", activeCareEvent.careEventId]
+            ];
+    return rows.map(([label, value]) => (
+      <View key={label} style={styles.profilePanelRow}>
+        <Text style={styles.profilePanelRowTitle}>{label}</Text>
+        <Text style={styles.profilePanelRowBody}>{value}</Text>
+      </View>
+    ));
+  };
+
+  const renderProfilePanel = () => {
+    if (!profilePanel) return null;
+    const titleMap: Record<Exclude<ProfilePanel, null>, string> = {
+      inbox: "消息中心",
+      info: "数据说明",
+      editName: "编辑昵称",
+      stamps: "邮戳收藏",
+      archive: "个人档案",
+      watch: "WATCH 应用",
+      vip: "TIDE Plus"
+    };
+    return (
+      <View style={styles.profilePanelLayer}>
+        <Pressable style={styles.profilePanelBackdrop} onPress={() => setProfilePanel(null)} />
+        <View style={styles.profilePanel}>
+          <View style={styles.profilePanelHeader}>
+            <Text style={styles.profilePanelTitle}>{titleMap[profilePanel]}</Text>
+            <Pressable onPress={() => setProfilePanel(null)}>
+              <Text style={styles.profilePanelClose}>×</Text>
+            </Pressable>
+          </View>
+          {profilePanel === "editName" ? (
+            <>
+              <TextInput
+                value={profileNameDraft}
+                onChangeText={setProfileNameDraft}
+                style={styles.profileNameInput}
+                placeholder="输入昵称"
+                placeholderTextColor="#9aa0aa"
+              />
+              <Text style={styles.profilePanelHint}>昵称只用于展示，不会覆盖你的身体人格类型。</Text>
+              <Pressable style={styles.profilePanelPrimary} onPress={saveProfileName}>
+                <Text style={styles.profilePanelPrimaryText}>保存</Text>
+              </Pressable>
+            </>
+          ) : (
+            <ScrollView style={styles.profilePanelScroll} contentContainerStyle={styles.profilePanelScrollContent}>
+              {renderProfilePanelRows()}
+            </ScrollView>
+          )}
+        </View>
+      </View>
+    );
+  };
 
   const renderProfile = () => (
     <View style={styles.nativeProfileLayer}>
@@ -1603,51 +2878,66 @@ export default function App() {
         <Pressable style={styles.nativeProfileClose} onPress={() => setProfileOpen(false)}>
           <Text style={styles.nativeProfileCloseText}>×</Text>
         </Pressable>
-        <Text style={styles.nativeProfileMini}>✉   ◎</Text>
+        <View style={styles.nativeProfileMini}>
+          <Pressable style={styles.nativeProfileIconButton} onPress={() => openProfilePanel("inbox")}>
+            <Text style={styles.nativeProfileMiniText}>✉</Text>
+          </Pressable>
+          <Pressable style={styles.nativeProfileIconButton} onPress={() => openProfilePanel("info")}>
+            <Text style={styles.nativeProfileMiniText}>◎</Text>
+          </Pressable>
+        </View>
         <View style={styles.nativeProfileHero}>
-          <View>
-            <Text style={styles.nativeProfileName}>Scarlett 🐰</Text>
-            <Text style={styles.nativeProfileSub}>与相遇的第 84 天</Text>
-          </View>
+          <Pressable onPress={() => openProfilePanel("editName")}>
+            <Text style={styles.nativeProfileName}>{vitoraState.profileSurface.displayName}</Text>
+            <Text style={styles.nativeProfileSub}>与你相遇第 {vitoraState.profileSurface.encounterDays} 天</Text>
+            <Text style={styles.nativeProfilePersona}>{vitoraState.profile.personaName} · {vitoraState.profile.personaType}</Text>
+          </Pressable>
           <View style={styles.nativeAvatar}>
             <Text style={styles.nativeAvatarText}>♟</Text>
           </View>
         </View>
-        <View style={styles.nativePlus}>
+        <Pressable style={styles.nativePlus} onPress={() => openProfilePanel("stamps")}>
           <View>
-            <Text style={styles.nativePlusTitle}>TIDE Plus</Text>
-            <Text style={styles.nativePlusSub}>新用户 7 天免费试用</Text>
+            <Text style={styles.nativePlusTitle}>{vitoraState.profile.mythicReference} 邮票册</Text>
+            <Text style={styles.nativePlusSub}>{vitoraState.profile.oneLine}</Text>
           </View>
-          <View style={styles.nativeMemberPill}>
+          <Pressable style={styles.nativeMemberPill} onPress={() => openProfilePanel("vip")}>
             <Text style={styles.nativeMemberText}>开通会员</Text>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
         <View style={styles.nativeProfileTiles}>
-          <View style={styles.nativeProfileTile}><Text style={styles.nativeProfileTileText}>♡{`\n`}收藏</Text></View>
-          <View style={styles.nativeProfileTile}><Text style={styles.nativeProfileTileText}>个人档案</Text></View>
+          <Pressable style={styles.nativeProfileTile} onPress={() => openProfilePanel("stamps")}><Text style={styles.nativeProfileTileText}>♡{`\n`}收藏</Text></Pressable>
+          <Pressable style={styles.nativeProfileTile} onPress={() => openProfilePanel("archive")}><Text style={styles.nativeProfileTileText}>个人档案</Text></Pressable>
         </View>
-        <View style={styles.nativeWatch}>
+        <Pressable style={styles.nativeWatch} onPress={() => openProfilePanel("watch")}>
           <Text style={styles.nativeWatchBox}>□</Text>
           <View>
             <Text style={styles.nativeWatchTitle}>WATCH 应用 ·</Text>
-            <Text style={styles.nativeWatchSub}>手腕上的身心健康伙伴</Text>
+            <Text style={styles.nativeWatchSub}>{vitoraState.profileSurface.watchStatus.body}</Text>
           </View>
           <Text style={styles.nativeWatchArrow}>›</Text>
-        </View>
+        </Pressable>
       </View>
+      {renderProfilePanel()}
     </View>
   );
 
   const renderNativeBody = () => {
     if (nativeTab === "health") return healthRoute === "detail" ? renderHealthDetail() : renderHealth();
-    if (nativeTab === "today") return todayRoute === "breathing" ? renderBreathingPractice() : renderToday();
+    if (nativeTab === "today") {
+      if (todayRoute === "breathing") return renderBreathingPractice();
+      if (todayRoute === "focusTimer") return renderTimedSession("focus");
+      if (todayRoute === "metabolismTimer") return renderTimedSession("metabolism");
+      if (todayRoute === "morningMap") return renderMorningMapGuide();
+      return renderToday();
+    }
     if (exploreRoute === "chat") return renderNativeChat();
     if (exploreRoute === "feedback") return renderFeedback();
     return renderExploreHome();
   };
 
   const showBottomNav = !(
-    (nativeTab === "today" && todayRoute === "breathing") ||
+    (nativeTab === "today" && todayRoute !== "home") ||
     (nativeTab === "explore" && (exploreRoute === "chat" || exploreRoute === "feedback")) ||
     (nativeTab === "health" && healthRoute === "detail")
   );
@@ -1730,6 +3020,7 @@ export default function App() {
           )}
           {profileOpen && renderProfile()}
           {renderReminderSheet()}
+          {renderStampRevealSheet()}
           {toast ? (
             <View style={styles.nativeToast}>
               <Text style={styles.nativeToastText}>{toast}</Text>
@@ -2282,16 +3573,248 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 17
   },
+  stampSheetLayer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 360,
+    justifyContent: "flex-end"
+  },
+  stampSheetScrim: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(18,20,24,0.48)"
+  },
+  stampSheet: {
+    minHeight: "72%",
+    maxHeight: "82%",
+    borderTopLeftRadius: 34,
+    borderTopRightRadius: 34,
+    paddingTop: 10,
+    paddingHorizontal: 24,
+    paddingBottom: 30,
+    overflow: "hidden",
+    backgroundColor: "#6f7a73",
+    shadowColor: "#000",
+    shadowOpacity: 0.28,
+    shadowRadius: 34,
+    shadowOffset: { width: 0, height: -12 }
+  },
+  stampSheetHandle: {
+    width: 48,
+    height: 5,
+    borderRadius: 3,
+    alignSelf: "center",
+    backgroundColor: "rgba(255,255,255,0.28)"
+  },
+  stampSheetTop: {
+    height: 52,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  stampSheetClose: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.34)"
+  },
+  stampSheetCloseText: {
+    color: "#fff",
+    fontSize: 28,
+    lineHeight: 31
+  },
+  stampSheetDots: {
+    flexDirection: "row",
+    gap: 10,
+    alignItems: "center"
+  },
+  stampSheetDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "rgba(255,255,255,0.14)"
+  },
+  stampSheetDotActive: {
+    backgroundColor: "#dcff63"
+  },
+  stampSheetHero: {
+    alignItems: "center",
+    marginTop: 4
+  },
+  stampFrame: {
+    width: 226,
+    height: 306,
+    alignItems: "center",
+    paddingTop: 34,
+    paddingHorizontal: 18,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.78)",
+    backgroundColor: "rgba(255,255,255,0.16)"
+  },
+  stampFrameSmall: {
+    transform: [{ scale: 0.92 }]
+  },
+  stampMonthPill: {
+    position: "absolute",
+    right: 13,
+    top: 13,
+    minWidth: 62,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 9,
+    backgroundColor: "rgba(255,255,255,0.22)"
+  },
+  stampMonthText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 10,
+    fontWeight: "900"
+  },
+  stampAssetPanel: {
+    width: 152,
+    height: 152,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 24
+  },
+  stampAssetGlyph: {
+    position: "absolute",
+    color: "rgba(255,255,255,0.96)",
+    fontSize: 30,
+    fontWeight: "900",
+    textShadowColor: "rgba(40,30,30,0.26)",
+    textShadowRadius: 5
+  },
+  stampFrameTitle: {
+    marginTop: 18,
+    color: "#fff",
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: "900",
+    textAlign: "center"
+  },
+  stampFrameFigure: {
+    marginTop: 3,
+    color: "rgba(255,255,255,0.72)",
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  stampSheetRevealCopy: {
+    marginTop: 22,
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 15,
+    textAlign: "center",
+    fontWeight: "800"
+  },
+  stampSheetDetails: {
+    marginTop: 18
+  },
+  stampSheetKicker: {
+    color: "#dcff63",
+    fontSize: 13,
+    fontWeight: "900",
+    letterSpacing: 1
+  },
+  stampSheetTitle: {
+    marginTop: 5,
+    color: "#fff",
+    fontSize: 27,
+    lineHeight: 32,
+    fontWeight: "900"
+  },
+  stampSheetReason: {
+    marginTop: 8,
+    color: "rgba(255,255,255,0.82)",
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: "700"
+  },
+  stampSheetMetaGrid: {
+    marginTop: 14,
+    flexDirection: "row",
+    gap: 12
+  },
+  stampSheetMeta: {
+    flex: 1,
+    minHeight: 70,
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: "rgba(255,255,255,0.12)"
+  },
+  stampSheetMetaLabel: {
+    color: "rgba(255,255,255,0.54)",
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  stampSheetMetaValue: {
+    marginTop: 6,
+    color: "#fff",
+    fontSize: 14,
+    lineHeight: 19,
+    fontWeight: "900"
+  },
+  stampEvidenceList: {
+    marginTop: 12,
+    gap: 5
+  },
+  stampEvidenceText: {
+    color: "rgba(255,255,255,0.70)",
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: "700"
+  },
+  stampSheetActions: {
+    marginTop: 18,
+    flexDirection: "row",
+    gap: 12
+  },
+  stampSheetSecondary: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.20)"
+  },
+  stampSheetSecondaryText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  stampSheetPrimary: {
+    flex: 1,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.88)"
+  },
+  stampSheetPrimaryText: {
+    color: "#27302d",
+    fontSize: 16,
+    fontWeight: "900"
+  },
   nativeHealth: {
     flex: 1,
     backgroundColor: "#ffffff"
   },
   nativeHealthContent: {
     minHeight: 1300,
-    paddingTop: 104,
+    paddingTop: 42,
     paddingHorizontal: 24,
     paddingBottom: 230,
-    backgroundColor: "#f6f5fb"
+    backgroundColor: "#f4f2fb"
   },
   nativeHello: {
     flexDirection: "row",
@@ -2331,9 +3854,40 @@ const styles = StyleSheet.create({
     textShadowRadius: 5,
     textShadowOffset: { width: 0, height: 3 }
   },
+  nativeHealthPersona: {
+    marginLeft: 10,
+    marginTop: 8,
+    color: "rgba(81,87,98,0.72)",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "900"
+  },
+  nativeTopicRail: {
+    marginTop: 12,
+    marginHorizontal: 6,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8
+  },
+  nativeTopicChip: {
+    minHeight: 32,
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    borderWidth: 1,
+    borderColor: "rgba(220,216,241,0.90)"
+  },
+  nativeTopicText: {
+    color: "#616979",
+    fontSize: 12,
+    fontWeight: "900"
+  },
   nativeStampStage: {
     position: "relative",
-    height: 282
+    height: 248,
+    marginTop: 4
   },
   nativeHealthStamp: {
     position: "absolute",
@@ -2348,6 +3902,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 7,
     shadowOffset: { width: 0, height: 5 }
+  },
+  nativeHealthStampLocked: {
+    opacity: 0.48
+  },
+  nativeStampMyth: {
+    position: "absolute",
+    top: 28,
+    color: "rgba(255,255,255,0.94)",
+    fontSize: 26,
+    fontWeight: "900",
+    textShadowColor: "rgba(58,40,38,0.28)",
+    textShadowRadius: 4
+  },
+  nativeStampLockedText: {
+    position: "absolute",
+    right: 7,
+    top: 7,
+    color: "#a4a4aa",
+    fontSize: 9,
+    fontWeight: "900"
   },
   nativeStampPerfRow: {
     position: "absolute",
@@ -2552,6 +4126,15 @@ const styles = StyleSheet.create({
   nativeStampC: { right: 4, top: 72, width: 116, transform: [{ rotate: "-8deg" }] },
   nativeStampD: { left: 86, top: 158, width: 94 },
   nativeStampE: { left: 204, top: 174, width: 94 },
+  nativePeriodExperience: {
+    marginTop: 4,
+    marginBottom: 10,
+    marginHorizontal: 8,
+    color: "#8f949b",
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: "800"
+  },
   nativeWeekCard: {
     overflow: "hidden",
     borderRadius: 24,
@@ -2561,8 +4144,28 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 8 }
   },
+  nativeWeekHeader: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#aa9cdb"
+  },
+  nativeWeekKicker: {
+    color: "rgba(255,255,255,0.72)",
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  nativeWeekTitle: {
+    marginTop: 2,
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "900"
+  },
   nativeWeekTop: {
-    minHeight: 150,
+    minHeight: 188,
     padding: 16,
     flexDirection: "row",
     backgroundColor: "#a997db"
@@ -2573,24 +4176,32 @@ const styles = StyleSheet.create({
   nativeCountRow: {
     flexDirection: "row",
     alignItems: "flex-end",
-    gap: 8,
-    marginBottom: 16
+    gap: 22,
+    marginBottom: 12
   },
   nativeCount: {
     color: "#fff",
-    fontSize: 40,
+    fontSize: 42,
     fontWeight: "900"
   },
   nativeCountLabel: {
     color: "rgba(255,255,255,0.82)",
-    fontSize: 13,
-    marginBottom: 7
+    fontSize: 12,
+    marginTop: -4,
+    fontWeight: "900"
   },
   nativeHeatmap: {
     width: 164,
+    gap: 6
+  },
+  nativeHeatmapRow: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  nativeHeatmapCells: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 7
+    gap: 6
   },
   nativeHeatCell: {
     width: 12,
@@ -2603,6 +4214,66 @@ const styles = StyleSheet.create({
   },
   nativeHeatCellDark: {
     backgroundColor: "#2f7d45"
+  },
+  nativeHeatCellHot: {
+    shadowColor: "#61ff79",
+    shadowOpacity: 0.42,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 0 }
+  },
+  nativeHeatLegend: {
+    marginTop: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8
+  },
+  nativeHeatLegendText: {
+    color: "rgba(255,255,255,0.76)",
+    fontSize: 10,
+    fontWeight: "800"
+  },
+  heatmapRangeControl: {
+    height: 30,
+    borderRadius: 15,
+    paddingHorizontal: 6,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.24)"
+  },
+  heatmapRangeArrow: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.30)"
+  },
+  heatmapRangeArrowText: {
+    color: "#fff",
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: "900"
+  },
+  heatmapRangeLabel: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  heatLegendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4
+  },
+  heatLegendDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4
+  },
+  nativeRadarWrap: {
+    width: 138,
+    alignItems: "center",
+    justifyContent: "center"
   },
   nativeRadar: {
     flex: 0.9,
@@ -2684,9 +4355,17 @@ const styles = StyleSheet.create({
   },
   nativeMetricValue: {
     color: "#4b5758",
-    fontSize: 62,
-    lineHeight: 72,
+    fontSize: 56,
+    lineHeight: 62,
     fontWeight: "900"
+  },
+  nativeMetricCopy: {
+    marginTop: 4,
+    color: "rgba(75,87,88,0.58)",
+    fontSize: 12,
+    lineHeight: 16,
+    textAlign: "center",
+    fontWeight: "800"
   },
   nativeExtraCard: {
     marginTop: 14,
@@ -2718,7 +4397,7 @@ const styles = StyleSheet.create({
   healthDetailContent: {
     paddingTop: 48,
     paddingHorizontal: 22,
-    paddingBottom: 54,
+    paddingBottom: 132,
     minHeight: 1120
   },
   healthDetailHeader: {
@@ -2748,6 +4427,24 @@ const styles = StyleSheet.create({
     color: "#202233",
     fontSize: 22,
     fontWeight: "900"
+  },
+  healthDateSwitcher: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14
+  },
+  healthDateArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  healthDateArrowText: {
+    color: "#202233",
+    fontSize: 35,
+    lineHeight: 35,
+    fontWeight: "700"
   },
   healthHeaderSpacer: {
     width: 54
@@ -2786,12 +4483,19 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   healthDetailTabs: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    bottom: 18,
     height: 42,
-    marginBottom: 18,
     borderRadius: 23,
     padding: 4,
     flexDirection: "row",
-    backgroundColor: "#eeebf7"
+    backgroundColor: "#eeebf7",
+    shadowColor: "#c9c5df",
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 }
   },
   healthDetailTabButton: {
     flex: 1,
@@ -2815,6 +4519,88 @@ const styles = StyleSheet.create({
     marginTop: 6,
     alignItems: "center",
     justifyContent: "center"
+  },
+  healthRadarGraph: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  healthRadarGraphCompact: {
+    transform: [{ scale: 0.96 }]
+  },
+  healthRadarRing: {
+    position: "absolute",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.62)"
+  },
+  healthRadarAxis: {
+    position: "absolute",
+    height: 2,
+    backgroundColor: "rgba(255,255,255,0.42)"
+  },
+  healthRadarBlob: {
+    position: "absolute",
+    width: 126,
+    height: 96,
+    borderRadius: 34,
+    backgroundColor: "rgba(79,216,137,0.22)",
+    borderWidth: 3,
+    borderColor: "#2fd27a",
+    transform: [{ rotate: "19deg" }]
+  },
+  healthRadarBlobCompact: {
+    width: 70,
+    height: 54,
+    borderRadius: 22,
+    borderWidth: 2
+  },
+  healthRadarDot: {
+    position: "absolute",
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#3ee878",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.86)"
+  },
+  healthRadarDotCompact: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    borderWidth: 1
+  },
+  healthRadarLabel: {
+    position: "absolute",
+    width: 44,
+    color: "#7c5cff",
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "900"
+  },
+  healthRadarMetricLayer: {
+    position: "absolute",
+    left: 0,
+    top: 0
+  },
+  healthRadarCenterScore: {
+    zIndex: 2,
+    width: 78,
+    height: 78,
+    borderRadius: 39,
+    overflow: "hidden",
+    textAlign: "center",
+    paddingTop: 11,
+    color: "#fff",
+    backgroundColor: "rgba(96,221,139,0.28)",
+    fontSize: 40,
+    fontWeight: "900"
+  },
+  healthRadarCenterScoreCompact: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    paddingTop: 10,
+    fontSize: 22
   },
   summaryRadarCircle: {
     width: 190,
@@ -2931,8 +4717,38 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 24,
     padding: 18,
-    flexDirection: "row",
     backgroundColor: "#aa9cdb"
+  },
+  summaryHeatHeader: {
+    marginBottom: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  summaryHeatTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "900"
+  },
+  summaryHeatGridRows: {
+    gap: 10
+  },
+  summaryHeatGridRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12
+  },
+  summaryHeatGridLabel: {
+    width: 42,
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 18,
+    fontWeight: "800"
+  },
+  summaryHeatGridCells: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7
   },
   summaryHeatLabels: {
     width: 58,
@@ -2956,6 +4772,24 @@ const styles = StyleSheet.create({
   },
   summaryHeatCellDark: {
     backgroundColor: "#2a7b43"
+  },
+  summaryHeatCellHot: {
+    shadowColor: "#61ff79",
+    shadowOpacity: 0.42,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 0 }
+  },
+  summaryHeatLegend: {
+    marginTop: 14,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 14
+  },
+  summaryHeatLegendText: {
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 12,
+    fontWeight: "800"
   },
   healthAdviceCard: {
     marginTop: 22,
@@ -3168,9 +5002,117 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   cycleRingCard: {
-    height: 330,
+    height: 338,
     alignItems: "center",
     justifyContent: "center"
+  },
+  cycleWheelHeader: {
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 8
+  },
+  cycleWheelPhase: {
+    color: "#111827",
+    fontSize: 24,
+    fontWeight: "900"
+  },
+  cycleWheelNext: {
+    marginTop: 6,
+    color: "#9294a3",
+    fontSize: 17,
+    fontWeight: "800"
+  },
+  cycleWheel: {
+    position: "relative",
+    width: 292,
+    height: 292,
+    borderRadius: 146,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(246,242,255,0.72)"
+  },
+  cycleWheelInner: {
+    width: 190,
+    height: 190,
+    borderRadius: 95,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,237,249,0.68)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.78)"
+  },
+  cycleWheelInnerIcon: {
+    color: "rgba(236,87,148,0.48)",
+    fontSize: 54
+  },
+  cycleWheelDay: {
+    position: "absolute",
+    width: 28,
+    height: 28,
+    borderRadius: 7,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.82)"
+  },
+  cycleWheelDayMenstrual: {
+    backgroundColor: "#ef2f8c"
+  },
+  cycleWheelDayFollicular: {
+    backgroundColor: "#32c9bd"
+  },
+  cycleWheelDayOvulation: {
+    backgroundColor: "#8d63ff"
+  },
+  cycleWheelDayLuteal: {
+    backgroundColor: "#ffbd42"
+  },
+  cycleWheelDayFuture: {
+    backgroundColor: "rgba(255,255,255,0.34)",
+    borderColor: "rgba(255,255,255,0.56)"
+  },
+  cycleWheelDayCurrent: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    zIndex: 4,
+    shadowColor: "#9b7cff",
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 0 }
+  },
+  cycleWheelCurrentGlow: {
+    position: "absolute",
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    backgroundColor: "rgba(255,255,255,0.34)"
+  },
+  cycleWheelDayText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 13,
+    fontWeight: "900"
+  },
+  cycleWheelDayTextCurrent: {
+    color: "#fff",
+    fontSize: 24
+  },
+  cycleWheelPhaseLabel: {
+    position: "absolute",
+    color: "#8f6bff",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  cycleWheelPhaseLeft: {
+    left: -38,
+    top: 136
+  },
+  cycleWheelPhaseRight: {
+    right: -38,
+    top: 136
+  },
+  cycleWheelPhaseBottom: {
+    bottom: -34
   },
   cycleRing: {
     width: 212,
@@ -3647,6 +5589,19 @@ const styles = StyleSheet.create({
     fontSize: 44
   },
   nativeProfileMini: {
+    position: "absolute",
+    left: 26,
+    top: 72,
+    flexDirection: "row",
+    gap: 24
+  },
+  nativeProfileIconButton: {
+    width: 42,
+    height: 42,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  nativeProfileMiniText: {
     color: "#24252a",
     fontSize: 28
   },
@@ -3667,6 +5622,12 @@ const styles = StyleSheet.create({
     color: "#8d8b96",
     fontSize: 22,
     fontWeight: "900"
+  },
+  nativeProfilePersona: {
+    marginTop: 8,
+    color: "#a8a7b0",
+    fontSize: 14,
+    fontWeight: "800"
   },
   nativeAvatar: {
     width: 88,
@@ -3759,92 +5720,380 @@ const styles = StyleSheet.create({
     color: "#aaa",
     fontSize: 32
   },
+  profilePanelLayer: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 30,
+    justifyContent: "flex-end"
+  },
+  profilePanelBackdrop: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(18,20,28,0.30)"
+  },
+  profilePanel: {
+    maxHeight: "68%",
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingTop: 20,
+    paddingHorizontal: 22,
+    paddingBottom: 28,
+    backgroundColor: "#fff"
+  },
+  profilePanelHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12
+  },
+  profilePanelTitle: {
+    color: "#111827",
+    fontSize: 24,
+    fontWeight: "900"
+  },
+  profilePanelClose: {
+    color: "#24252a",
+    fontSize: 30,
+    fontWeight: "600"
+  },
+  profilePanelScroll: {
+    maxHeight: 430
+  },
+  profilePanelScrollContent: {
+    paddingBottom: 8
+  },
+  profilePanelRow: {
+    minHeight: 66,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    backgroundColor: "#f7f6fb"
+  },
+  profilePanelDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "#cfd4dd"
+  },
+  profilePanelDotUnread: {
+    backgroundColor: "#7d5cff"
+  },
+  profilePanelCopy: {
+    flex: 1
+  },
+  profilePanelRowTitle: {
+    color: "#1d2330",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  profilePanelRowBody: {
+    flex: 1,
+    marginTop: 3,
+    color: "#6f7684",
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "700"
+  },
+  profileNameInput: {
+    height: 54,
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    color: "#111827",
+    backgroundColor: "#f2f0f8",
+    fontSize: 20,
+    fontWeight: "800"
+  },
+  profilePanelHint: {
+    marginTop: 10,
+    color: "#8b90a0",
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: "700"
+  },
+  profilePanelPrimary: {
+    height: 50,
+    marginTop: 18,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#202633"
+  },
+  profilePanelPrimaryText: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "900"
+  },
+  profileStampGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12
+  },
+  profileStampItem: {
+    width: "47%",
+    minHeight: 196,
+    borderRadius: 18,
+    alignItems: "center",
+    padding: 14,
+    backgroundColor: "#f7f6fb"
+  },
+  profileStampItemLocked: {
+    opacity: 0.55
+  },
+  profileStampGlyph: {
+    position: "absolute",
+    top: 32,
+    color: "rgba(255,255,255,0.95)",
+    fontSize: 24,
+    fontWeight: "900"
+  },
+  profileStampTitle: {
+    marginTop: 10,
+    color: "#1d2330",
+    fontSize: 16,
+    fontWeight: "900"
+  },
+  profileStampRule: {
+    marginTop: 6,
+    color: "#707785",
+    fontSize: 12,
+    lineHeight: 17,
+    textAlign: "center",
+    fontWeight: "700"
+  },
   nativeToday: {
     flex: 1,
     backgroundColor: "#f8f6f5"
   },
   nativeTodayContent: {
-    paddingTop: 82,
-    paddingHorizontal: 20,
-    paddingBottom: 210,
-    minHeight: 860
+    paddingTop: 68,
+    paddingHorizontal: 18,
+    paddingBottom: 190,
+    minHeight: 900,
+    position: "relative"
   },
-  todayChipRow: {
-    height: 72,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 8,
-    marginBottom: 14
+  todayNavRail: {
+    position: "relative",
+    height: 88,
+    marginHorizontal: -18,
+    marginBottom: 8
   },
-  todayChip: {
-    flex: 1,
-    height: 66,
-    borderRadius: 33,
+  todayNavContent: {
+    paddingHorizontal: 48,
+    gap: 12,
+    alignItems: "center"
+  },
+  todayNavFade: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 42,
+    zIndex: 6,
+    overflow: "hidden"
+  },
+  todayNavFadeLeft: {
+    left: 0
+  },
+  todayNavFadeRight: {
+    right: 0
+  },
+  todayNavFadeSegment: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 10,
+    backgroundColor: "#f8f6f5"
+  },
+  todayNavCircle: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "visible",
     backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.92)",
     shadowColor: "#d9d7dc",
     shadowOpacity: 0.22,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 }
   },
-  todayChipActive: {
-    backgroundColor: "#e8f3ff"
+  todayNavCircleActive: {
+    backgroundColor: "#e7f3ff",
+    shadowColor: "#b7d8ff",
+    shadowOpacity: 0.48,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    borderColor: "rgba(255,255,255,0.98)"
   },
-  todayChipLabel: {
+  todayNavAlertDot: {
+    position: "absolute",
+    top: 12,
+    right: 13,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ff4a53"
+  },
+  todayNavLabel: {
     color: "#666c75",
     fontSize: 13,
     fontWeight: "900"
   },
-  todayChipValue: {
+  todayNavLabelActive: {
+    color: "#5f6570"
+  },
+  todayNavValue: {
     marginTop: 3,
     color: "#111826",
     fontSize: 19,
-    fontWeight: "900"
+    lineHeight: 23,
+    fontWeight: "900",
+    maxWidth: 60
+  },
+  todayNavValueActive: {
+    color: "#111826"
+  },
+  todayArtworkCard: {
+    width: "100%",
+    borderRadius: 36,
+    overflow: "hidden",
+    backgroundColor: "#f8f6f5",
+    shadowColor: "#d2cbd1",
+    shadowOpacity: 0.18,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 10 }
+  },
+  todayArtworkPressable: {
+    width: "100%"
+  },
+  todayArtworkImage: {
+    width: "100%"
+  },
+  todayArtworkImageRadius: {
+    borderRadius: 36
   },
   todayMainCard: {
-    minHeight: 468,
-    borderRadius: 34,
-    padding: 22,
+    minHeight: 584,
+    borderRadius: 36,
+    padding: 24,
+    position: "relative",
     overflow: "hidden",
     shadowColor: "#d2cbd1",
     shadowOpacity: 0.28,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 12 }
   },
+  todayMainCardSleep: {
+    minHeight: 472,
+    paddingVertical: 22
+  },
+  todayLayeredPressable: {
+    zIndex: 4
+  },
   todayCard_energy: {
-    backgroundColor: "#f5bd47"
+    backgroundColor: "transparent"
   },
   todayCard_sleep: {
-    backgroundColor: "#d0e8ff"
+    backgroundColor: "transparent"
+  },
+  todayCard_cycle: {
+    backgroundColor: "transparent"
   },
   todayCard_focus: {
-    backgroundColor: "#dee6fb"
+    backgroundColor: "transparent"
   },
   todayCard_metabolism: {
-    backgroundColor: "#efb73d"
+    backgroundColor: "transparent"
   },
   todayCard_morning: {
-    backgroundColor: "#eee3dc"
+    backgroundColor: "transparent"
+  },
+  todayToneBase: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0
+  },
+  todayToneTopWash: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 218,
+    opacity: 0.82
+  },
+  todayToneBottomGlow: {
+    position: "absolute",
+    left: -18,
+    right: -18,
+    bottom: -18,
+    height: 176,
+    borderTopLeftRadius: 120,
+    borderTopRightRadius: 120,
+    opacity: 0.88
+  },
+  todayToneBottomGlowStrong: {
+    position: "absolute",
+    left: 42,
+    right: 42,
+    bottom: -10,
+    height: 78,
+    borderTopLeftRadius: 80,
+    borderTopRightRadius: 80,
+    opacity: 0.72
   },
   todayCardHeader: {
-    minHeight: 98,
+    minHeight: 124,
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12
+    gap: 12,
+    zIndex: 4
+  },
+  todayCardHeaderCopy: {
+    flex: 1
   },
   todayCardTitle: {
     color: "#fff",
-    fontSize: 42,
-    lineHeight: 48,
+    fontSize: 39,
+    lineHeight: 44,
+    fontWeight: "900"
+  },
+  todayCycleTitleRow: {
+    minHeight: 52,
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 5
+  },
+  todayCycleTitleDay: {
+    color: "#9b7cff",
+    fontSize: 40,
+    lineHeight: 46,
+    fontWeight: "900"
+  },
+  todayCycleTitleUnit: {
+    color: "#142033",
+    fontSize: 19,
+    lineHeight: 28,
     fontWeight: "900"
   },
   todayCardSubtitle: {
-    maxWidth: 246,
+    maxWidth: 286,
     marginTop: 8,
     color: "rgba(255,255,255,0.90)",
-    fontSize: 17,
-    lineHeight: 24,
+    fontSize: 15,
+    lineHeight: 21,
     fontWeight: "800"
   },
   todayMorePill: {
@@ -3863,8 +6112,15 @@ const styles = StyleSheet.create({
   },
   todaySunVisual: {
     position: "relative",
-    height: 238,
-    justifyContent: "center"
+    height: 228,
+    justifyContent: "flex-start",
+    zIndex: 4
+  },
+  todayDotMatrixScore: {
+    position: "absolute",
+    top: 4,
+    left: 0,
+    right: 0
   },
   todayDotScore: {
     color: "#fff",
@@ -3874,6 +6130,10 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   todayDotSub: {
+    position: "absolute",
+    top: 74,
+    left: 0,
+    right: 0,
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
@@ -3881,13 +6141,13 @@ const styles = StyleSheet.create({
   },
   todaySunArc: {
     position: "absolute",
-    left: 72,
-    right: 72,
-    top: 122,
-    height: 82,
-    borderTopWidth: 5,
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
+    left: 58,
+    right: 58,
+    top: 116,
+    height: 76,
+    borderTopWidth: 4,
+    borderLeftWidth: 4,
+    borderRightWidth: 4,
     borderColor: "#fff",
     borderTopLeftRadius: 120,
     borderTopRightRadius: 120
@@ -3899,61 +6159,298 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     backgroundColor: "#fff"
   },
+  todaySunHorizon: {
+    position: "absolute",
+    left: 18,
+    right: 18,
+    top: 188,
+    height: 2,
+    backgroundColor: "rgba(255,255,255,0.55)"
+  },
   todaySunTime: {
     position: "absolute",
-    bottom: 22,
+    bottom: 4,
     color: "#fff",
     fontSize: 20,
     lineHeight: 24,
     textAlign: "center"
   },
   todaySleepVisual: {
-    height: 238,
-    justifyContent: "center"
+    height: 246,
+    justifyContent: "flex-start",
+    zIndex: 4
+  },
+  todaySleepPanel: {
+    height: 62,
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255,255,255,0.16)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)"
+  },
+  todaySleepTotalRow: {
+    flexDirection: "row",
+    alignItems: "flex-end"
+  },
+  todaySleepHourUnit: {
+    color: "#fff",
+    fontSize: 22,
+    marginLeft: 6,
+    marginBottom: 2,
+    fontWeight: "300"
+  },
+  todaySleepSmallLabel: {
+    marginTop: 4,
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 11,
+    fontWeight: "800"
+  },
+  todaySleepQuality: {
+    alignItems: "flex-end"
+  },
+  todaySleepQualityLabel: {
+    color: "rgba(255,255,255,0.78)",
+    fontSize: 13,
+    fontWeight: "800"
+  },
+  todaySleepQualityValue: {
+    marginTop: 3,
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "900"
   },
   todaySleepChart: {
-    height: 108,
+    height: 76,
+    marginTop: 8,
     flexDirection: "row",
     alignItems: "flex-end",
     justifyContent: "center",
     gap: 7,
-    borderRadius: 20,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.26)",
     backgroundColor: "rgba(255,255,255,0.12)",
     paddingHorizontal: 18,
-    paddingBottom: 20
+    paddingBottom: 10
   },
   todaySleepBar: {
-    width: 22,
+    width: 20,
     borderRadius: 10
   },
-  todaySleepTime: {
-    marginTop: 24,
+  todaySleepAdjustRow: {
+    height: 38,
+    marginTop: 8,
+    paddingHorizontal: 2,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
+  },
+  todaySleepAdjust: {
+    width: 52,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.88)",
+    shadowColor: "#fff",
+    shadowOpacity: 0.32,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 }
+  },
+  todaySleepAdjustText: {
+    color: "#19202a",
+    fontSize: 25,
+    lineHeight: 28,
+    fontWeight: "900"
+  },
+  todaySleepWindowText: {
+    color: "rgba(255,255,255,0.76)",
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  todaySleepTimeRow: {
+    height: 34,
+    marginTop: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 14
+  },
+  todaySleepTimeDots: {
     color: "#fff",
-    fontSize: 34,
-    lineHeight: 42,
-    textAlign: "center",
-    fontWeight: "300"
+    fontSize: 16,
+    letterSpacing: 3
+  },
+  todaySleepTimeText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: "900"
   },
   todaySleepHint: {
-    marginTop: 18,
+    marginTop: 0,
     color: "#eaff66",
-    fontSize: 17,
+    fontSize: 13,
+    lineHeight: 18,
     fontWeight: "900"
+  },
+  todayCycleVisual: {
+    height: 258,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 4
+  },
+  todayCyclePhaseTop: {
+    position: "absolute",
+    top: 0,
+    color: "#101622",
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "900"
+  },
+  todayCycleDial: {
+    width: 244,
+    height: 244,
+    borderRadius: 122,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(203,213,237,0.62)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.72)"
+  },
+  todayCycleInner: {
+    position: "absolute",
+    width: 176,
+    height: 176,
+    borderRadius: 88,
+    backgroundColor: "rgba(209,216,238,0.96)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.52)"
+  },
+  todayCycleDay: {
+    position: "absolute",
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.22)"
+  },
+  todayCycleDay_period: {
+    backgroundColor: "#ed2d91"
+  },
+  todayCycleDay_ovulation: {
+    backgroundColor: "rgba(165,128,226,0.72)"
+  },
+  todayCycleDay_active: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: "rgba(171,128,229,0.76)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.62)"
+  },
+  todayCycleDayText: {
+    color: "#fff",
+    fontSize: 11,
+    lineHeight: 13,
+    fontWeight: "900"
+  },
+  todayCycleDayText_active: {
+    fontSize: 18,
+    lineHeight: 22
+  },
+  todayCycleOrb: {
+    position: "absolute",
+    borderWidth: 3,
+    borderColor: "#f02e91",
+    backgroundColor: "rgba(255,255,255,0.70)"
+  },
+  todayCycleOrb_large: {
+    left: 54,
+    top: 104,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(240,46,145,0.42)"
+  },
+  todayCycleOrb_a: {
+    right: 54,
+    top: 76,
+    width: 38,
+    height: 38,
+    borderRadius: 19
+  },
+  todayCycleOrb_b: {
+    right: 44,
+    top: 130,
+    width: 34,
+    height: 34,
+    borderRadius: 17
+  },
+  todayCycleOrb_c: {
+    left: 112,
+    bottom: 44,
+    width: 30,
+    height: 30,
+    borderRadius: 15
+  },
+  todayCycleCurrentBadge: {
+    position: "absolute",
+    bottom: -14,
+    width: 58,
+    height: 42,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(178,132,225,0.80)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.52)"
+  },
+  todayCycleCurrentText: {
+    color: "#fff",
+    fontSize: 26,
+    lineHeight: 30,
+    fontWeight: "900"
+  },
+  todayCyclePhaseLabel: {
+    position: "absolute",
+    color: "#8f6eff",
+    fontSize: 17,
+    lineHeight: 22,
+    fontWeight: "900"
+  },
+  todayCyclePhaseLeft: {
+    left: 0,
+    top: 122
+  },
+  todayCyclePhaseRight: {
+    right: 0,
+    top: 136
+  },
+  todayCyclePhaseBottom: {
+    bottom: 0,
+    color: "#121212"
   },
   todayFocusVisual: {
-    height: 238,
-    justifyContent: "center"
+    height: 244,
+    justifyContent: "center",
+    zIndex: 4
   },
-  todayFocusMinutes: {
-    color: "#fff",
-    fontSize: 62,
-    textAlign: "center",
-    fontWeight: "900"
+  todayFocusDotRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "flex-end",
+    gap: 16
   },
   todayFocusUnit: {
-    fontSize: 33
+    color: "#fff",
+    fontSize: 30,
+    lineHeight: 34,
+    fontWeight: "900"
   },
   todayFocusTicks: {
     height: 106,
@@ -3976,16 +6473,21 @@ const styles = StyleSheet.create({
   todayFocusRange: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 18
+    paddingHorizontal: 10
   },
-  todayFocusRangeText: {
+  todayFocusAdjust: {
+    width: 62,
+    height: 42,
     overflow: "hidden",
-    borderRadius: 18,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.84)"
+  },
+  todayFocusAdjustText: {
     color: "#1f2430",
-    backgroundColor: "rgba(255,255,255,0.82)",
-    fontSize: 18,
+    fontSize: 28,
+    lineHeight: 31,
     fontWeight: "900"
   },
   todayFocusHint: {
@@ -3998,8 +6500,9 @@ const styles = StyleSheet.create({
   },
   todayMetabolismVisual: {
     position: "relative",
-    height: 238,
-    justifyContent: "center"
+    height: 244,
+    justifyContent: "center",
+    zIndex: 4
   },
   todayMetabolismValue: {
     color: "#fff",
@@ -4053,8 +6556,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   todayMorningVisual: {
-    height: 238,
-    justifyContent: "center"
+    height: 244,
+    justifyContent: "center",
+    zIndex: 4
   },
   todayMorningMap: {
     height: 180,
@@ -4089,6 +6593,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#edd857",
     transform: [{ rotate: "45deg" }]
   },
+  todayMorningGlow: {
+    position: "absolute",
+    right: 82,
+    top: 34,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "rgba(238,216,76,0.62)"
+  },
+  todayMorningSunBeam: {
+    position: "absolute",
+    right: 62,
+    top: 20,
+    width: 7,
+    height: 150,
+    borderRadius: 4,
+    backgroundColor: "rgba(255,228,97,0.72)",
+    transform: [{ rotate: "-4deg" }]
+  },
   todayMorningPlace: {
     position: "absolute",
     left: 54,
@@ -4118,12 +6641,17 @@ const styles = StyleSheet.create({
   todayCardAction: {
     alignSelf: "center",
     minWidth: 238,
-    height: 54,
-    borderRadius: 27,
+    height: 52,
+    borderRadius: 26,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    backgroundColor: "rgba(255,255,255,0.92)"
+    backgroundColor: "rgba(255,255,255,0.92)",
+    zIndex: 5,
+    shadowColor: "#fff",
+    shadowOpacity: 0.36,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 8 }
   },
   todayCardActionText: {
     color: "#1a202b",
@@ -4132,12 +6660,13 @@ const styles = StyleSheet.create({
   },
   todayMonitorCard: {
     width: "72%",
-    minHeight: 90,
+    height: 104,
     marginTop: 20,
+    marginBottom: 156,
     marginLeft: 18,
     borderRadius: 20,
     paddingHorizontal: 22,
-    paddingVertical: 16,
+    paddingVertical: 14,
     backgroundColor: "#d8d8d8"
   },
   todayMonitorTitle: {
@@ -4149,8 +6678,137 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: "#5b6067",
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 19,
     fontWeight: "800"
+  },
+  todayReferenceOverlay: {
+    position: "absolute",
+    top: -82,
+    left: -18,
+    right: -18,
+    height: 852,
+    zIndex: 30
+  },
+  todayReferenceImage: {
+    opacity: 1
+  },
+  todayReferenceOverlayImage: {
+    width: "100%",
+    height: "100%"
+  },
+  todayReferenceControls: {
+    position: "absolute",
+    right: 18,
+    bottom: 132,
+    flexDirection: "row",
+    gap: 8,
+    zIndex: 40
+  },
+  todayReferenceButton: {
+    minWidth: 46,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    backgroundColor: "rgba(16,18,22,0.72)"
+  },
+  todayReferenceButtonActive: {
+    backgroundColor: "rgba(118,138,255,0.88)"
+  },
+  todayReferenceButtonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "900"
+  },
+  sessionDotClock: {
+    marginTop: 18
+  },
+  sessionPage: {
+    flex: 1,
+    paddingTop: 58,
+    paddingHorizontal: 24,
+    overflow: "hidden"
+  },
+  sessionCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  sessionLargeClock: {
+    marginTop: 30
+  },
+  sessionCopy: {
+    marginTop: 24,
+    color: "rgba(28,32,38,0.72)",
+    fontSize: 18,
+    lineHeight: 28,
+    textAlign: "center",
+    fontWeight: "800"
+  },
+  sessionHeart: {
+    width: 138,
+    height: 124,
+    borderRadius: 62,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,214,91,0.48)"
+  },
+  sessionHeartText: {
+    color: "#fff",
+    fontSize: 42,
+    fontWeight: "900"
+  },
+  sessionFocusOrb: {
+    width: 132,
+    height: 132,
+    borderRadius: 66,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.24)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.42)"
+  },
+  sessionFocusText: {
+    color: "#fff",
+    fontSize: 48,
+    fontWeight: "900"
+  },
+  sessionCompleteButton: {
+    height: 58,
+    borderRadius: 29,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 34,
+    backgroundColor: "rgba(255,255,255,0.94)"
+  },
+  sessionCompleteText: {
+    color: "#18202a",
+    fontSize: 19,
+    fontWeight: "900"
+  },
+  morningGuidePage: {
+    backgroundColor: "#eee3df"
+  },
+  morningGuideMap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  morningGuideBeam: {
+    position: "absolute",
+    width: 10,
+    height: 250,
+    borderRadius: 5,
+    backgroundColor: "rgba(255,224,86,0.62)",
+    transform: [{ rotate: "-6deg" }]
+  },
+  morningGuideLabel: {
+    position: "absolute",
+    bottom: 96,
+    color: "#352b28",
+    fontSize: 18,
+    fontWeight: "900"
   },
   breathPractice: {
     flex: 1,

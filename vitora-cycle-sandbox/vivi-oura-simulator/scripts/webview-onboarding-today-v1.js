@@ -8,6 +8,7 @@
   const PERMISSION_KEY = "vivi:prediction:permissionsV1";
   const FEEDBACK_KEY = "vivi:prediction:feedbackV1";
   const BODY_PROFILE_KEY = "vivi:user:bodyProfileV1";
+  const COMPAT_BODY_PROFILE_KEY = "vitora_body_profile_v1";
   const CONTENT_KEY = "vivi:content:recommendationV1";
 
   let genTimer = null;
@@ -227,7 +228,22 @@
   function writeBodyProfile() {
     const profile = buildBodyProfileFromOnboarding();
     writeJson(BODY_PROFILE_KEY, profile);
+    writeJson(COMPAT_BODY_PROFILE_KEY, profile);
     return profile;
+  }
+
+  function postRuntimeToNative(open, completed) {
+    try {
+      window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
+        scope: "vitora-onboarding",
+        open,
+        completed,
+        profile: readJson(BODY_PROFILE_KEY, null) || readJson(COMPAT_BODY_PROFILE_KEY, null),
+        signals: readJson(SIGNAL_KEY, null),
+        content: readJson(CONTENT_KEY, null),
+        permissionState: readJson(PERMISSION_KEY, permissions()),
+      }));
+    } catch (_) {}
   }
 
   function syncFlowAnswersForPrediction() {
@@ -840,6 +856,7 @@
     syncFlowAnswersForPrediction();
     const prediction = applyPrediction(buildSignals());
     writeJson(ONBOARDING_KEY, { ...state, onboardingVersion: ONBOARDING_VERSION, completed: true, completedAt: Date.now() });
+    postRuntimeToNative(false, true);
     closeOnboarding();
     try {
       if (typeof switchTab === "function") switchTab("today");

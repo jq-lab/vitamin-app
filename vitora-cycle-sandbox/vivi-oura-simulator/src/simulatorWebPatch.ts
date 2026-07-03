@@ -212,16 +212,32 @@ export const SIMULATOR_WEB_PATCH = `
   }
 
   function postOnboardingState(force) {
+    function readJson(key, fallback) {
+      try {
+        var raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch (_) {
+        return fallback;
+      }
+    }
     var open = onboardingIsOpen();
     var completed = onboardingCompleted();
-    var signature = String(open) + ":" + String(completed);
+    var profile = readJson("vivi:user:bodyProfileV1", null) || readJson("vitora_body_profile_v1", null);
+    var signals = readJson("vivi:prediction:signalsV1", null);
+    var content = readJson("vivi:content:recommendationV1", null);
+    var permissionState = readJson("vivi:prediction:permissionsV1", null);
+    var signature = String(open) + ":" + String(completed) + ":" + String(profile && (profile.rawCode || profile.bodyCode)) + ":" + String(signals && signals.date);
     if (!force && signature === onboardingSignature) return;
     onboardingSignature = signature;
     try {
       window.ReactNativeWebView && window.ReactNativeWebView.postMessage(JSON.stringify({
         scope: "vitora-onboarding",
         open: open,
-        completed: completed
+        completed: completed,
+        profile: profile,
+        signals: signals,
+        content: content,
+        permissionState: permissionState
       }));
     } catch (_) {}
   }
@@ -421,6 +437,44 @@ export const SIMULATOR_WEB_PATCH = `
     cards.unshift(card);
     saveCards(cards);
     state.cardId = card.id;
+    return card;
+  }
+
+  function saveConversationStamp(card) {
+    var theme = themeById(state.themeId);
+    var now = new Date();
+    var month = now.toISOString().slice(0, 7);
+    var existing = [];
+    try {
+      existing = JSON.parse(localStorage.getItem("vivi:achievement:monthlyStampsV1") || "[]");
+    } catch (_) {
+      existing = [];
+    }
+    if (!Array.isArray(existing)) existing = [];
+    var stamp = {
+      schemaVersion: "AchievementStampV1",
+      stampId: "stamp-" + now.toISOString().slice(0, 10) + "-conversation-" + theme.id + "-" + now.getTime(),
+      profileId: "webview-profile",
+      snapshotId: "webview-snapshot-" + now.toISOString().slice(0, 10),
+      predictionId: "webview-prediction-" + now.toISOString().slice(0, 10),
+      month: month,
+      title: "对话回忆邮戳",
+      type: "steady_recovery",
+      tone: "sleepers",
+      source: "conversation_stamp",
+      sourceLabel: "探索对话 · " + theme.tag,
+      sourceId: theme.id,
+      assetKey: "stamp-conversation-dream",
+      mythicFigure: "对话回忆",
+      oilPaintingPrompt: "Oil painting postage stamp for a reflective Vitora conversation, antique paper, soft moonlight.",
+      awardRule: "完成一次探索对话，并保存对话主题与连续记录。",
+      evidenceLabel: "对话完成",
+      reason: "你完成了「" + theme.tag + "」探索，这次记录会进入你的健康邮戳收藏。",
+      evidence: ["主题=" + theme.tag, "cardId=" + (card && card.id ? card.id : ""), "messages=" + state.messages.length],
+      awardedAt: now.toISOString()
+    };
+    localStorage.setItem("vivi:achievement:monthlyStampsV1", JSON.stringify([stamp].concat(existing.filter(function (item) { return item && item.stampId !== stamp.stampId; }))));
+    return stamp;
   }
 
   function clearToastSoon() {
@@ -478,7 +532,7 @@ export const SIMULATOR_WEB_PATCH = `
         state.messages.push({ role: "ai", text: reply(input.value.trim()), createdAt: new Date().toISOString() });
         input.value = "";
       }
-      addCard();
+      saveConversationStamp(addCard());
       state.route = "feedback";
       saveState();
       renderExplore();

@@ -8581,6 +8581,13 @@ function applyFinalCopyConvergence(html) {
     .replace(/PillowTalk 主题记录/g, "PillowTalk 组件流")
     .replace(/原充电模式内容已经移除。当前仅保留底部 Tab 和一个占位页面，后续可直接替换为新的探索体验。/g, "PillowTalk 组件流已准备好。")
     .replace(/原探索内容已经移除。当前仅保留底部 Tab 和一个占位页面，后续可直接替换为新的探索体验。/g, "PillowTalk 组件流已准备好。")
+    .replace(/label: "你的灵感"/g, 'label: "灵感"')
+    .replace(/label: "你的意识"/g, 'label: "意识"')
+    .replace(/label: "你的思想"/g, 'label: "意识"')
+    .replace(/label: "你的梦想"/g, 'label: "梦想"')
+    .replace(/label: "你的关系"/g, 'label: "关系"')
+    .replace(/<strong>你的意识<\/strong>/g, "<strong>意识</strong>")
+    .replace(/var themeOrder = \["thought", "inspiration", "dream", "relationship"\];/g, 'var themeOrder = ["inspiration", "thought", "dream", "relationship"];')
     .replace(
       /(<button class="tab" data-tab="health">[\s\S]*?<span>)手机(<\/span><\/button>)/,
       "$1收集$2"

@@ -19,7 +19,7 @@ export const SIMULATOR_WEB_PATCH = `
   var themes = [
     {
       id: "relationship",
-      tag: "你的关系",
+      tag: "关系",
       title: "来帮我们一起塑造 pillowtalk",
       prompt: "今天世界无事发生，可以好好歇着，等一切安静下来",
       image: galleryBase + "green_spark_full_bleed.png",
@@ -27,40 +27,14 @@ export const SIMULATOR_WEB_PATCH = `
       tone: "teal",
       detailLead: "想想你是如何与他人建立联系的",
       detailTitle: "探索你的关系模式",
-      recentTitle: "最近记录 · 你的关系",
+      recentTitle: "最近记录 · 关系",
       recentCopy: "这段记录里有一个很明确的核心：你正在寻找一种更稳定、更真实的表达方式。",
       feedbackTitle: "海上漂浮\\n城市意象",
       feedbackSub: "当前连胜\\n最佳连续记录"
     },
     {
-      id: "dream",
-      tag: "你的梦想",
-      title: "你对其中一个梦有什么印象？",
-      prompt: "写下一个梦里留下来的画面",
-      image: galleryBase + "saturn_full_bleed.png",
-      stampId: "dream",
-      tone: "gray",
-      detailLead: "把醒来后仍然清晰的画面留下来",
-      detailTitle: "梦境回想",
-      recentTitle: "最近记录 · 你的梦想",
-      recentCopy: "这段记录里有一些反复出现的画面，可以作为你本周的情绪线索。"
-    },
-    {
-      id: "thought",
-      tag: "你的意识",
-      title: "这一刻你反复想到什么？",
-      prompt: "把脑海里反复出现的念头放在这里",
-      image: galleryBase + "comet_full_bleed.png",
-      stampId: "thought",
-      tone: "green",
-      detailLead: "观察那个反复回来的念头",
-      detailTitle: "意识线索",
-      recentTitle: "最近记录 · 你的意识",
-      recentCopy: "这些片段会帮你看到压力、期待和行动之间的关系。"
-    },
-    {
       id: "inspiration",
-      tag: "你的灵感",
+      tag: "灵感",
       title: "哪一句话今天抓住了你？",
       prompt: "保存一句今天让你有感觉的话",
       image: galleryBase + "sky_color_full_bleed.png",
@@ -68,8 +42,34 @@ export const SIMULATOR_WEB_PATCH = `
       tone: "amber",
       detailLead: "把今天抓住你的句子放在这里",
       detailTitle: "灵感句子",
-      recentTitle: "最近记录 · 你的灵感",
+      recentTitle: "最近记录 · 灵感",
       recentCopy: "这些句子会变成你之后回看自己的线索。"
+    },
+    {
+      id: "thought",
+      tag: "意识",
+      title: "这一刻你反复想到什么？",
+      prompt: "把脑海里反复出现的念头放在这里",
+      image: galleryBase + "comet_full_bleed.png",
+      stampId: "thought",
+      tone: "green",
+      detailLead: "观察那个反复回来的念头",
+      detailTitle: "意识线索",
+      recentTitle: "最近记录 · 意识",
+      recentCopy: "这些片段会帮你看到压力、期待和行动之间的关系。"
+    },
+    {
+      id: "dream",
+      tag: "梦想",
+      title: "你对其中一个梦有什么印象？",
+      prompt: "写下一个梦里留下来的画面",
+      image: galleryBase + "saturn_full_bleed.png",
+      stampId: "dream",
+      tone: "gray",
+      detailLead: "把醒来后仍然清晰的画面留下来",
+      detailTitle: "梦境回想",
+      recentTitle: "最近记录 · 梦想",
+      recentCopy: "这段记录里有一些反复出现的画面，可以作为你本周的情绪线索。"
     }
   ];
 
@@ -458,18 +458,20 @@ export const SIMULATOR_WEB_PATCH = `
       snapshotId: "webview-snapshot-" + now.toISOString().slice(0, 10),
       predictionId: "webview-prediction-" + now.toISOString().slice(0, 10),
       month: month,
-      title: "对话回忆邮戳",
+      title: "能量回光",
       type: "steady_recovery",
       tone: "sleepers",
       source: "conversation_stamp",
       sourceLabel: "探索对话 · " + theme.tag,
       sourceId: theme.id,
       assetKey: "stamp-conversation-dream",
-      mythicFigure: "对话回忆",
+      mythicFigure: "阿波罗",
       oilPaintingPrompt: "Oil painting postage stamp for a reflective Vitora conversation, antique paper, soft moonlight.",
       awardRule: "完成一次探索对话，并保存对话主题与连续记录。",
       evidenceLabel: "对话完成",
-      reason: "你完成了「" + theme.tag + "」探索，这次记录会进入你的健康邮戳收藏。",
+      displayReason: "这枚「能量回光」来自一次 Dori 对话记录。愿它把你说出的感受，变成下一次更温柔的预测线索。",
+      shareCaption: "我在 Vitora 收集到「能量回光」，来自一次 Dori 对话记录。",
+      reason: "你完成了「" + theme.tag + "」探索，这次记录会进入你的健康油戳收集。",
       evidence: ["主题=" + theme.tag, "cardId=" + (card && card.id ? card.id : ""), "messages=" + state.messages.length],
       awardedAt: now.toISOString()
     };

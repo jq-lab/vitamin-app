@@ -7,7 +7,7 @@ export type VitoraRuntimeKey =
   | "vivi:achievement:monthlyStampsV1";
 
 export type TodayCardId = "today" | "sleep" | "cycle" | "focus" | "metabolism" | "morning";
-export type HealthDetailTab = "summary" | "sleep" | "cycle" | "focus" | "metabolism" | "morning";
+export type HealthDetailTab = "summary" | "sleep" | "cycle" | "focus" | "metabolism";
 export type HealthStampTone = "amateur" | "sleepers" | "steps" | "gym" | "hours";
 export type CareActionTypeV1 = "direct_session" | "reminder" | "map_guidance";
 export type AchievementStampTypeV1 =
@@ -215,8 +215,11 @@ export type HealthInsightSummaryV1 = {
   bestWindows: number;
   highEnergyDays: number;
   lowEnergyDays: number;
+  highEnergyCountLabel: string;
+  lowEnergyCountLabel: string;
   periodExperience: string;
   periodTopics: string[];
+  heatmapMode: "week";
   heatmapRange: "this_week" | "last_week";
   heatmapLegend: Array<{
     label: string;
@@ -243,6 +246,7 @@ export type HealthInsightSummaryV1 = {
     metabolism: number;
     focus: number;
   };
+  radarLabels?: string[];
   explanation: string;
 };
 
@@ -317,6 +321,13 @@ export type AchievementStampV1 = {
   assetKey: string;
   mythicFigure: string;
   oilPaintingPrompt: string;
+  artworkAssetKey?: string;
+  displayReason?: string;
+  shareCaption?: string;
+  sourceMuseum?: string;
+  artworkTitle?: string;
+  artworkLicense?: string;
+  artworkSourceUrl?: string;
   awardRule: string;
   evidenceLabel: string;
   lockedReason?: string;

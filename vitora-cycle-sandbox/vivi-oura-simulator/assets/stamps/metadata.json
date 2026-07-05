@@ -1,0 +1,101 @@
+[
+  {
+    "assetKey": "stamp-perfect-goddess",
+    "file": "assets/stamps/stamp-perfect-goddess.png",
+    "query": "Aphrodite",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Limestone statue of Aphrodite holding winged Eros",
+    "artist": "",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/242017",
+    "objectID": 242017
+  },
+  {
+    "assetKey": "stamp-consistency-flame",
+    "file": "assets/stamps/stamp-consistency-flame.png",
+    "query": "Vesta goddess",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Portrait of a Young Woman as a Vestal Virgin",
+    "artist": "François Hubert Drouais",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/436216",
+    "objectID": 436216
+  },
+  {
+    "assetKey": "stamp-sleep-hypnos",
+    "file": "assets/stamps/stamp-sleep-hypnos.png",
+    "query": "Hypnos",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Terracotta lekythos (oil flask)",
+    "artist": "Painter of the New York Hypnos",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/251387",
+    "objectID": 251387
+  },
+  {
+    "assetKey": "stamp-recovery-hygieia",
+    "file": "assets/stamps/stamp-recovery-hygieia.png",
+    "query": "Hygieia",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Lower part of a marble seated statue of Hygieia",
+    "artist": "",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/246996",
+    "objectID": 246996
+  },
+  {
+    "assetKey": "stamp-movement-artemis",
+    "file": "assets/stamps/stamp-movement-artemis.png",
+    "query": "Artemis",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Marble column from the Temple of Artemis at Sardis",
+    "artist": "",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/252453",
+    "objectID": 252453
+  },
+  {
+    "assetKey": "stamp-focus-athena",
+    "file": "assets/stamps/stamp-focus-athena.png",
+    "query": "Athena",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Athena",
+    "artist": "Anonymous, Italian, 16th century",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/632359",
+    "objectID": 632359
+  },
+  {
+    "assetKey": "stamp-cycle-selene",
+    "file": "assets/stamps/stamp-cycle-selene.png",
+    "query": "Selene",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Marble sarcophagus with the myth of Selene and Endymion",
+    "artist": "",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/254590",
+    "objectID": 254590
+  },
+  {
+    "assetKey": "stamp-energy-dori",
+    "file": "assets/stamps/stamp-energy-dori.png",
+    "query": "Apollo",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Apollo",
+    "artist": "Adriaen de Vries",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/199016",
+    "objectID": 199016
+  },
+  {
+    "assetKey": "stamp-conversation-dream",
+    "file": "assets/stamps/stamp-conversation-dream.png",
+    "query": "moon painting",
+    "sourceMuseum": "The Metropolitan Museum of Art",
+    "artworkTitle": "Two Men Contemplating the Moon",
+    "artist": "Caspar David Friedrich",
+    "license": "Public Domain / Open Access",
+    "sourceUrl": "https://www.metmuseum.org/art/collection/search/438417",
+    "objectID": 438417
+  }
+]

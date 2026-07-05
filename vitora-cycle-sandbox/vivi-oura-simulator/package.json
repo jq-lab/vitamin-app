@@ -11,12 +11,19 @@
     "ios": "pnpm prepare:web && pnpm patch:expo-jsi && expo run:ios",
     "ios:release": "pnpm prepare:web && pnpm patch:expo-jsi && expo run:ios --configuration Release",
     "typecheck": "tsc --noEmit",
-    "tts:bakeoff": "node tools/tts-bakeoff/run-bakeoff.mjs"
+    "tts:bakeoff": "node tools/tts-bakeoff/run-bakeoff.mjs",
+    "tts:bridge": "node tools/vitora-tts-bridge/server.mjs",
+    "tts:bridge:local": "VITORA_TTS_DATA_DIR=/private/tmp/vitora-tts-live-listen VITORA_TTS_HOST=127.0.0.1 VITORA_TTS_PORT=8787 node tools/vitora-tts-bridge/server.mjs",
+    "tts:mcp": "node tools/vitora-tts-mcp/server.mjs"
   },
   "dependencies": {
     "expo": "~56.0.8",
     "expo-asset": "~56.0.15",
+    "expo-audio": "~56.0.12",
+    "expo-blur": "~56.0.3",
     "expo-file-system": "~56.0.7",
+    "expo-image-picker": "~56.0.19",
+    "expo-linear-gradient": "~56.0.4",
     "expo-status-bar": "~56.0.4",
     "react": "19.2.3",
     "react-native": "0.85.3",

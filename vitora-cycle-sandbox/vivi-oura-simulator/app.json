@@ -11,7 +11,10 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.local.vivi.oura",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Vitora uses your approximate location to estimate the direction of sunlight for the morning plan."
+        "NSLocationWhenInUseUsageDescription": "Vitora uses your approximate location to estimate the direction of sunlight for the morning plan.",
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true
+        }
       }
     },
     "splash": {
@@ -19,6 +22,9 @@
     },
     "assetBundlePatterns": [
       "web/**/*"
+    ],
+    "plugins": [
+      "expo-audio"
     ]
   }
 }

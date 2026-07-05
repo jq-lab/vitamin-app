@@ -585,11 +585,6 @@ function buildSuggestions(snapshot: HealthSnapshotV1, prediction: PredictionStat
       { icon: "☕", time: "15:00", title: "加餐恢复", copy: "补充温和能量，降低下午恢复压力。", action: "提醒我", tone: "green" },
       { icon: "◒", time: "17:30", title: "轻走 8 分钟", copy: "不做强刺激，只把循环拉回来。", action: "设置" },
       { icon: "□", time: "20:30", title: "代谢回看", copy: "记录今晚食欲和疲劳感，作为明天预测线索。", action: "提醒我" }
-    ],
-    morning: [
-      { icon: "☼", time: "07:20", title: "窗边光照", copy: "醒后先接触自然光，降低启动成本。", action: "提醒我", tone: "green" },
-      { icon: "◒", time: "07:40", title: "轻走路线", copy: "用 8 分钟路线完成晨间唤醒。", action: "设置" },
-      { icon: "□", time: "08:10", title: "记录晨间反馈", copy: "记录疲劳、水肿和食欲变化。", action: "提醒我" }
     ]
   };
 }
@@ -687,7 +682,7 @@ export function composeContent(profile: BodyProfileV1, snapshot: HealthSnapshotV
       score: snapshot.activity.distanceKm.toFixed(2),
       scoreUnit: "KM",
       tone: "morning",
-      moreTab: "morning",
+      moreTab: "summary",
       monitor: `晨间得分 ${prediction.scores.morning}；自然光和轻走会帮助今天更早进入稳态。`,
       action: "打开晨间路线",
       actionType: "map_guidance",
@@ -745,13 +740,6 @@ export function composeContent(profile: BodyProfileV1, snapshot: HealthSnapshotV
         snapshot.activity.steps.toLocaleString(),
         [`距离 ${snapshot.activity.distanceKm.toFixed(2)} km`, `活跃消耗 ${snapshot.activity.activeCalories} kcal`, `体温变化 ${snapshot.recovery.bodyTemperatureDelta > 0 ? "+" : ""}${snapshot.recovery.bodyTemperatureDelta}°C`],
         suggestions.metabolism
-      ),
-      morning: healthDetail(
-        "晨间启动",
-        `晨间得分 ${prediction.scores.morning}，自然光、轻走和低门槛动作会让今天更早稳定。`,
-        snapshot.activity.distanceKm.toFixed(2),
-        [`晨间目标：${snapshot.selfReport.goal}`, `周期：${snapshot.cycle.phaseLabel}`, `恢复分：${prediction.scores.readiness}`],
-        suggestions.morning
       )
     }
   };
@@ -876,8 +864,11 @@ export function createHealthInsightSummary(
     bestWindows,
     highEnergyDays,
     lowEnergyDays,
+    highEnergyCountLabel: "高精力天",
+    lowEnergyCountLabel: "低精力天",
     periodExperience: `本期经历：${periodTopics.join("、")}`,
     periodTopics,
+    heatmapMode: "week",
     heatmapRange: "this_week",
     heatmapLegend: [
       { label: "高精力", color: "#42e75e" },
@@ -897,6 +888,7 @@ export function createHealthInsightSummary(
       metabolism: prediction.scores.metabolism,
       focus: prediction.scores.focus
     },
+    radarLabels: ["睡眠", "周期", "抗压", "代谢", "专注"],
     explanation: `${profile.personaName}本期有 ${highEnergyDays} 天高精力、${lowEnergyDays} 天低精力，${stableWindows} 个时段接近稳态。热力图绿色越深代表越接近高精力，灰色代表低精力或信号不足。`
   };
 }
@@ -994,89 +986,66 @@ export function createAchievementStamps(profile: BodyProfileV1, snapshot: Health
   };
   return [
     makeStamp(0, {
-      title: "完美月",
-      type: "perfect_month",
-      assetKey: "stamp-perfect-goddess",
-      mythicFigure: "阿佛洛狄忒",
-      oilPaintingPrompt: "Classical Greek oil painting postage stamp of Aphrodite as a calm perfect-month goddess, warm green and gold enamel border, ornate perforated stamp edges, soft museum lighting.",
-      awardRule: "当月每日目标完成率 >= 90%，且平均综合分 >= 80。",
-      evidenceLabel: "模拟月度完成率 93%",
-      reason: `${month} 每日活动目标持续达成，恢复、睡眠和周期反馈都完成记录。`,
-      evidence: [`月度平均准备度 ${prediction.scores.readiness}`, `步数 ${snapshot.activity.steps.toLocaleString()}`, `predictionId=${prediction.predictionId}`],
-      earned: prediction.scores.readiness >= 70
+      title: "能量回光",
+      type: "steady_recovery",
+      assetKey: "stamp-energy-dori",
+      mythicFigure: "阿波罗",
+      oilPaintingPrompt: "Public domain classical oil painting inspired postage stamp about light returning to the body, frosted paper, collectible health stamp.",
+      awardRule: "完成今日能量记录、呼吸或低刺激恢复。",
+      evidenceLabel: `综合 ${prediction.todayScore}%`,
+      reason: "你把今天的能量状态记录下来，让身体从高刺激里慢慢回到可预测的节奏。",
+      evidence: [`综合 ${prediction.todayScore}%`, `${snapshot.cycle.phaseLabel} D${snapshot.cycle.cycleDay}`, `建议 ${prediction.primaryAction.title}`],
+      lockedReason: "完成一次今日能量记录或呼吸后解锁。",
+      earned: prediction.todayScore >= 60
     }),
     makeStamp(1, {
-      title: "最坚持月",
-      type: "most_consistent",
-      assetKey: "stamp-consistency-flame",
-      mythicFigure: "赫斯提亚",
-      oilPaintingPrompt: "Oil painting postage stamp of Hestia guarding an eternal flame, symbolizing quiet consistency and long streaks, gold frame, green enamel, premium collectible stamp.",
-      awardRule: "连续记录或完成计划 >= 21 天，或当月最长连续天数最高。",
-      evidenceLabel: "连续记录 24 天",
-      reason: "你持续记录睡眠、周期和完成反馈，系统能用同一条数据链给出更稳定预测。",
-      evidence: [`profileId=${profile.profileId}`, `snapshotId=${snapshot.snapshotId}`, `连续记录用于生成主动关心事件`],
-      earned: true
-    }),
-    makeStamp(2, {
-      title: "睡神",
+      title: "睡眠守夜",
       type: "sleep_guardian",
       assetKey: "stamp-sleep-hypnos",
       mythicFigure: "希普诺斯",
       oilPaintingPrompt: "Ancient oil painting postage stamp of Hypnos in deep blue night robes, soft moonlight, sleepy golden border, collectible stamp.",
-      awardRule: "近 7 天平均睡眠 >= 7 小时，睡眠负债 <= 1 小时，且至少 5 天按时入睡。",
+      awardRule: "完成睡眠修复、睡前提醒，或达成睡眠建议。",
       evidenceLabel: `睡眠 ${Math.round(snapshot.sleep.durationMinutes / 60 * 10) / 10}h`,
-      reason: "你把睡眠连续性稳定在恢复窗口内，白天专注和情绪都更容易回稳。",
+      reason: "你守住了一次睡眠恢复窗口，明天的专注和情绪会更容易回到稳态。",
       evidence: [`睡眠分 ${prediction.scores.sleep}`, `清醒 ${snapshot.sleep.awakeMinutes} 分钟`, `效率 ${Math.round(snapshot.sleep.efficiency * 100)}%`],
       lockedReason: "再减少一次夜间清醒即可解锁。",
       earned: prediction.scores.sleep >= 78 && snapshot.sleep.awakeMinutes <= 18
     }),
-    makeStamp(3, {
-      title: "稳定恢复",
-      type: "steady_recovery",
-      assetKey: "stamp-recovery-hygieia",
-      mythicFigure: "希吉亚",
-      oilPaintingPrompt: "Oil painting postage stamp of Hygieia holding a bowl of calm green light, soft ancient fresco texture, premium wellness stamp.",
-      awardRule: "HRV/抗压恢复稳定，近 7 天无连续 3 天低恢复。",
-      evidenceLabel: `HRV ${snapshot.recovery.hrvRmssd}ms`,
-      reason: "你的恢复压力没有继续累积，适合用低刺激动作维持稳态。",
-      evidence: [`抗压分 ${prediction.scores.stress}`, `静息心率 ${snapshot.recovery.restingHeartRate}bpm`, `体温变化 ${snapshot.recovery.bodyTemperatureDelta}`],
-      lockedReason: "抗压分稳定到 70 以上后解锁。",
-      earned: prediction.scores.stress >= 70
-    }),
-    makeStamp(4, {
-      title: "行动火花",
-      type: "movement_spark",
-      assetKey: "stamp-movement-artemis",
-      mythicFigure: "阿尔忒弥斯",
-      oilPaintingPrompt: "Ancient oil painting postage stamp of Artemis walking under sunrise, emerald and gold frame, active but gentle health achievement.",
-      awardRule: "完成晨间运动、散步、代谢或运动计划达到周目标。",
-      evidenceLabel: `${snapshot.activity.steps.toLocaleString()} steps`,
-      reason: "你已经把身体从静止状态轻轻启动，完成反馈会进入今日预测。",
-      evidence: [`步数 ${snapshot.activity.steps.toLocaleString()}`, `距离 ${snapshot.activity.distanceKm.toFixed(2)} km`, `活跃消耗 ${snapshot.activity.activeCalories} kcal`],
-      earned: snapshot.activity.steps >= 6000
-    }),
-    makeStamp(5, {
-      title: "专注缪斯",
+    makeStamp(2, {
+      title: "专注火种",
       type: "focus_muse",
       assetKey: "stamp-focus-athena",
       mythicFigure: "雅典娜",
       oilPaintingPrompt: "Oil painting postage stamp of Athena as a quiet focus muse, violet blue light, antique paper, ornate border.",
-      awardRule: "完成专注训练，且本周专注窗口明显提升。",
+      awardRule: "完成一次专注计时，或本周专注窗口明显提升。",
       evidenceLabel: `专注分 ${prediction.scores.focus}`,
-      reason: "你减少了切换成本，让注意力有机会回到单任务轨道。",
+      reason: "你点燃了一段单任务时间，注意力从切换噪音里重新聚拢。",
       evidence: [`专注分 ${prediction.scores.focus}`, `压力自评 ${snapshot.selfReport.stress}/10`, `睡眠效率 ${Math.round(snapshot.sleep.efficiency * 100)}%`],
       lockedReason: "完成一次专注计时后解锁。",
       earned: prediction.scores.focus >= 76
     }),
-    makeStamp(6, {
-      title: "周期守护",
+    makeStamp(3, {
+      title: "行动心跳",
+      type: "movement_spark",
+      assetKey: "stamp-movement-artemis",
+      mythicFigure: "阿尔忒弥斯",
+      oilPaintingPrompt: "Ancient oil painting postage stamp of Artemis walking under sunrise, emerald and gold frame, active but gentle health achievement.",
+      awardRule: "完成代谢、晨间、散步或轻运动。",
+      evidenceLabel: `${snapshot.activity.steps.toLocaleString()} steps`,
+      reason: "你让身体重新有了节律，轻微行动会把低能量慢慢推回流动状态。",
+      evidence: [`步数 ${snapshot.activity.steps.toLocaleString()}`, `距离 ${snapshot.activity.distanceKm.toFixed(2)} km`, `活跃消耗 ${snapshot.activity.activeCalories} kcal`],
+      lockedReason: "完成一次代谢或晨间行动后解锁。",
+      earned: snapshot.activity.steps >= 6000
+    }),
+    makeStamp(4, {
+      title: "周期护符",
       type: "cycle_keeper",
       assetKey: "stamp-cycle-selene",
       mythicFigure: "塞勒涅",
       oilPaintingPrompt: "Ancient moon goddess Selene oil painting postage stamp, pearl violet cycle wheel, frosted glass moonlight, collectible stamp.",
-      awardRule: "周期记录完整，并在经期/黄体期完成低刺激恢复建议。",
+      awardRule: "完成周期记录，或在经期/黄体期完成低刺激恢复建议。",
       evidenceLabel: `${snapshot.cycle.phaseLabel} D${snapshot.cycle.cycleDay}`,
-      reason: "你把周期变化记录进预测链路，系统能更温和地安排恢复窗口。",
+      reason: "你把周期变化变成可被照顾的线索，身体会因此得到更温和的安排。",
       evidence: [`${snapshot.cycle.phaseLabel} D${snapshot.cycle.cycleDay}`, `预计 ${snapshot.cycle.periodPredictedInDays} 天后经期`, `症状 ${snapshot.cycle.symptoms.join("、") || "暂无"}`],
       earned: snapshot.cycle.phase === "luteal" || snapshot.cycle.phase === "menstrual"
     })

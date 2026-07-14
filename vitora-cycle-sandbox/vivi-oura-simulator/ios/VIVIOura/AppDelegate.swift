@@ -61,6 +61,12 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
 
   override func bundleURL() -> URL? {
 #if DEBUG
+    if ProcessInfo.processInfo.environment["VIVI_USE_METRO"] == "1" {
+      return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
+    }
+    if let bundledURL = Bundle.main.url(forResource: "main", withExtension: "jsbundle") {
+      return bundledURL
+    }
     return RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: ".expo/.virtual-metro-entry")
 #else
     return Bundle.main.url(forResource: "main", withExtension: "jsbundle")

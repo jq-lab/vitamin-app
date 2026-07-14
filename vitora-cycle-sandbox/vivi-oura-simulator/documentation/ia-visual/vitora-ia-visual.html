@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vitora IA 可视化截图目录</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --panel: #ffffff;
+      --ink: #17191d;
+      --muted: #626a73;
+      --line: #ded8ce;
+      --soft: #ece7dd;
+      --accent: #1e6f64;
+      --warn: #9b5b12;
+      --bad: #a63a3a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+      line-height: 1.55;
+    }
+    a { color: inherit; }
+    .shell {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+      padding: 24px 18px;
+      border-right: 1px solid var(--line);
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(16px);
+    }
+    main { padding: 32px clamp(20px, 4vw, 56px) 72px; }
+    h1 { margin: 0 0 10px; font-size: 34px; line-height: 1.12; letter-spacing: 0; }
+    h2 { margin: 44px 0 16px; font-size: 24px; }
+    h3 { margin: 28px 0 12px; font-size: 18px; }
+    p { margin: 8px 0; }
+    .muted { color: var(--muted); }
+    .nav-title { margin: 0 0 12px; font-size: 15px; font-weight: 800; }
+    .nav a {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 7px;
+      text-decoration: none;
+      color: #2b3138;
+      font-size: 14px;
+    }
+    .nav a:hover { background: var(--soft); }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 22px 0 28px;
+    }
+    .metric, .note, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(30, 28, 24, 0.05);
+    }
+    .metric { padding: 16px; }
+    .metric b { display: block; font-size: 28px; line-height: 1.1; }
+    .metric span { color: var(--muted); font-size: 13px; }
+    .note { padding: 16px 18px; }
+    .tree {
+      overflow: auto;
+      padding: 18px;
+      background: #191b1f;
+      color: #f4f1e9;
+      border-radius: 8px;
+      font: 13px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+      gap: 18px;
+    }
+    .card { overflow: hidden; }
+    .card-body { padding: 14px 16px 16px; }
+    .card h3 { margin-top: 0; }
+    .shot {
+      display: block;
+      width: 100%;
+      max-height: 680px;
+      object-fit: contain;
+      background: #111;
+      border-bottom: 1px solid var(--line);
+    }
+    .tag {
+      display: inline-block;
+      margin: 0 6px 8px 0;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #e7f2ef;
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .tag.warn { background: #fff0d6; color: var(--warn); }
+    .tag.bad { background: #ffe3e3; color: var(--bad); }
+    .refs {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #eee9df; font-size: 13px; }
+    tr:last-child td { border-bottom: 0; }
+    @media (max-width: 900px) {
+      .shell { display: block; }
+      aside { position: static; height: auto; }
+      .summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside>
+      <p class="nav-title">目录</p>
+      <nav class="nav">
+        <a href="#scope">范围与证据</a>
+        <a href="#tree">IA 树</a>
+        <a href="#today">今日 Today</a>
+        <a href="#explore">探索 Explore</a>
+        <a href="#health">健康 Health</a>
+        <a href="#profile">个人中心 Profile</a>
+        <a href="#webview">WebView / Onboarding</a>
+        <a href="#gaps">覆盖说明</a>
+        <a href="#sources">本地证据</a>
+      </nav>
+    </aside>
+    <main>
+      <section id="scope">
+        <h1>Vitora IA 可视化截图目录</h1>
+        <p class="muted">对象是 <code>vivi-oura-simulator</code> 当前 Expo / React Native + WebView 可交互原型；这不是原生 Swift 新实现，也不是生产级健康产品。</p>
+        <div class="summary">
+          <div class="metric"><b>36</b><span>已接入 HTML 的真实模拟器截图</span></div>
+          <div class="metric"><b>3</b><span>主导航：今日、探索、健康</span></div>
+          <div class="metric"><b>1</b><span>剩余 WebView onboarding 遗留层未验证</span></div>
+        </div>
+        <div class="note">
+          <p><b>截图原则：</b>只接入真实 iOS Simulator 渲染出来的页面截图；被系统键盘教学、异常画面、错误路由或重复页面污染的截图已清理。</p>
+          <p><b>覆盖方式：</b>主 Tab 和普通路由按真实 app 运行路径截取；Profile 子面板、弹层、Alert 和部分 click-only 状态通过临时 QA deep link 打开后截图，因为本轮 Simulator 的辅助点击多次显示成功但没有稳定触发 RN Pressable。临时 QA 路由只用于取证，截图完成后会从源码撤回。</p>
+        </div>
+      </section>
+
+      <section id="tree">
+        <h2>IA 树</h2>
+        <pre class="tree">Vitora RN 覆盖层
+├── 全局
+│   ├── WebView 底层容器
+│   ├── Native overlay
+│   ├── Bottom nav: 今日 / 探索 / 健康
+│   ├── Profile overlay
+│   ├── ReminderSheet
+│   ├── StampRevealSheet
+│   ├── Health metric Alert
+│   └── Today photo Alert
+├── 今日 Today
+│   ├── Today home
+│   │   ├── 今日能量
+│   │   ├── 睡眠
+│   │   ├── 周期
+│   │   ├── 专注
+│   │   ├── 代谢
+│   │   └── 晨间计划
+│   ├── 呼吸恢复
+│   ├── 专注计时
+│   ├── 代谢计时
+│   ├── 晨间找太阳
+│   └── 添加今日快卡 Alert
+├── 探索 Explore
+│   ├── 主题卡列表
+│   ├── Chat
+│   │   ├── 输入模式菜单
+│   │   ├── 语音输入
+│   │   └── 快捷问题
+│   ├── 主题详情
+│   └── Feedback / Daily card
+├── 健康 Health
+│   ├── Health home
+│   └── Health detail
+│       ├── 身体翻译 / summary
+│       ├── 睡眠连续性
+│       ├── 周期趋势
+│       ├── 专注窗口
+│       ├── 代谢窗口
+│       ├── ReminderSheet
+│       └── 指标解释 Alert
+└── 个人中心 Profile
+    ├── Profile overlay
+    ├── 消息中心
+    ├── 数据说明
+    ├── 编辑昵称
+    ├── 油戳收集
+    ├── 个人档案
+    ├── WATCH 应用
+    ├── TIDE Plus
+    └── 油戳弹层 award / detail</pre>
+      </section>
+
+      <section id="today">
+        <h2>今日 Today</h2>
+        <div class="grid">
+          <article class="card" id="today-energy">
+            <a href="screenshots/01-today-home-today.png"><img class="shot" src="screenshots/01-today-home-today.png" alt="今日能量"></a>
+            <div class="card-body"><h3>今日能量</h3><span class="tag">已截图</span><span class="tag">Today home</span><p>主卡把周期、身体人格和今日能量分数合成一个“今天怎么行动”的入口。</p><p class="refs">来源：App.tsx:3897；runtime.ts:602。</p></div>
+          </article>
+          <article class="card" id="today-sleep">
+            <a href="screenshots/02-today-home-sleep.png"><img class="shot" src="screenshots/02-today-home-sleep.png" alt="睡眠卡"></a>
+            <div class="card-body"><h3>睡眠</h3><span class="tag">已截图</span><p>把睡眠总时长、睡眠质量与提醒动作放在同一张 Today 卡里。</p><p class="refs">来源：runtime.ts:617。</p></div>
+          </article>
+          <article class="card" id="today-cycle">
+            <a href="screenshots/03-today-home-cycle.png"><img class="shot" src="screenshots/03-today-home-cycle.png" alt="周期卡"></a>
+            <div class="card-body"><h3>周期</h3><span class="tag">已截图</span><p>展示周期天数、当前阶段和低刺激恢复建议。</p><p class="refs">来源：runtime.ts:632。</p></div>
+          </article>
+          <article class="card" id="today-focus">
+            <a href="screenshots/04-today-home-focus.png"><img class="shot" src="screenshots/04-today-home-focus.png" alt="专注卡"></a>
+            <div class="card-body"><h3>专注</h3><span class="tag">已截图</span><p>把 HRV、疲劳和睡眠折算成单任务窗口建议。</p><p class="refs">来源：runtime.ts:647。</p></div>
+          </article>
+          <article class="card" id="today-metabolism">
+            <a href="screenshots/05-today-home-metabolism.png"><img class="shot" src="screenshots/05-today-home-metabolism.png" alt="代谢卡"></a>
+            <div class="card-body"><h3>代谢</h3><span class="tag">已截图</span><p>用步数、体温和周期窗口解释补能与温和活动。</p><p class="refs">来源：runtime.ts:662。</p></div>
+          </article>
+          <article class="card" id="today-morning">
+            <a href="screenshots/06-today-home-morning.png"><img class="shot" src="screenshots/06-today-home-morning.png" alt="晨间计划"></a>
+            <div class="card-body"><h3>晨间计划</h3><span class="tag">已截图</span><p>把自然光和轻走路线作为晨间启动建议。</p><p class="refs">来源：runtime.ts:676。</p></div>
+          </article>
+          <article class="card" id="today-breathing">
+            <a href="screenshots/07-today-breathing.png"><img class="shot" src="screenshots/07-today-breathing.png" alt="呼吸恢复"></a>
+            <div class="card-body"><h3>呼吸恢复</h3><span class="tag">已截图</span><p>Today 子路由，用声音、节奏球和背景选择帮助低刺激恢复。</p><p class="refs">来源：App.tsx:3911。</p></div>
+          </article>
+          <article class="card" id="today-focus-timer">
+            <a href="screenshots/08-today-focus-timer.png"><img class="shot" src="screenshots/08-today-focus-timer.png" alt="专注计时"></a>
+            <div class="card-body"><h3>专注计时</h3><span class="tag">已截图</span><p>专注动作页，完成动作后会进入油戳奖励心智；油戳弹层已在 Profile 区单独截图。</p><p class="refs">来源：App.tsx:3963；App.tsx:1612。</p></div>
+          </article>
+          <article class="card" id="today-metabolism-timer">
+            <a href="screenshots/09-today-metabolism-timer.png"><img class="shot" src="screenshots/09-today-metabolism-timer.png" alt="代谢计时"></a>
+            <div class="card-body"><h3>代谢计时</h3><span class="tag">已截图</span><p>温和活动计时页，围绕心率和代谢窗口组织动作。</p><p class="refs">来源：App.tsx:3963。</p></div>
+          </article>
+          <article class="card" id="today-morning-map">
+            <a href="screenshots/10-today-morning-map.png"><img class="shot" src="screenshots/10-today-morning-map.png" alt="晨间找太阳"></a>
+            <div class="card-body"><h3>晨间找太阳</h3><span class="tag">已截图</span><p>模拟地图路线页；源码说明真机接定位后才会生成真实路线。</p><p class="refs">来源：App.tsx:3998。</p></div>
+          </article>
+          <article class="card" id="today-photo-alert">
+            <a href="screenshots/39-today-photo-alert.png"><img class="shot" src="screenshots/39-today-photo-alert.png" alt="添加今日快卡 Alert"></a>
+            <div class="card-body"><h3>添加今日快卡 Alert</h3><span class="tag">已截图</span><span class="tag">系统弹窗</span><p>Today 的加号入口会触发“添加今日快卡”系统 Alert，用于进入拍照记录或手动记录。</p><p class="refs">来源：App.tsx:1801。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="explore">
+        <h2>探索 Explore</h2>
+        <div class="grid">
+          <article class="card" id="explore-home">
+            <a href="screenshots/11-explore-home.png"><img class="shot" src="screenshots/11-explore-home.png" alt="探索首页"></a>
+            <div class="card-body"><h3>主题卡列表</h3><span class="tag">已截图</span><p>探索页以可写入的情绪/表达主题卡作为入口。</p><p class="refs">来源：App.tsx:2032。</p></div>
+          </article>
+          <article class="card" id="explore-chat">
+            <a href="screenshots/12-explore-chat-inspiration.png"><img class="shot" src="screenshots/12-explore-chat-inspiration.png" alt="探索对话"></a>
+            <div class="card-body"><h3>Chat</h3><span class="tag">已截图</span><p>Dori 对话页，包含消息流、输入框、加号入口和完成按钮。</p><p class="refs">来源：App.tsx:2088。</p></div>
+          </article>
+          <article class="card" id="explore-detail">
+            <a href="screenshots/33-explore-detail-inspiration.png"><img class="shot" src="screenshots/33-explore-detail-inspiration.png" alt="探索主题详情"></a>
+            <div class="card-body"><h3>主题详情</h3><span class="tag">已截图</span><p>主题详情页把一个表达主题拆成解释、引导问题和开始聊天入口。</p><p class="refs">来源：App.tsx:2032；App.tsx:2064。</p></div>
+          </article>
+          <article class="card" id="explore-chat-menu">
+            <a href="screenshots/35-chat-input-menu.png"><img class="shot" src="screenshots/35-chat-input-menu.png" alt="聊天输入模式菜单"></a>
+            <div class="card-body"><h3>输入模式菜单</h3><span class="tag">已截图</span><p>Chat 输入框旁的加号菜单，承接键盘、语音和快捷问题等表达方式。</p><p class="refs">来源：App.tsx:2088。</p></div>
+          </article>
+          <article class="card" id="explore-voice">
+            <a href="screenshots/36-chat-voice-panel.png"><img class="shot" src="screenshots/36-chat-voice-panel.png" alt="语音输入"></a>
+            <div class="card-body"><h3>语音输入</h3><span class="tag">已截图</span><p>语音输入面板服务于低负担情绪记录，不要求用户把身体感受立即写成完整文本。</p><p class="refs">来源：App.tsx:2088。</p></div>
+          </article>
+          <article class="card" id="explore-quick-actions">
+            <a href="screenshots/37-chat-quick-actions.png"><img class="shot" src="screenshots/37-chat-quick-actions.png" alt="快捷问题"></a>
+            <div class="card-body"><h3>快捷问题</h3><span class="tag">已截图</span><p>快捷问题把聊天入口收敛成少量可点选的记录方向。</p><p class="refs">来源：App.tsx:2088。</p></div>
+          </article>
+          <article class="card" id="explore-feedback">
+            <a href="screenshots/34-explore-feedback.png"><img class="shot" src="screenshots/34-explore-feedback.png" alt="反馈和连续记录"></a>
+            <div class="card-body"><h3>Feedback / Daily card</h3><span class="tag">已截图</span><p>对话完成后的反馈页，用连续记录、情绪标签和下一步建议收束 Explore 流程。</p><p class="refs">来源：App.tsx:56；App.tsx:1301。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="health">
+        <h2>健康 Health</h2>
+        <div class="grid">
+          <article class="card" id="health-home">
+            <a href="screenshots/13-health-home.png"><img class="shot" src="screenshots/13-health-home.png" alt="健康首页"></a>
+            <div class="card-body"><h3>Health home</h3><span class="tag">已截图</span><p>健康首页聚合油戳、能量热力图、AI 身体翻译和指标卡。</p><p class="refs">来源：App.tsx:4219；runtime.ts:700。</p></div>
+          </article>
+          <article class="card" id="health-summary">
+            <a href="screenshots/14-health-detail-summary.png"><img class="shot" src="screenshots/14-health-detail-summary.png" alt="健康详情 summary"></a>
+            <div class="card-body"><h3>身体翻译</h3><span class="tag">已截图</span><p>健康详情默认页，用雷达图、百分比和 AI 建议解释当天状态。</p><p class="refs">来源：App.tsx:2818；App.tsx:3099。</p></div>
+          </article>
+          <article class="card" id="health-sleep">
+            <a href="screenshots/15-health-detail-sleep.png"><img class="shot" src="screenshots/15-health-detail-sleep.png" alt="睡眠详情"></a>
+            <div class="card-body"><h3>睡眠连续性</h3><span class="tag">已截图</span><p>把睡眠时长、清醒、HRV 等证据转成连续性解释。</p><p class="refs">来源：App.tsx:2890；runtime.ts:716。</p></div>
+          </article>
+          <article class="card" id="health-cycle">
+            <a href="screenshots/16-health-detail-cycle.png"><img class="shot" src="screenshots/16-health-detail-cycle.png" alt="周期详情"></a>
+            <div class="card-body"><h3>周期趋势</h3><span class="tag">已截图</span><p>解释周期阶段和症状如何影响恢复、情绪和专注耐受。</p><p class="refs">来源：App.tsx:2930。</p></div>
+          </article>
+          <article class="card" id="health-focus">
+            <a href="screenshots/17-health-detail-focus.png"><img class="shot" src="screenshots/17-health-detail-focus.png" alt="专注详情"></a>
+            <div class="card-body"><h3>专注窗口</h3><span class="tag">已截图</span><p>围绕切换成本和单任务窗口组织建议。</p><p class="refs">来源：App.tsx:3037。</p></div>
+          </article>
+          <article class="card" id="health-metabolism">
+            <a href="screenshots/18-health-detail-metabolism.png"><img class="shot" src="screenshots/18-health-detail-metabolism.png" alt="代谢详情"></a>
+            <div class="card-body"><h3>代谢窗口</h3><span class="tag">已截图</span><p>解释活动消耗、步数和补能窗口。</p><p class="refs">来源：App.tsx:3053。</p></div>
+          </article>
+          <article class="card" id="health-reminder">
+            <a href="screenshots/30-reminder-sheet.png"><img class="shot" src="screenshots/30-reminder-sheet.png" alt="提醒设置弹层"></a>
+            <div class="card-body"><h3>ReminderSheet</h3><span class="tag">已截图</span><span class="tag">弹层</span><p>Health 建议可以被转成稍后提醒，弹层让用户确认提醒来源和时间。</p><p class="refs">来源：App.tsx:3112。</p></div>
+          </article>
+          <article class="card" id="health-metric-alert">
+            <a href="screenshots/38-health-metric-alert.png"><img class="shot" src="screenshots/38-health-metric-alert.png" alt="健康指标解释 Alert"></a>
+            <div class="card-body"><h3>指标解释 Alert</h3><span class="tag">已截图</span><span class="tag">系统弹窗</span><p>Health 指标卡可以打开解释 Alert，说明平均能量等指标如何由本地 mock 数据推导。</p><p class="refs">来源：App.tsx:2731。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="profile">
+        <h2>个人中心 Profile</h2>
+        <div class="grid">
+          <article class="card" id="profile-overlay">
+            <a href="screenshots/19-profile-overlay.png"><img class="shot" src="screenshots/19-profile-overlay.png" alt="个人中心覆盖层"></a>
+            <div class="card-body"><h3>Profile overlay</h3><span class="tag">已截图</span><p>覆盖在 Health 上方，包含头像、身体人格、邮票册、油戳、档案、Watch 和会员入口。</p><p class="refs">来源：App.tsx:4165。</p></div>
+          </article>
+          <article class="card" id="profile-inbox">
+            <a href="screenshots/23-profile-inbox-panel.png"><img class="shot" src="screenshots/23-profile-inbox-panel.png" alt="消息中心"></a>
+            <div class="card-body"><h3>消息中心</h3><span class="tag">已截图</span><p>ProfilePanel 的消息列表，展示 Dori 主动关心和周期提醒。</p><p class="refs">来源：App.tsx:4053；App.tsx:4120。</p></div>
+          </article>
+          <article class="card" id="profile-info">
+            <a href="screenshots/24-profile-info-panel.png"><img class="shot" src="screenshots/24-profile-info-panel.png" alt="数据说明"></a>
+            <div class="card-body"><h3>数据说明</h3><span class="tag">已截图</span><p>解释当前原型的数据来源和本地模拟边界，是用户理解可信度的重要辅助页。</p><p class="refs">来源：App.tsx:4120。</p></div>
+          </article>
+          <article class="card" id="profile-edit-name">
+            <a href="screenshots/25-profile-edit-name-panel.png"><img class="shot" src="screenshots/25-profile-edit-name-panel.png" alt="编辑昵称"></a>
+            <div class="card-body"><h3>编辑昵称</h3><span class="tag">已截图</span><p>ProfilePanel 的昵称编辑页，承接个人化称呼和身体人格展示。</p><p class="refs">来源：App.tsx:4120。</p></div>
+          </article>
+          <article class="card" id="profile-stamps">
+            <a href="screenshots/26-profile-stamps-panel.png"><img class="shot" src="screenshots/26-profile-stamps-panel.png" alt="油戳收集"></a>
+            <div class="card-body"><h3>油戳收集</h3><span class="tag">已截图</span><p>展示已解锁和未解锁油戳，强化轻量成就与行为记录的关系。</p><p class="refs">来源：App.tsx:4120；App.tsx:2448。</p></div>
+          </article>
+          <article class="card" id="profile-archive">
+            <a href="screenshots/27-profile-archive-panel.png"><img class="shot" src="screenshots/27-profile-archive-panel.png" alt="个人档案"></a>
+            <div class="card-body"><h3>个人档案</h3><span class="tag">已截图</span><p>归档用户的周期、睡眠和记录偏好，是 Profile 中偏设置/历史的节点。</p><p class="refs">来源：App.tsx:4120。</p></div>
+          </article>
+          <article class="card" id="profile-watch">
+            <a href="screenshots/28-profile-watch-panel.png"><img class="shot" src="screenshots/28-profile-watch-panel.png" alt="WATCH 应用"></a>
+            <div class="card-body"><h3>WATCH 应用</h3><span class="tag">已截图</span><p>说明可穿戴连接愿景，但当前原型仍以本地 mock 数据为主。</p><p class="refs">来源：App.tsx:4120；documentation/permissions.md:5。</p></div>
+          </article>
+          <article class="card" id="profile-vip">
+            <a href="screenshots/29-profile-vip-panel.png"><img class="shot" src="screenshots/29-profile-vip-panel.png" alt="TIDE Plus"></a>
+            <div class="card-body"><h3>TIDE Plus</h3><span class="tag">已截图</span><p>会员入口展示潜在商业化包装，但当前原型没有后端计费或真实订阅链路。</p><p class="refs">来源：App.tsx:4120；documentation/architecture.md:60。</p></div>
+          </article>
+          <article class="card" id="profile-stamp-award">
+            <a href="screenshots/31-stamp-award-sheet.png"><img class="shot" src="screenshots/31-stamp-award-sheet.png" alt="油戳奖励弹层"></a>
+            <div class="card-body"><h3>油戳奖励弹层</h3><span class="tag">已截图</span><span class="tag">弹层</span><p>完成动作后出现的奖励态，用油戳把一次行动转成可收藏的身体记忆。</p><p class="refs">来源：App.tsx:2448。</p></div>
+          </article>
+          <article class="card" id="profile-stamp-detail">
+            <a href="screenshots/32-stamp-detail-sheet.png"><img class="shot" src="screenshots/32-stamp-detail-sheet.png" alt="油戳详情弹层"></a>
+            <div class="card-body"><h3>油戳详情弹层</h3><span class="tag">已截图</span><span class="tag">弹层</span><p>油戳展开态展示名称、说明和来源，让成就不只是装饰图标。</p><p class="refs">来源：App.tsx:2448。</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="webview">
+        <h2>WebView / Onboarding</h2>
+        <div class="note">
+          <p>当前 app 确实有底层 WebView，文档说明它会加载远程或本地 <code>web/index.html</code>，并支持 <code>onboarding</code>、<code>showOnboarding</code> 查询转发。</p>
+          <p>本轮尝试 <code>vivi-oura://app?onboarding=1</code> 与 <code>vivi-oura://app?showOnboarding=1</code> 时，实际截图仍停留在 Explore 详情页，所以没有接入 onboarding PNG，避免把错误页面标成 onboarding。</p>
+          <p class="refs">来源：architecture.md:18-24；App.tsx:4242-4265；App.tsx:4272。</p>
+        </div>
+      </section>
+
+      <section id="gaps">
+        <h2>覆盖说明</h2>
+        <table>
+          <thead><tr><th>范围</th><th>证据</th><th>当前处理</th><th>风险 / 下一步</th></tr></thead>
+          <tbody>
+            <tr><td>RN 覆盖层主 IA</td><td>App.tsx 主路由、Today / Explore / Health / Profile 渲染函数；36 张 Simulator PNG</td><td>主 Tab、二级页、ProfilePanel、ReminderSheet、StampRevealSheet、系统 Alert 均已接入本 HTML。</td><td>部分 click-only 状态通过临时 QA deep link 打开；截图是真实渲染，但入口路径不是完整人工点击路径。</td></tr>
+            <tr><td>Explore detail / feedback</td><td>App.tsx 中存在 route enum 与渲染函数；截图 33、34</td><td>为完成 IA 取证，临时接入 render 分支后截图；源码会在交付前撤回临时 QA 改动。</td><td>如果产品需要保留这些页面，应由正式需求决定是否把渲染分支纳入 app，而不是沿用 QA 路由。</td></tr>
+            <tr><td>WebView onboarding 遗留层</td><td>architecture.md:18-24；App.tsx:4242-4265；App.tsx:4272</td><td>文档和 bridge 状态存在；尝试 <code>onboarding=1</code> 与 <code>showOnboarding=1</code> 时没有打开真实 onboarding，因此未把错误页面标成 onboarding。</td><td>这是唯一剩余未验证层；需要从 WebView 内部入口、清空本地状态或重新确认旧 web onboarding 是否仍是可达产品面。</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="sources">
+        <h2>本地证据</h2>
+        <div class="note">
+          <p><b>主导航与路由：</b><code>/Users/bytedance/Desktop/Work/vitamin-app/vitora-cycle-sandbox/vivi-oura-simulator/App.tsx:55</code>、<code>App.tsx:901</code>、<code>App.tsx:1267</code>、<code>App.tsx:4219</code>。</p>
+          <p><b>Today 卡与 mock 运行时：</b><code>/Users/bytedance/Desktop/Work/vitamin-app/vitora-cycle-sandbox/vivi-oura-simulator/src/lib/vitora/runtime.ts:596</code>。</p>
+          <p><b>Profile、提醒、油戳弹层：</b><code>App.tsx:4120</code>、<code>App.tsx:3112</code>、<code>App.tsx:2448</code>。</p>
+          <p><b>架构与限制：</b><code>/Users/bytedance/Desktop/Work/vitamin-app/vitora-cycle-sandbox/vivi-oura-simulator/documentation/architecture.md:5</code>、<code>architecture.md:60</code>、<code>permissions.md:5</code>、<code>variables.md:18</code>、<code>tests.md:24</code>。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

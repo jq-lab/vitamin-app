@@ -9004,6 +9004,13 @@ async function writeSoundscapeLicenseManifest() {
 }
 
 async function main() {
+  const sourceHtml = path.join(sourceRoot, "index.html");
+  if (!(await exists(sourceHtml))) {
+    throw new Error(
+      `Missing source HTML: ${sourceHtml}. Set VIVI_OURA_SOURCE to a valid generated web output directory, or use the committed web/index.html without running prepare:web.`
+    );
+  }
+
   await fs.rm(webRoot, { force: true, recursive: true });
   await writeEcosystemMetadata();
   await copyWeeklyThemePlanets();
